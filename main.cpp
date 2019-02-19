@@ -1,14 +1,20 @@
 //#################SDL######################
 #include <SDL.h>//SDL
+#include <SDL_image.h>
 #include <stdio.h>//alternative iostream
+
 //Bildschirm-Dimensionen
 const int BILDSCHIRM_BREITE = 600;
 const int BILDSCHIRM_HOEHE = 600;
 //###########################################
 
+//#include "klassen.h"
+#include "klassen.cpp"
 #include <iostream>
 #include <stdlib.h> //für random-Zahlen
 
+
+//Erstellt Informationen zum Spielfeld; wird zur Ausgabe des Feldes benutzt
 const int stretching_points = 9;
 const int sqrt_s_p = 3;
 
@@ -16,11 +22,46 @@ const int feldbreite = BILDSCHIRM_BREITE/sqrt_s_p;
 const int feldhoehe = BILDSCHIRM_HOEHE/sqrt_s_p;
 int feld[feldbreite][feldhoehe];
 
+
+
+//Erstellt Array mit allen Personen, Hindernissen und Zielen
+const int anzahl_personen = 10;
+const int anzahl_hindernisse = 10;
+const int anzahl_ziele = 1;
+
+person persarray [anzahl_personen];
+hindernis hinarray [anzahl_hindernisse];
+ziel zarray [anzahl_ziele];
+
+
+
+
+
+
+
+
 using namespace std;
 
 
 
+void feldeingabe(int arr[feldbreite][feldhoehe])
+{
 
+    /*
+    //Initialize PNG loading
+    int imgFlags = IMG_INIT_PNG;
+    if( !( IMG_Init( imgFlags ) & imgFlags ) )
+    {
+        printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
+    }
+
+    gTexture = loadTexture( "Haus.png" ); //Name BILD
+	if( gTexture == NULL ){printf( "Fehler beim Laden des Bildes" );}
+
+    SDL_Texture* loadTexture( std::string path );
+    SDL_Texture* gTexture = NULL; */
+
+}
 
 void eintragzeichnen(SDL_Renderer *renderer,int r, int g, int b, int alpha, int x, int y, bool aktuallisieren)//Zeichnet einen Arrayeintrag
 {
@@ -36,7 +77,7 @@ void eintragzeichnen(SDL_Renderer *renderer,int r, int g, int b, int alpha, int 
         {x + sqrt_s_p * x + 2 , y + sqrt_s_p * y},
         {x + sqrt_s_p * x + 2 ,y + sqrt_s_p * y + 1},
         {x + sqrt_s_p * x + 2 ,y + sqrt_s_p * y + 2},
-    };
+    }; // bei einer Änderung des stretching-Verfahrens muss die feldbreite/feldhoehe oben angepasst werden / entfällt
     SDL_SetRenderDrawColor(renderer,r,g,b,alpha);
     //SDL_RenderDrawPoint(renderer,x,y);
     SDL_RenderDrawPoints(renderer,points,stretching_points);
@@ -84,15 +125,28 @@ int main(int argc, char* args[])
         printf( "SDL renderer wurde nicht richtig erstellt; SDL_Error : %s\n", SDL_GetError() );
     }
 
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);//r,g,b,alpha
-    SDL_RenderClear(renderer);
+    //erstellt die im Feld befindlichen Personen, hindernisse, ziele
+    for(int o = 0; o < anzahl_personen; o++){
+        persarray[o] = person(o+20,o*2+20) ;
+        cout << persarray[o].x << ";" << persarray[o].y << endl; // gibt Variablen der Klassen aus
+    }
+    for(int p = 0; p < anzahl_hindernisse; p++){
+        hinarray[p] = hindernis(6,3) ;
+    }
+    for(int q = 0; q < anzahl_ziele; q++){
+            zarray[q] = ziel(7,2) ;
+    }
 
-    eintragzeichnen(renderer,50,100,150,100,100,100,true);
 
-    for (int k = 0; k < 25; k++){
+    //SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);//r,g,b,alpha
+    //SDL_RenderClear(renderer);
+
+    //eintragzeichnen(renderer,50,100,150,100,100,100,true);
+
+    for (int k = 0; k < 50; k++){
         random_intarray(feld,feldhoehe,feldbreite);
         feldzeichnen(feld,feldbreite,feldhoehe,renderer);
-        SDL_Delay( 1000 );
+        SDL_Delay(1);
     }
 
     //SDL_SetRenderDrawColor(renderer, 199, 21, 133, 255);//r,g,b,alpha
