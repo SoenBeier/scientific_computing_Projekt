@@ -1,37 +1,126 @@
 
-class hindernis
+class obstacle
 {
 public:
-    hindernis(){}; //defaultconstructor
-    hindernis(int a, int b){x = a; y = b;}; //constructor
+// constructors
+    obstacle(){};
+    obstacle(int a, int b){
+        x = a;
+        y = b;
+        setrgb(200,200,200);
+    };
+    obstacle(int a, int b, int f1, int f2, int f3){
+        x = a;
+        y = b;
+        setrgb(f1,f2,f3);
+    };
+// constructors
+
+// methods
+    void setrgb(int f1, int f2, int f3){
+        r = f1;
+        g = f2;
+        b = f3;
+    };
+    void moveto(int xn, int yn){
+        x = xn;
+        y = yn;
+    }
+
+// methods
+
+//coordinates
     int x;
     int y;
+//colour
+    int r;
+    int g;
+    int b;
 
 private:
-
 
 };
 
 class person
 {
 public:
-    person(){}; //defaultconstructor
-    person(int a, int b){x = a; y = b;}    ; //constructor
+// constructors
+    person(){};
+    person(int a, int b){
+        x = a;
+        y = b;
+        setrgb(0,0,200);
+    };
+    person(int a, int b, int f1, int f2, int f3){
+        x = a;
+        y = b;
+        setrgb(f1,f2,f3);
+    };
+// constructors
+
+// methods
+    void setrgb(int f1, int f2, int f3){
+        r = f1;
+        g = f2;
+        b = f3;
+    };
+    void moveto(int xn, int yn){
+        x = xn;
+        y = yn;
+    }
+// methods
+
+//coordinates
     int x;
     int y;
+//colour
+    int r;
+    int g;
+    int b;
+
 
 private:
 
 };
 
-class ziel
+class destination
 {
 public:
-    ziel(){}; //defaultconstructor
-    ziel(int a, int b){x = a; y = b;}    ; //constructor
+// constructors
+    destination(){};
+    destination(int a, int b){
+        x = a;
+        y = b;
+        setrgb(0,200,0);
+    };
+    destination(int a, int b, int f1, int f2, int f3){
+        x = a;
+        y = b;
+        setrgb(f1,f2,f3);
+    };
+// constructors
+
+// methods
+    void setrgb(int f1, int f2, int f3){
+        r = f1;
+        g = f2;
+        b = f3;
+    };
+    void moveto(int xn, int yn){
+        x = xn;
+        y = yn;
+    }
+// methods
+
+//coordinates
     int x;
     int y;
-
+//coordinates
+//colour
+    int r;
+    int g;
+    int b;
+//colour
 
 private:
 
