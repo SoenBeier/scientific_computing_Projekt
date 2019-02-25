@@ -9,13 +9,13 @@ using namespace std;
 
 
 //################## initial situation
-const int quantity_persons = 2;
+const int quantity_persons = 4;
 const int quantity_destinations = 1;
-const int quantity_obstacles = 4;
+const int quantity_obstacles = 1;
 int number_of_iterations = 7;
-int initcoord_pers_array[quantity_persons*2] = {2,2,4,4};
-int initcoord_dest_array[quantity_destinations*2] = {5,5};
-int initcoord_obst_array[quantity_obstacles*2] = {1,1,3,3,1,2,3,4};
+int initcoord_pers_array[quantity_persons][2] = {{2,5},{5,6},{0,3},{7,0}};
+int initcoord_dest_array[quantity_destinations][2] = {{5,5}};
+int initcoord_obst_array[quantity_obstacles][2] = {{4,2}};
 //################## initial situation
 
 
@@ -103,13 +103,13 @@ int main(int argc, char* args[]){
 //HIER EINFÜGEN WIE NIMMT DAS GANZE DING DIE LISTEN AUF
 
 for(int p = 0; p < quantity_persons; p++){
-    persarray[p] = person(initcoord_pers_array[p*2],initcoord_pers_array[p*2+1]);
+    persarray[p] = person(initcoord_pers_array[p][1],initcoord_pers_array[p][2]);
 }
 for(int d = 0; d < quantity_destinations; d++){
-    destarray[d] = destination(initcoord_dest_array[d*2],initcoord_dest_array[d*2+1]);
+    destarray[d] = destination(initcoord_dest_array[d][1],initcoord_dest_array[d][1]);
 }
 for(int o = 0; o < quantity_obstacles; o++){
-    obsarray[o] = obstacle(initcoord_obst_array[o*2],initcoord_obst_array[o*2+1]);
+    obsarray[o] = obstacle(initcoord_obst_array[o][1],initcoord_obst_array[o][2]);
 }
 //################## object declaration 2
 
