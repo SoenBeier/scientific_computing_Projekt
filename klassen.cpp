@@ -1,3 +1,5 @@
+const int grid_height = 100;
+const int grid_width = 150;
 
 class obstacle
 {
@@ -50,11 +52,17 @@ public:
         x = a;
         y = b;
         setrgb(0,0,200);
+
+
+
+
+
     };
     person(int a, int b, int f1, int f2, int f3){
         x = a;
         y = b;
         setrgb(f1,f2,f3);
+
     };
 // constructors
 
@@ -68,6 +76,7 @@ public:
         x = xn;
         y = yn;
     }
+
 // methods
 
 //coordinates
@@ -77,6 +86,9 @@ public:
     int r;
     int g;
     int b;
+
+// Dynamic floor field D
+    int D[grid_height][grid_width];
 
 
 private:
