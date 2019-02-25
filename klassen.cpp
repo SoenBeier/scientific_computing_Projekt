@@ -28,7 +28,14 @@ public:
         x = xn;
         y = yn;
     }
-
+    bool is_it_here(int qx, int qy){// has the object the coordinates (qx,qy) ?
+        if (x == qx && y == qy){
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 // methods
 
 //coordinates
@@ -52,17 +59,11 @@ public:
         x = a;
         y = b;
         setrgb(0,0,200);
-
-
-
-
-
     };
     person(int a, int b, int f1, int f2, int f3){
         x = a;
         y = b;
         setrgb(f1,f2,f3);
-
     };
 // constructors
 
@@ -75,6 +76,14 @@ public:
     void moveto(int xn, int yn){
         x = xn;
         y = yn;
+    }
+    bool is_it_here(int qx, int qy){
+        if (x == qx && y == qy){
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
 // methods
@@ -121,6 +130,14 @@ public:
     void moveto(int xn, int yn){
         x = xn;
         y = yn;
+    }
+    bool is_it_here(int qx, int qy){// has the object the coordinates (qx,qy) ?
+        if (x == qx && y == qy){
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 // methods
 
