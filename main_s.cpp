@@ -2,20 +2,14 @@
 #include <SDL_image.h>
 #include <stdio.h>
 #include <iostream>
-
 #include "klassen.cpp"
+
 
 using namespace std;
 
 
 //################## initial situation
-const int quantity_persons = 4;
-const int quantity_destinations = 1;
-const int quantity_obstacles = 1;
-int number_of_iterations = 7;
-int initcoord_pers_array[quantity_persons][2] = {{2,5},{5,6},{0,3},{7,0}};
-int initcoord_dest_array[quantity_destinations][2] = {{5,5}};
-int initcoord_obst_array[quantity_obstacles][2] = {{4,2}};
+#include "initial_situation.cpp"
 //################## initial situation
 
 
@@ -25,6 +19,7 @@ person persarray [quantity_persons]; //contains all objects of type person
 destination destarray [quantity_destinations];
 obstacle obsarray [quantity_obstacles];
 //################## object declaration 1
+
 
 void clear_drawing(SDL_Renderer *renderer){// clears the whole screen/pigment the whole screen white //NOCHMAL DURCH RICHTIGEN BEFEHL ERSETZEN
     SDL_SetRenderDrawColor(renderer,250,250,250,0);
@@ -95,6 +90,8 @@ void draw_grid(person pa[quantity_persons], destination da[quantity_destinations
     SDL_RenderPresent(renderer);
 }
 
+
+
 int main(int argc, char* args[]){
 
 
@@ -103,13 +100,13 @@ int main(int argc, char* args[]){
 //HIER EINFÜGEN WIE NIMMT DAS GANZE DING DIE LISTEN AUF
 
 for(int p = 0; p < quantity_persons; p++){
-    persarray[p] = person(initcoord_pers_array[p][1],initcoord_pers_array[p][2]);
+    persarray[p] = person(initcoord_pers_array[p][0],initcoord_pers_array[p][1]);
 }
 for(int d = 0; d < quantity_destinations; d++){
-    destarray[d] = destination(initcoord_dest_array[d][1],initcoord_dest_array[d][1]);
+    destarray[d] = destination(initcoord_dest_array[d][0],initcoord_dest_array[d][1]);
 }
 for(int o = 0; o < quantity_obstacles; o++){
-    obsarray[o] = obstacle(initcoord_obst_array[o][1],initcoord_obst_array[o][2]);
+    obsarray[o] = obstacle(initcoord_obst_array[o][0],initcoord_obst_array[o][1]);
 }
 //################## object declaration 2
 
@@ -122,6 +119,19 @@ for(int o = 0; o < quantity_obstacles; o++){
     SDL_CreateWindowAndRenderer(grid_width*3, grid_height*3, 0, &window, &renderer);
 
 //################## visual output 1
+
+//test
+destarray[0].set_static_field(obsarray);
+for(int i = 0; i < grid_width; i++){
+    for(int j = 0; j < grid_height; j++){
+        cout << destarray[0].S_k[i][j] << ";" ;
+    }
+    cout << endl;
+}
+//persarray[0].set_static_field(destarray,obsarray);
+//test
+
+
 
 for(int i = 0; i < number_of_iterations; i++){
 //################## iteration method
@@ -138,7 +148,7 @@ cout << "-------------------------------------" << endl;
 
 //################## visual output 2
         draw_grid(persarray,destarray,obsarray,renderer,2);
-        SDL_Delay(2000);
+        SDL_Delay(100);
 
 }
     while (1) {
