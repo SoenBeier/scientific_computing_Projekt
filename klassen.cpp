@@ -103,7 +103,7 @@ public:
 //colour
 //Static field Sk, which is created by this destination:
     int S_k[grid_width][grid_height];
-
+    int counter_call = 0;
 
     void set_static_field(obstacle obsarray[quantity_obstacles]){
     //time 1
@@ -118,7 +118,9 @@ public:
         }
         // Use the Manhatten Metric to fill S_k with potentials dependent on the distance the person has to go to the individually cell of S_k:
         int counter = 0;
-        set_S_entry(x,y,counter,obsarray);
+        set_S_entry2(x,y,counter,obsarray,true,true,true,true);
+        //set_S_entry(x,y,counter,obsarray);
+        cout << "counter_call:" << counter_call << endl;
     //time 2
     time1 += clock() - tstart;
     time1 = time1/CLOCKS_PER_SEC;
@@ -126,7 +128,7 @@ public:
     //time 2
 
     }
-        void set_S_entry(int sx, int sy, int counter, obstacle obsarray[quantity_obstacles]){
+    void set_S_entry(int sx, int sy, int counter, obstacle obsarray[quantity_obstacles]){
 
         //cout << "pyth :" << counter << endl;
                 //cout << counter << ": grenze: "<< grid_height*grid_height << endl;
@@ -138,13 +140,65 @@ public:
             sx + 1, sy,
             sx - 1, sy,
         };
+
+        S_k[sx][sy] = counter; // the entry of S_k at the position (sx,sy) becomes the new potential
+        S_k[x][y] = 0; //probably the entry at the cell with the coordinates of the destination is overwritten; so we have to correct the entry
+
         for (int j = 0; j < 4; j++){
-            S_k[sx][sy] = counter;
-            S_k[x][y] = 0;
-            if (((S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) > counter | (S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) == 0 ) & could_a_person_go_to(coords_neigbours[2*j],coords_neigbours[2*j+1], obsarray)){
+            if (((S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) > counter || (S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) == 0 ) && could_a_person_go_to(coords_neigbours[2*j],coords_neigbours[2*j+1], obsarray)){// if the entry of the neigbourcell is larger than the counter or 0 and could a person go to this coordinates, the program will continue with:
                 //cout << "Ansage:" << could_I_go_to(-1,2,obsarray) << "x: " << obsarray[0].x << "y: " << obsarray[0].y << endl;
+                counter_call++;
                 set_S_entry(coords_neigbours[2*j],coords_neigbours[2*j+1],counter + 1, obsarray);
+
             }
+        }
+    }
+
+    void set_S_entry2(int sx, int sy, int counter, obstacle obsarray[quantity_obstacles], bool up, bool down, bool right, bool left){// set one entry of S_k and call itself afterwards, with new coordinates sx,sy ; if it isn't worth to go to this side the parameters up,down,right,left will be false
+
+        //cout << "pyth :" << counter << endl;
+                //cout << counter << ": grenze: "<< grid_height*grid_height << endl;
+        if (counter > (25)){return;}
+        counter_call++;
+        //cout << sx << " ; " << sy << endl;
+        int coords_neigbours[8] = {// using Von Neumann neighbourhood
+            sx, sy + 1,
+            sx, sy - 1,
+            sx + 1, sy,
+            sx - 1, sy,
+        };
+
+        S_k[sx][sy] = counter; // the entry of S_k at the position (sx,sy) becomes the new potential
+        //S_k[x][y] = 0; //probably the entry at the cell with the coordinates of the destination is overwritten; so we have to correct the entry
+
+
+
+
+        for (int j = 0; j < 4; j++){
+
+            // ###Zeitersparnis
+            //wenn der Wert des Potentials in eine Richtung schon niedriger als der Counter selbst ist, so muss man nicht weiter in diese Richtung gehen und überprüfen ob es sinn macht in diese Richtung zu gehen
+            if ((S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]] + 1 <= counter) && S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]] != 0){
+                if(j == 0){up = false;}
+                if(j == 1){down = false;}
+                if(j == 2){right = false;}
+                if(j == 3){left = false;}
+            }
+            //cout << up << ";" << down<<";"<< right << ";" << left << endl;
+            //springt ans Ende der for Schleife wenn es keinen Sinn macht in die jeweilige Richtung zu gehen
+            if (up == false && j == 0){continue;}
+            if (down == false && j == 1){continue;}
+            if (right == false && j == 2){continue;}
+            if (left == false && j == 3){continue;}
+            //###Zeitersparnis
+
+            //cout << up << ";" << down << ";" << right << ";" << left << endl;
+                if (((S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) > counter || (S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) == 0 ) && could_a_person_go_to(coords_neigbours[2*j],coords_neigbours[2*j+1], obsarray) && (coords_neigbours[2*j] != 15 || coords_neigbours[2*j+1] != 15)){// if the entry of the neigbourcell is larger than the counter or 0 and could a person go to this coordinates, the program will continue with:
+                    //cout << "Ansage:" << could_I_go_to(-1,2,obsarray) << "x: " << obsarray[0].x << "y: " << obsarray[0].y << endl;
+
+                    set_S_entry2(coords_neigbours[2*j],coords_neigbours[2*j+1],counter + 1, obsarray,up,down,right,left);
+
+                }
         }
     }
 
