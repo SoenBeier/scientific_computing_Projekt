@@ -2,6 +2,8 @@
 #include <stddef.h>
 #include <iostream>
 #include <time.h>
+#include <stdio.h>
+#include <vector>
 
 using namespace std;
 
@@ -104,8 +106,9 @@ public:
 //Static field Sk, which is created by this destination:
     int S_k[grid_width][grid_height];
     int counter_call = 0;
+    int counter_global = 0;
 
-    void set_static_field(obstacle obsarray[quantity_obstacles]){
+    void set_static_field1(obstacle obsarray[quantity_obstacles]){
     //time 1
     double time1=0.0, tstart;
     tstart = clock();
@@ -120,7 +123,9 @@ public:
         int counter = 0;
         set_S_entry2(x,y,counter,obsarray,true,true,true,true);
         //set_S_entry(x,y,counter,obsarray);
-        cout << "counter_call:" << counter_call << endl;
+
+
+
     //time 2
     time1 += clock() - tstart;
     time1 = time1/CLOCKS_PER_SEC;
@@ -128,11 +133,139 @@ public:
     //time 2
 
     }
+    //declare a vector, which contains all positions of entries, which has to be set with set_S_entry:
+    vector<int> qns; //"queue next steps"
+    void set_static_field2(obstacle obsarray[quantity_obstacles]){
+    //time 1
+    double time1=0.0, tstart;
+    tstart = clock();
+    //time 1
+
+        int max_counter = 15;
+        // set all entries of S_k = 0:
+        for(int g = 0; g < grid_width; g++){
+            for(int h = 0; h< grid_height; h++){
+                S_k[g][h] = 0;
+            }
+        }
+        // Use the Manhatten Metric to fill S_k with potentials dependent on the distance the person has to go to the individually cell of S_k:
+
+
+
+        //set start condition:
+        qns.push_back(x);
+        qns.push_back(y);
+
+        //
+
+        int qns_n;
+
+        for (int c = 0; c < max_counter; c++){
+
+            qns_n = qns.size() / 2;
+
+            if(qns_n == 0){return;}
+            int q = 0;
+            int i = 0;
+            while(i < qns_n && i < 190000){
+
+                S_k[qns[0]][qns[1]] = c;
+
+                find_neigbours(qns[0],qns[1],c,obsarray);
+
+                qns.erase(qns.begin());
+                qns.erase(qns.begin());
+
+                i++;
+        }}
+
+
+    //time 2
+    time1 += clock() - tstart;
+    time1 = time1/CLOCKS_PER_SEC;
+    cout << "  time = " << time1 << " sec." << endl;
+    //time 2
+
+    }
+    void set_static_field3(obstacle obsarray[quantity_obstacles]){//ist am schnellsten
+    //time 1
+    double time1=0.0, tstart;
+    tstart = clock();
+    //time 1
+
+        int max_counter = 50;
+        // set all entries of S_k = 0:
+        for(int g = 0; g < grid_width; g++){
+            for(int h = 0; h< grid_height; h++){
+                S_k[g][h] = 0;
+            }
+        }
+        // Use the Manhatten Metric to fill S_k with potentials dependent on the distance the person has to go to the individually cell of S_k:
+
+
+
+        //set start condition:
+        qns.push_back(x);
+        qns.push_back(y);
+
+        //
+
+        int qns_n;
+        int i = 0;
+        for (int c = 0; c < max_counter; c++){
+
+            qns_n = qns.size() / 2;
+
+            if(qns_n == 0){return;}
+            int q = 0;
+
+            while(i < qns_n && i < (qns.max_size() - 10)){
+
+                S_k[qns[2*i]][qns[2*i + 1]] = c;
+
+                find_neigbours(qns[2*i],qns[2*i + 1],c,obsarray);
+
+                i++;
+        }}
+
+
+    //time 2
+    time1 += clock() - tstart;
+    time1 = time1/CLOCKS_PER_SEC;
+    cout << "  time = " << time1 << " sec." << endl;
+    //time 2
+
+    }
+    void find_neigbours(int sx, int sy, int counter,  obstacle obsarray[quantity_obstacles]){
+
+        int coords_neigbours[8] = {// using Von Neumann neighbourhood
+            sx, sy + 1,
+            sx, sy - 1,
+            sx + 1, sy,
+            sx - 1, sy,
+        };
+
+        bool uebergeben = true;
+        for(int j = 0; j < 4; j++){
+            if (((S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) > counter || (S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) == 0 ) && could_a_person_go_to(coords_neigbours[2*j],coords_neigbours[2*j+1], obsarray) && (coords_neigbours[2*j] != x || coords_neigbours[2*j+1] != y)){
+                for(int i; i < qns.size() / 2; i++){
+                    if((coords_neigbours[2*j] == qns[2*i]) && (coords_neigbours[2*j + 1] == qns[2*i + 1])){
+                        uebergeben = false;
+                    }
+                }
+                if(uebergeben == true){
+                    qns.push_back(coords_neigbours[2*j]);
+                    qns.push_back(coords_neigbours[2*j+1]);
+                }
+            }
+        }
+
+    }
     void set_S_entry(int sx, int sy, int counter, obstacle obsarray[quantity_obstacles]){
 
         //cout << "pyth :" << counter << endl;
                 //cout << counter << ": grenze: "<< grid_height*grid_height << endl;
-        if (counter > (25)){return;}
+        if (counter > (20)){return;}
 
         int coords_neigbours[8] = {// using Von Neumann neighbourhood
             sx, sy + 1,
@@ -153,14 +286,13 @@ public:
             }
         }
     }
-
     void set_S_entry2(int sx, int sy, int counter, obstacle obsarray[quantity_obstacles], bool up, bool down, bool right, bool left){// set one entry of S_k and call itself afterwards, with new coordinates sx,sy ; if it isn't worth to go to this side the parameters up,down,right,left will be false
 
-        //cout << "pyth :" << counter << endl;
-                //cout << counter << ": grenze: "<< grid_height*grid_height << endl;
-        if (counter > (25)){return;}
+        if (counter > (29)){
+            return;
+        }
+
         counter_call++;
-        //cout << sx << " ; " << sy << endl;
         int coords_neigbours[8] = {// using Von Neumann neighbourhood
             sx, sy + 1,
             sx, sy - 1,
@@ -186,26 +318,21 @@ public:
             }
             //cout << up << ";" << down<<";"<< right << ";" << left << endl;
             //springt ans Ende der for Schleife wenn es keinen Sinn macht in die jeweilige Richtung zu gehen
-            if (up == false && j == 0){continue;}
-            if (down == false && j == 1){continue;}
-            if (right == false && j == 2){continue;}
-            if (left == false && j == 3){continue;}
+            if ((up == false && j == 0 )||(down == false && j == 1)||(right == false && j == 2)||(left == false && j == 3) ){continue;}
             //###Zeitersparnis
 
             //cout << up << ";" << down << ";" << right << ";" << left << endl;
-                if (((S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) > counter || (S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) == 0 ) && could_a_person_go_to(coords_neigbours[2*j],coords_neigbours[2*j+1], obsarray) && (coords_neigbours[2*j] != 15 || coords_neigbours[2*j+1] != 15)){// if the entry of the neigbourcell is larger than the counter or 0 and could a person go to this coordinates, the program will continue with:
+                if (((S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) > counter || (S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) == 0 ) && could_a_person_go_to(coords_neigbours[2*j],coords_neigbours[2*j+1], obsarray) && (coords_neigbours[2*j] != x || coords_neigbours[2*j+1] != y)){// if the entry of the neigbourcell is larger than the counter or 0 and could a person go to this coordinates and this coordinates arent the coordinates of the destination, the program will continue with:
                     //cout << "Ansage:" << could_I_go_to(-1,2,obsarray) << "x: " << obsarray[0].x << "y: " << obsarray[0].y << endl;
 
-                    set_S_entry2(coords_neigbours[2*j],coords_neigbours[2*j+1],counter + 1, obsarray,up,down,right,left);
 
+                    set_S_entry2(coords_neigbours[2*j],coords_neigbours[2*j+1],counter + 1, obsarray,up,down,right,left);
                 }
         }
     }
-
-
     bool could_a_person_go_to (int qx, int qy, obstacle obsarray[quantity_obstacles]){//delivers true, if the person could stay at (x,y)/ could move to this cell
     //###cells out of borders arent available for a person:
-        if ((qy > grid_height) || (qx > grid_width)){
+        if ((qy >= grid_height) || (qx >= grid_width)){
             return false;
         }
         if ((qy < 0) || (qx < 0)){
@@ -303,61 +430,7 @@ public:
     int D[grid_width][grid_height];
 // Static field S
     double S[grid_width][grid_height];
-/*
-    void set_static_field(destination destarray[quantity_destinations], obstacle obsarray[quantity_obstacles]){
 
-        int k = 0;
-        double S_k[grid_width][grid_height];
-        int xd = destarray[k].x;
-        int yd = destarray[k].y;
-
-        // set all entries of S_k = 0:
-        for(int g = 0; g < grid_width; g++){
-            for(int h = 0; h< grid_height; h++){
-                S_k[g][h] = 0;
-            }
-        }
-    // Use the Manhatten Metric to fill S_k with potentials dependent on the distance the person has to go to the individually cell of S_k:
-        int counter = 0;
-        set_S_entry(xd,yd,counter,destarray,S_k,k,obsarray);
-
-
-        for(int g = 0; g < grid_width; g++){
-            for (int h = 0; h < grid_height; h++){
-                S[g][h] = S_k[g][h];
-                cout << S[g][h] << ";";
-            }
-            cout << endl;
-        }
-    }
-
-    void set_S_entry(int x, int y, int counter, destination destarray[quantity_destinations], double S_k[grid_height][grid_height], int k, obstacle obsarray[quantity_obstacles]){
-        int xd = destarray[k].x;
-        int yd = destarray[k].y;
-        //cout << "pyth :" << counter << endl;
-                //cout << counter << ": grenze: "<< grid_height*grid_height << endl;
-        if (counter > (15)){return;}
-
-
-        int coords_neigbours[8] = {// using Von Neumann neighbourhood
-            x, y + 1,
-            x, y - 1,
-            x + 1, y,
-            x - 1, y,
-        };
-        for (int j = 0; j < 4; j++){
-            S_k[x][y] = counter;
-            S_k[xd][yd] = 0;
-            if ((S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) > counter || (S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]] == 0 )){
-                //cout << "Ansage:" << could_I_go_to(-1,2,obsarray) << "x: " << obsarray[0].x << "y: " << obsarray[0].y << endl;
-                if (could_I_go_to(coords_neigbours[2*j],coords_neigbours[2*j+1], obsarray)){
-                    set_S_entry(coords_neigbours[2*j],coords_neigbours[2*j+1],counter + 1, destarray, S_k, k,obsarray);
-            }}
-        }
-    }
-
-
-*/
 
 
 

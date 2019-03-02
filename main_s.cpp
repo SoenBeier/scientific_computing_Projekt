@@ -121,10 +121,13 @@ for(int o = 0; o < quantity_obstacles; o++){
 //################## visual output 1
 
 //test
-destarray[0].set_static_field(obsarray);
-for(int i = 0; i < grid_width; i++){
-    for(int j = 0; j < grid_height; j++){
-        cout << destarray[0].S_k[i][j] << ";" ;
+destarray[0].set_static_field3(obsarray);
+for(int j = 0; j < grid_height; j++){
+    for(int i = 0; i < grid_width; i++){
+
+        if (destarray[0].S_k[i][j] > 9){cout << destarray[0].S_k[i][j] << ";" ;}
+        else {cout << " " << destarray[0].S_k[i][j] << ";" ;}
+
     }
     cout << endl;
 }
