@@ -171,7 +171,7 @@ public:
 
                 S_k[qns[0]][qns[1]] = c;
 
-                find_neigbours(qns[0],qns[1],c,obsarray);
+                find_neigbours(qns[0],qns[1],c,obsarray,qns_n);
 
                 qns.erase(qns.begin());
                 qns.erase(qns.begin());
@@ -193,7 +193,7 @@ public:
     tstart = clock();
     //time 1
 
-        int max_counter = 50;
+        int max_counter = 300;
         // set all entries of S_k = 0:
         for(int g = 0; g < grid_width; g++){
             for(int h = 0; h< grid_height; h++){
@@ -202,12 +202,9 @@ public:
         }
         // Use the Manhatten Metric to fill S_k with potentials dependent on the distance the person has to go to the individually cell of S_k:
 
-
-
         //set start condition:
         qns.push_back(x);
         qns.push_back(y);
-
         //
 
         int qns_n;
@@ -215,15 +212,16 @@ public:
         for (int c = 0; c < max_counter; c++){
 
             qns_n = qns.size() / 2;
+            cout << c << ";" << qns_n*2 << endl;
 
-            if(qns_n == 0){return;}
+
             int q = 0;
 
-            while(i < qns_n && i < (qns.max_size() - 10)){
+            while(i < qns_n && i < (qns.max_size() -10)){
 
                 S_k[qns[2*i]][qns[2*i + 1]] = c;
 
-                find_neigbours(qns[2*i],qns[2*i + 1],c,obsarray);
+                find_neigbours(qns[2*i],qns[2*i + 1],c,obsarray, qns_n);
 
                 i++;
         }}
@@ -236,7 +234,7 @@ public:
     //time 2
 
     }
-    void find_neigbours(int sx, int sy, int counter,  obstacle obsarray[quantity_obstacles]){
+    void find_neigbours(int sx, int sy, int counter,  obstacle obsarray[quantity_obstacles], int qns_n){
 
         int coords_neigbours[8] = {// using Von Neumann neighbourhood
             sx, sy + 1,
@@ -247,8 +245,9 @@ public:
 
         bool uebergeben = true;
         for(int j = 0; j < 4; j++){
-            if (((S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) > counter || (S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) == 0 ) && could_a_person_go_to(coords_neigbours[2*j],coords_neigbours[2*j+1], obsarray) && (coords_neigbours[2*j] != x || coords_neigbours[2*j+1] != y)){
-                for(int i; i < qns.size() / 2; i++){
+            if (((S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) > counter || (S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) == 0 ) && could_a_person_go_to(coords_neigbours[2*j],coords_neigbours[2*j+1], obsarray) &&
+                (coords_neigbours[2*j] != x || coords_neigbours[2*j+1] != y)){
+                for(int i = 6800*grid_height; i < qns.size()/2 ; i++){
                     if((coords_neigbours[2*j] == qns[2*i]) && (coords_neigbours[2*j + 1] == qns[2*i + 1])){
                         uebergeben = false;
                     }

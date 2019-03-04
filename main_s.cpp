@@ -125,8 +125,9 @@ destarray[0].set_static_field3(obsarray);
 for(int j = 0; j < grid_height; j++){
     for(int i = 0; i < grid_width; i++){
 
-        if (destarray[0].S_k[i][j] > 9){cout << destarray[0].S_k[i][j] << ";" ;}
-        else {cout << " " << destarray[0].S_k[i][j] << ";" ;}
+        if (destarray[0].S_k[i][j] > 9 && destarray[0].S_k[i][j] <= 99){cout << " " << destarray[0].S_k[i][j] << ";" ;}
+        else if (destarray[0].S_k[i][j] > 99){cout << destarray[0].S_k[i][j] << ";" ;}
+        else {cout << "  " << destarray[0].S_k[i][j] << ";" ;}
 
     }
     cout << endl;
