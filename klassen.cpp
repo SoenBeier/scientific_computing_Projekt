@@ -66,13 +66,13 @@ public:
         x = a;
         y = b;
         setrgb(0,200,0);
-        set_static_field_k4(obsarray);
+        set_static_field_k(obsarray);
     };
     destination(int a, int b, int f1, int f2, int f3,obstacle* obsarray){
         x = a;
         y = b;
         setrgb(f1,f2,f3);
-        set_static_field_k4(obsarray);
+        set_static_field_k(obsarray);
     };
 // constructors
 
@@ -131,7 +131,7 @@ public:
     }
     vector<int> to_do;
     vector<int> processed;
-    void set_static_field_k4(obstacle obsarray[quantity_obstacles]){
+    void set_static_field_k(obstacle obsarray[quantity_obstacles]){
         //Setzt alle Einträge von S_k auf 0
         for(int g = 0; g < grid_width; g++){
             for(int h = 0; h< grid_height; h++){
@@ -199,8 +199,22 @@ public:
         }
 
     }
+    int get_S_k(int x, int y){
+        return S_k[x][y];
+    }
+    void print_S_k(){
+        cout << "----------------------------------------------------------------" << endl;
+        for(int j = 0; j < grid_height; j++){
+            for(int i = 0; i < grid_width; i++){
 
+        if (S_k[i][j] > 9 && S_k[i][j] <= 99){cout << " " << S_k[i][j] << ";" ;}
+        else if (S_k[i][j] > 99){cout << S_k[i][j] << ";" ;}
+        else {cout << "  " << S_k[i][j] << ";" ;}
 
+            }
+        cout << endl;
+        }
+    }
 
 
 
@@ -213,15 +227,17 @@ class person
 public:
 // constructors
     person(){};
-    person(int a, int b){
+    person(int a, int b,destination destarray[quantity_destinations]){
         x = a;
         y = b;
         setrgb(0,0,200);
+        set_S(destarray);
     };
-    person(int a, int b, int f1, int f2, int f3){
+    person(int a, int b, int f1, int f2, int f3,destination destarray[quantity_destinations]){
         x = a;
         y = b;
         setrgb(f1,f2,f3);
+        set_S(destarray);
     };
 // constructors
 
@@ -264,6 +280,34 @@ public:
         return return_value;
     }
 
+    void set_S(destination destarray[quantity_destinations]){
+        for(int xi = 0; xi < grid_width; xi++){//setze alle Einträge von S auf 0
+            for(int yi = 0; yi < grid_height; yi++){
+                S[xi][yi] = 0;
+            }
+        }
+
+
+        for(int l = 0; l < quantity_destinations; l++){//Füllt die Einträge von S
+            for(int xi = 0; xi < grid_width; xi++){
+                for(int yi = 0; yi < grid_height; yi++){
+                    S[xi][yi] = S[xi][yi] + destarray[l].get_S_k(xi,yi);
+                }
+            }
+        }
+    }
+    void print_S(){
+        cout << "----------------------------------------------------------------" << endl;
+        for(int j = 0; j < grid_height; j++){
+            for(int i = 0; i < grid_width; i++){
+                if (S[i][j] > 9 && S[i][j] <= 99){cout << " " << S[i][j] << ";" ;}
+                else if (S[i][j] > 99){cout << S[i][j] << ";" ;}
+                else {cout << "  " << S[i][j] << ";" ;}
+
+            }
+        cout << endl;
+        }
+    }
 // methods
 
 //coordinates
@@ -278,6 +322,9 @@ public:
     int D[grid_width][grid_height];
 // Static field S
     double S[grid_width][grid_height];
+    //Addiere alle S_k Arrays der einzelnen destinations zum S Array hinzu; dies verläuft nach Gewichtung
+
+
 
 
 
