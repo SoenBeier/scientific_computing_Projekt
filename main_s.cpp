@@ -99,14 +99,15 @@ int main(int argc, char* args[]){
 //construction of used objects:
 //HIER EINFÜGEN WIE NIMMT DAS GANZE DING DIE LISTEN AUF
 
-for(int p = 0; p < quantity_persons; p++){
-    persarray[p] = person(initcoord_pers_array[p][0],initcoord_pers_array[p][1]);
-}
-for(int d = 0; d < quantity_destinations; d++){
-    destarray[d] = destination(initcoord_dest_array[d][0],initcoord_dest_array[d][1]);
-}
+
 for(int o = 0; o < quantity_obstacles; o++){
     obsarray[o] = obstacle(initcoord_obst_array[o][0],initcoord_obst_array[o][1]);
+}
+for(int d = 0; d < quantity_destinations; d++){
+    destarray[d] = destination(initcoord_dest_array[d][0],initcoord_dest_array[d][1],obsarray);
+}
+for(int p = 0; p < quantity_persons; p++){
+    persarray[p] = person(initcoord_pers_array[p][0],initcoord_pers_array[p][1],destarray);
 }
 //################## object declaration 2
 
@@ -121,18 +122,9 @@ for(int o = 0; o < quantity_obstacles; o++){
 //################## visual output 1
 
 //test
-destarray[0].set_static_field3(obsarray);
-for(int j = 0; j < grid_height; j++){
-    for(int i = 0; i < grid_width; i++){
-
-        if (destarray[0].S_k[i][j] > 9 && destarray[0].S_k[i][j] <= 99){cout << " " << destarray[0].S_k[i][j] << ";" ;}
-        else if (destarray[0].S_k[i][j] > 99){cout << destarray[0].S_k[i][j] << ";" ;}
-        else {cout << "  " << destarray[0].S_k[i][j] << ";" ;}
-
-    }
-    cout << endl;
-}
-//persarray[0].set_static_field(destarray,obsarray);
+destarray[0].print_S_k();
+destarray[1].print_S_k();
+persarray[0].print_S();
 //test
 
 
