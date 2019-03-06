@@ -62,15 +62,17 @@ class destination
 public:
 // constructors
     destination(){};
-    destination(int a, int b){
+    destination(int a, int b,obstacle* obsarray){
         x = a;
         y = b;
         setrgb(0,200,0);
+        set_static_field_k3(obsarray);
     };
-    destination(int a, int b, int f1, int f2, int f3){
+    destination(int a, int b, int f1, int f2, int f3,obstacle* obsarray){
         x = a;
         y = b;
         setrgb(f1,f2,f3);
+        set_static_field_k3(obsarray);
     };
 // constructors
 
@@ -108,7 +110,7 @@ public:
     int counter_call = 0;
     int counter_global = 0;
 
-    void set_static_field1(obstacle obsarray[quantity_obstacles]){
+    void set_static_field_k1(obstacle obsarray[quantity_obstacles]){
     //time 1
     double time1=0.0, tstart;
     tstart = clock();
@@ -135,7 +137,7 @@ public:
     }
     //declare a vector, which contains all positions of entries, which has to be set with set_S_entry:
     vector<int> qns; //"queue next steps"
-    void set_static_field2(obstacle obsarray[quantity_obstacles]){
+    void set_static_field_k2(obstacle obsarray[quantity_obstacles]){//Max_counter anpassen !!
     //time 1
     double time1=0.0, tstart;
     tstart = clock();
@@ -165,7 +167,6 @@ public:
             qns_n = qns.size() / 2;
 
             if(qns_n == 0){return;}
-            int q = 0;
             int i = 0;
             while(i < qns_n && i < 190000){
 
@@ -187,7 +188,7 @@ public:
     //time 2
 
     }
-    void set_static_field3(obstacle obsarray[quantity_obstacles]){//ist am schnellsten
+    void set_static_field_k3(obstacle obsarray[quantity_obstacles]){//ist am schnellsten
     //time 1
     double time1=0.0, tstart;
     tstart = clock();
@@ -247,7 +248,7 @@ public:
         for(int j = 0; j < 4; j++){
             if (((S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) > counter || (S_k[coords_neigbours[2*j]][coords_neigbours[2*j+1]]) == 0 ) && could_a_person_go_to(coords_neigbours[2*j],coords_neigbours[2*j+1], obsarray) &&
                 (coords_neigbours[2*j] != x || coords_neigbours[2*j+1] != y)){
-                for(int i = 6800*grid_height; i < qns.size()/2 ; i++){
+                for(int i = 0 /*50000*grid_height*/; i < qns.size()/2 ; i++){// HIER HAUT ES EINEN FEHLER REIN
                     if((coords_neigbours[2*j] == qns[2*i]) && (coords_neigbours[2*j + 1] == qns[2*i + 1])){
                         uebergeben = false;
                     }
@@ -287,7 +288,7 @@ public:
     }
     void set_S_entry2(int sx, int sy, int counter, obstacle obsarray[quantity_obstacles], bool up, bool down, bool right, bool left){// set one entry of S_k and call itself afterwards, with new coordinates sx,sy ; if it isn't worth to go to this side the parameters up,down,right,left will be false
 
-        if (counter > (29)){
+        if (counter > (25)){
             return;
         }
 
