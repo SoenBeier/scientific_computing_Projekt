@@ -231,12 +231,14 @@ public:
         x = a;
         y = b;
         setrgb(0,0,200);
+        set_w_S();
         set_S(destarray);
     };
     person(int a, int b, int f1, int f2, int f3,destination destarray[quantity_destinations]){
         x = a;
         y = b;
         setrgb(f1,f2,f3);
+        set_w_S();
         set_S(destarray);
     };
 // constructors
@@ -280,7 +282,30 @@ public:
         return return_value;
     }
 
-    void set_S(destination destarray[quantity_destinations]){
+
+// methods
+
+//coordinates
+    int x;
+    int y;
+//colour
+    int r;
+    int g;
+    int b;
+
+// Dynamic floor field D
+    int D[grid_width][grid_height];
+// Static field S
+    double w_S[quantity_destinations]; // wie sehr kennt die Person die verschiedenen Eingänge; Eintrag ist zwischen 0,1
+    double S[grid_width][grid_height];
+
+    void set_w_S(){
+        for(int i = 0; i < quantity_destinations ; i++){
+            w_S[i] = (double)(rand() % 10) / 10;
+            cout <<"w_S ist:" <<w_S[i] << endl;
+        }
+    }
+    void set_S(destination destarray[quantity_destinations]){//Addiere alle S_k Arrays der einzelnen destinations zum S Array hinzu; dies verläuft nach Gewichtung
         for(int xi = 0; xi < grid_width; xi++){//setze alle Einträge von S auf 0
             for(int yi = 0; yi < grid_height; yi++){
                 S[xi][yi] = 0;
@@ -291,7 +316,7 @@ public:
         for(int l = 0; l < quantity_destinations; l++){//Füllt die Einträge von S
             for(int xi = 0; xi < grid_width; xi++){
                 for(int yi = 0; yi < grid_height; yi++){
-                    S[xi][yi] = S[xi][yi] + destarray[l].get_S_k(xi,yi);
+                    S[xi][yi] = S[xi][yi] + destarray[l].get_S_k(xi,yi)*w_S[l];
                 }
             }
         }
@@ -308,25 +333,6 @@ public:
         cout << endl;
         }
     }
-// methods
-
-//coordinates
-    int x;
-    int y;
-//colour
-    int r;
-    int g;
-    int b;
-
-// Dynamic floor field D
-    int D[grid_width][grid_height];
-// Static field S
-    double S[grid_width][grid_height];
-    //Addiere alle S_k Arrays der einzelnen destinations zum S Array hinzu; dies verläuft nach Gewichtung
-
-
-
-
 
 
 
