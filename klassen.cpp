@@ -4,6 +4,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <vector>
+#include <math.h>
 
 using namespace std;
 
@@ -197,7 +198,25 @@ public:
             }
         counter++;
         }
+    //Potentialfeld besitzt am Ausgang das größte Potential und nimmt von da an ab; also Werte müssen noch "umgekehrt" werden:
+        //Finden des größten Eintrags in S_k:
+        int max_pot = 0;
+        for(int i = 0; i < grid_width; i++){
+            for(int j = 0; j < grid_height; j++){
+                if(S_k[i][j] > max_pot){
+                    max_pot = S_k[i][j];
+                }
+            }
+        }
+        //"umkehren" der Einträge: also Potential verläuft vom Eingang aus gesehen von groß nach klein
+        for(int i = 0; i < grid_width; i++){
+            for(int j = 0; j < grid_height; j++){
+                    if(could_a_person_go_to(i,j,obsarray)){
+                        S_k[i][j] = max_pot - S_k[i][j];
+                    }
 
+            }
+        }
     }
     int get_S_k(int x, int y){
         return S_k[x][y];
@@ -232,14 +251,18 @@ public:
         y = b;
         setrgb(0,0,200);
         set_w_S();
+        renew_w_S(destarray);
         set_S(destarray);
+        set_D();
     };
     person(int a, int b, int f1, int f2, int f3,destination destarray[quantity_destinations]){
         x = a;
         y = b;
         setrgb(f1,f2,f3);
         set_w_S();
+        renew_w_S(destarray);
         set_S(destarray);
+        set_D();
     };
 // constructors
 
@@ -263,7 +286,7 @@ public:
     }
     bool could_I_go_to (int qx, int qy, obstacle obsarray[quantity_obstacles]){//delivers true, if the person could stay at (x,y)/ could move to this cell
     //###cells out of borders arent available for a person:
-        if ((qy > grid_height) || (qx > grid_width)){
+        if ((qy >= grid_height) || (qx >= grid_width)){
             return false;
         }
         if ((qy < 0) || (qx < 0)){
@@ -281,7 +304,9 @@ public:
     // in all other cases:
         return return_value;
     }
-
+    void print_coords(){
+        cout << "Ich bin bei x: " << x << "y: " << y << endl;
+    }
 
 // methods
 
@@ -293,33 +318,68 @@ public:
     int g;
     int b;
 
-// Dynamic floor field D
+// ###### Dynamic floor field DZur Uni Potsdam(Brandenburg):
+    double k_D = 1;
     int D[grid_width][grid_height];
-// Static field S
+
+    void set_D(){
+        for (int i = 0; i < grid_width; i++){
+            for(int j = 0; j < grid_height; j++){
+                D[i][j] = 0;
+            }
+        }
+    }
+    void print_D(){
+        for (int i = 0; i < grid_height; i++){
+            for(int j = 0; j < grid_width; j++){
+                cout << D[i][j] << ":";
+            }
+            cout << endl;
+        }
+    }
+
+
+// ####### Static field S
+    double k_S = 1;
     double w_S[quantity_destinations]; // wie sehr kennt die Person die verschiedenen Eingänge; Eintrag ist zwischen 0,1
     double S[grid_width][grid_height];
 
-    void set_w_S(){
+    void set_w_S(){//legt den anfänglicher Wissensstand der Person über die Ausgänge
         for(int i = 0; i < quantity_destinations ; i++){
+            //Gibt dem Wert w_S für das jeweilige Ziele einen zufälligen Wert zwischen 0 und 1; w_S stellt hier das Wissen der Person über den ort des Ausgangs da
             w_S[i] = (double)(rand() % 10) / 10;
             cout <<"w_S ist:" <<w_S[i] << endl;
         }
     }
+    void renew_w_S(destination destarray[quantity_destinations]){// erneuert die Einträge von w_S, wenn bestimmt Umstände eintreten
+        //wenn sich die Person sehr nahe an einem Ausgang befindet bekommt der Wert w_S, der für das Wissen über diesen Ausgang steht, einen sehr hohen Wert, da die Person den Ausgang sieht o.Ä.
+        int r_influence_sphere = 5;// legt fest, ab wann die Person den Ausgang sehen kann
+        for(int i = 0; i < quantity_destinations; i++){
+            if(destarray[i].x > x - r_influence_sphere && destarray[i].x < x + r_influence_sphere){
+                if(destarray[i].y > y - r_influence_sphere && destarray[i].y < y + r_influence_sphere){
+                    w_S[i] = 2;
+                }
+            }
+        }
+    }
     void set_S(destination destarray[quantity_destinations]){//Addiere alle S_k Arrays der einzelnen destinations zum S Array hinzu; dies verläuft nach Gewichtung
-        for(int xi = 0; xi < grid_width; xi++){//setze alle Einträge von S auf 0
+        //setze alle Einträge von S auf 0:
+        for(int xi = 0; xi < grid_width; xi++){
             for(int yi = 0; yi < grid_height; yi++){
                 S[xi][yi] = 0;
             }
         }
 
-
-        for(int l = 0; l < quantity_destinations; l++){//Füllt die Einträge von S
+        //Füllt die Einträge von S
+        for(int l = 0; l < quantity_destinations; l++){
             for(int xi = 0; xi < grid_width; xi++){
                 for(int yi = 0; yi < grid_height; yi++){
                     S[xi][yi] = S[xi][yi] + destarray[l].get_S_k(xi,yi)*w_S[l];
                 }
             }
         }
+
+
     }
     void print_S(){
         cout << "----------------------------------------------------------------" << endl;
@@ -334,7 +394,81 @@ public:
         }
     }
 
+// ###### Transmission matrix
+    double T[3][3];
 
+    void set_T(obstacle* obsarray){
+    //füllt Einträge:
+        //Alle Felder bekommen Wert 0; nicht benutzte Felder (nach Neumann Nachbarschaft) bleiben 0:
+        for (int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                T[i][j] = 0;
+            }
+        }
+        //cout << "hier müsste alles null sein:" << endl;
+        //print_T();
+        //Eintrag oben:
+        //cout << "oben ?" << could_I_go_to(x,y - 1,obsarray) << endl;
+        if(could_I_go_to(x,y - 1,obsarray)){
+            T[1][0] = exp(k_S * S[x][y - 1]) + exp(k_D * D[x][y - 1]);
+        }
+        //Eintrag rechts:
+        //cout << "rechts ?" << could_I_go_to(x + 1,y,obsarray) << endl;
+        if(could_I_go_to(x + 2,y + 1,obsarray)){
+            T[2][1] = exp(k_S * S[x + 1][y]) + exp(k_D * D[x + 1][y]);
+        }
+        //Eintrag unten:
+        //cout << "unten ?" << could_I_go_to(x,y+1,obsarray) << endl;
+        if(could_I_go_to(x + 1,y + 2,obsarray)){
+            T[1][2] = exp(k_S * S[x][y + 1]) + exp(k_D * D[x][y + 1]);
+        }
+        //Eintrag links:
+        //cout << "unten ?" << could_I_go_to(x,y+1,obsarray) << endl;
+        if(could_I_go_to(x - 1,y,obsarray)){
+            T[0][1] = exp(k_S * S[x - 1][y]) + exp(k_D * D[x - 1][y]);
+        }
+        //mitte:
+        //cout << "hier bleiben ?" << could_I_go_to(x,y,obsarray) << endl;
+        if(could_I_go_to(x,y,obsarray)){
+            T[1][1] = exp(k_S * S[x][y]) + exp(k_D * D[x][y]);
+        }
+        //cout << "T befor normalization:" <<endl;
+        //print_T();
+
+    //Normalisierung der T-Matrix:
+        //Finden der Summe der Einträge von T:
+        double sum_T_entries = 0;
+        for (int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                sum_T_entries = sum_T_entries + T[i][j];
+            }
+        }
+        //Normalisierung durchführen:
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                T[i][j] = T[i][j] / sum_T_entries;
+            }
+        }
+        //cout << "T after normalization:" <<endl;
+        print_T();
+    }
+    void print_T(){
+        cout << "--------------------------------------" << endl;
+        cout << "transition matrix T:" << endl;
+        for (int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                cout << T[i][j] << " ; ";
+            }
+            cout << endl;
+        }
+        cout << "--------------------------------------" << endl;
+    }
+    double get_T(int qx, int qy){// gibt Eintrag der 3x3 Matrix aus
+        if(qx > 2 || qy > 2 || qx < 0 || qy < 0){
+                cout << "Fehler aufgetreten bei get_T!!" << endl;
+        }
+        return T[qx][qy];
+    }
 
 private:
 

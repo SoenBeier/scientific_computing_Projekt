@@ -2,7 +2,9 @@
 #include <SDL_image.h>
 #include <stdio.h>
 #include <iostream>
+#include <vector>
 #include "klassen.cpp"
+
 
 
 using namespace std;
@@ -89,26 +91,68 @@ void draw_grid(person pa[quantity_persons], destination da[quantity_destinations
         }
     SDL_RenderPresent(renderer);
 }
+void move_people_sequential(person *persarray, obstacle *obsarray){
+    //cout << "SIND GERADE HIER AM ARBEITEN" << endl;
+    //Vector wird mit allen Nummern gefüllt; jede Nummer kann genau einer Person zugeordnet werden kann
+    vector<int> serial_number_pers;
+    for(int i = 0; i < quantity_persons; i++){
+        serial_number_pers.push_back(i);
+        //cout << i;
+    }
+    //cout << endl;
+//Bewegung jeder Person:
+    for(int j = 0; j < quantity_persons; j++){
+    //Aussuchen: wer ist dran?
+        int l =  rand() % (quantity_persons - j);
+        //cout << "l: " << l << endl;
+        int whose_turn = serial_number_pers[l];
+        //cout << "whose turn: " << whose_turn << endl;
+        serial_number_pers.erase(serial_number_pers.begin() + l);
 
+    //Abrufen: Erstellen der transition Matrix:
+    persarray[j].set_T(obsarray);
+
+    //Aussuchen: Bewegungsrichtung:
+    double r = ((rand() % 10000) / 10000.);
+    //cout << "Zufallszahl r: " << r << endl;
+
+    if(r < persarray[j].get_T(1,0)){// Bewegung nach oben?
+        persarray[j].moveto(persarray[j].x, persarray[j].y - 1);
+    }
+    else if(r < (persarray[j].get_T(1,0) + persarray[j].get_T(2,1))){//nach rechts?
+        persarray[j].moveto(persarray[j].x + 1, persarray[j].y);
+    }
+    else if(r < (persarray[j].get_T(1,0) + persarray[j].get_T(2,1) + persarray[j].get_T(1,2))){//nach unten?
+        persarray[j].moveto(persarray[j].x, persarray[j].y + 1);
+    }
+    else if(r < (persarray[j].get_T(1,0) + persarray[j].get_T(2,1) + persarray[j].get_T(1,2) + persarray[j].get_T(0,1))){//nach links?
+        persarray[j].moveto(persarray[j].x - 1, persarray[j].y);
+    }
+    else{//stehen bleiben
+    }
+
+    }
+
+}
 
 
 int main(int argc, char* args[]){
-
+    srand (time(NULL));
 
 //################## object declaration 2
 //construction of used objects:
 //HIER EINFÜGEN WIE NIMMT DAS GANZE DING DIE LISTEN AUF
 
 
-for(int o = 0; o < quantity_obstacles; o++){
-    obsarray[o] = obstacle(initcoord_obst_array[o][0],initcoord_obst_array[o][1]);
-}
-for(int d = 0; d < quantity_destinations; d++){
-    destarray[d] = destination(initcoord_dest_array[d][0],initcoord_dest_array[d][1],obsarray);
-}
-for(int p = 0; p < quantity_persons; p++){
-    persarray[p] = person(initcoord_pers_array[p][0],initcoord_pers_array[p][1],destarray);
-}
+    for(int o = 0; o < quantity_obstacles; o++){
+        obsarray[o] = obstacle(initcoord_obst_array[o][0],initcoord_obst_array[o][1]);
+    }
+    for(int d = 0; d < quantity_destinations; d++){
+        destarray[d] = destination(initcoord_dest_array[d][0],initcoord_dest_array[d][1],obsarray);
+    }
+    for(int p = 0; p < quantity_persons; p++){
+        persarray[p] = person(initcoord_pers_array[p][0],initcoord_pers_array[p][1],destarray);
+    }
 //################## object declaration 2
 
 
@@ -125,12 +169,20 @@ for(int p = 0; p < quantity_persons; p++){
 destarray[0].print_S_k();
 destarray[1].print_S_k();
 persarray[0].print_S();
+move_people_sequential(persarray,obsarray);
+persarray[0].set_T(obsarray);
+persarray[1].set_T(obsarray);
 //test
 
 
 
 for(int i = 0; i < number_of_iterations; i++){
 //################## iteration method
+cout << "ITERATION: " << i << endl;
+cout << "                                                           x:" << persarray[0].x << " y:" << persarray[0].y << endl;
+move_people_sequential(persarray,obsarray);
+
+/*
 for(int h = 0; h < quantity_persons; h++){
     int new_x = rand() % grid_width;
     int new_y = rand() % grid_height;
@@ -138,13 +190,14 @@ for(int h = 0; h < quantity_persons; h++){
     cout << new_x << " ; " << new_y << endl;
 }
 cout << "-------------------------------------" << endl;
+*/
 //################## iteration method
 
 
 
 //################## visual output 2
         draw_grid(persarray,destarray,obsarray,renderer,2);
-        SDL_Delay(100);
+        SDL_Delay(800);
 
 }
     while (1) {
