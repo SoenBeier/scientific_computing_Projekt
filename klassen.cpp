@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <vector>
 #include <math.h>
+#include <time.h>
 
 using namespace std;
 
@@ -250,18 +251,31 @@ public:
         x = a;
         y = b;
         setrgb(0,0,200);
-        set_w_S(quantity_destinations);
+
+        //###Zu set_w_S
+        int p_d[1]; //bevorzugtes Ziel
+        p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zufällig ausgewählt
+        set_w_S(true,1,p_d, rand() % (quantity_destinations ) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
+        //###Zu set_w_S
         renew_w_S(destarray);
         set_S(destarray);
+
         set_D();
     };
     person(int a, int b, int f1, int f2, int f3,destination *destarray){
         x = a;
         y = b;
         setrgb(f1,f2,f3);
-        set_w_S(quantity_destinations);
+
+        //###Zu set_w_S
+        int p_d[1]; //bevorzugtes Ziel
+        p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zufällig ausgewählt
+        set_w_S(true,1,p_d, rand() % (quantity_destinations) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
+        //###Zu set_w_S
+
         renew_w_S(destarray);
         set_S(destarray);
+
         set_D();
     };
 // constructors
@@ -417,7 +431,6 @@ public:
             set_w_S(quantity_known_dest);
         }
 
-        cout << "HIER: " << preferred_dest[0] << endl;
 
 
 
@@ -433,7 +446,15 @@ public:
             }
         }
     }
+    void print_w_S(){
+        cout << endl << "print_w_S:" << endl;
+        for(int i = 0; i < quantity_destinations; i++){
+            cout << w_S[i] << ";";
+        }
+        cout << endl;
+    }
     void set_S(destination *destarray){//Addiere alle S_k Arrays der einzelnen destinations zum S Array hinzu; dies verläuft nach Gewichtung
+        double max_S = 0;
         //setze alle Einträge von S auf 0:
         for(int xi = 0; xi < grid_width; xi++){
             for(int yi = 0; yi < grid_height; yi++){
@@ -446,16 +467,37 @@ public:
             for(int xi = 0; xi < grid_width; xi++){
                 for(int yi = 0; yi < grid_height; yi++){
                     S[xi][yi] = S[xi][yi] + destarray[l].get_S_k(xi,yi)*w_S[l];
+                    if(S[xi][yi] > max_S){
+                        max_S = S[xi][yi];
+
+                    }
                 }
             }
         }
+        /*
+        //cout <<"max_S : " <<max_S << endl;
+        // Beschränkt die Größe der Einträge, damit die größe der Zahlen nicht die Speichergrenze beim exponentieren überschreiten
+        while (max_S > 200){
+            for(int l = 0; l < quantity_destinations; l++){
+                for(int xi = 0; xi < grid_width; xi++){
+                    for(int yi = 0; yi < grid_height; yi++){
+                        S[xi][yi] = S[xi][yi]/2;
+
+
+                    }
+                }
+
+            }
+            max_S = max_S/2;
+            //cout <<"max_S2 : " <<max_S << endl;
+        }*/
 
 
     }
-    void print_S(){
+    void print_S(int width = grid_width, int height = grid_height){
         cout << "----------------------------------------------------------------" << endl;
-        for(int j = 0; j < grid_height; j++){
-            for(int i = 0; i < grid_width; i++){
+        for(int j = 0; j < height; j++){
+            for(int i = 0; i < width; i++){
                 if (S[i][j] > 9 && S[i][j] <= 99){cout << " " << S[i][j] << ";" ;}
                 else if (S[i][j] > 99){cout << S[i][j] << ";" ;}
                 else {cout << "  " << S[i][j] << ";" ;}
@@ -466,7 +508,7 @@ public:
     }
 
 // ###### Transmission matrix
-    double T[3][3];
+    long double T[3][3];
 
     void set_T(obstacle* obsarray,person *persarray){
     //füllt Einträge:
@@ -481,31 +523,91 @@ public:
         //Eintrag oben:
         //cout << "oben ?" << could_I_go_to(x,y - 1,obsarray) << endl;
         if(could_I_go_to(x,y - 1,obsarray,persarray)){
-            T[1][0] = exp(k_S * S[x][y - 1]) + exp(k_D * D[x][y - 1]);
+            T[1][0] = expl(k_S * S[x][y - 1]) + exp(k_D * D[x][y - 1]);
         }
         //Eintrag rechts:
         //cout << "rechts ?" << could_I_go_to(x + 1,y,obsarray) << endl;
         if(could_I_go_to(x + 2,y + 1,obsarray,persarray)){
-            T[2][1] = exp(k_S * S[x + 1][y]) + exp(k_D * D[x + 1][y]);
+            T[2][1] = expl(k_S * S[x + 1][y]) + exp(k_D * D[x + 1][y]);
         }
         //Eintrag unten:
         //cout << "unten ?" << could_I_go_to(x,y+1,obsarray) << endl;
         if(could_I_go_to(x + 1,y + 2,obsarray,persarray)){
-            T[1][2] = exp(k_S * S[x][y + 1]) + exp(k_D * D[x][y + 1]);
+            T[1][2] = expl(k_S * S[x][y + 1]) + exp(k_D * D[x][y + 1]);
         }
         //Eintrag links:
         //cout << "unten ?" << could_I_go_to(x,y+1,obsarray) << endl;
         if(could_I_go_to(x - 1,y,obsarray,persarray)){
-            T[0][1] = exp(k_S * S[x - 1][y]) + exp(k_D * D[x - 1][y]);
+            T[0][1] = expl(k_S * S[x - 1][y]) + exp(k_D * D[x - 1][y]);
         }
         //mitte:
         //cout << "hier bleiben ?" << could_I_go_to(x,y,obsarray) << endl;
-        if(could_I_go_to(x,y,obsarray,persarray)){
-            T[1][1] = exp(k_S * S[x][y]) + exp(k_D * D[x][y]);
+            T[1][1] = expl(k_S * S[x][y]) + exp(k_D * D[x][y]);
+
+
+    //Überprüfung ob das Feld zu groß ist und deswegen T fehlerhaft erstellt wird:
+        for (int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                if (isinf(T[i][j])){
+                    cout << "Fehler beim Erstellen der Matrix T aufgetreten ! Die Größe der Einträge übersteigt die maximale Größe des long double Zahlentyps." << endl << "Versuchen sie die Simulation mit einem kleineren Feld zu wiederholen" << endl;
+                }
+            }
         }
+
         //cout << "T befor normalization:" <<endl;
         //print_T();
-
+    //Normalisierung der T-Matrix:
+        //Finden der Summe der Einträge von T:
+        long double sum_T_entries = 0;
+        for (int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                sum_T_entries = sum_T_entries + T[i][j];
+            }
+        }
+        //Normalisierung durchführen:
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                T[i][j] = T[i][j] / sum_T_entries;
+            }
+        }
+        //cout << "T after normalization:" <<endl;
+        //print_T();
+    }
+    void set_T_experimentell(obstacle* obsarray,person *persarray){
+    //füllt Einträge:
+        //Alle Felder bekommen Wert 0; nicht benutzte Felder (nach Neumann Nachbarschaft) bleiben 0:
+        for (int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                T[i][j] = 0;
+            }
+        }
+        //cout << "hier müsste alles null sein:" << endl;
+        //print_T();
+        //Eintrag oben:
+        //cout << "oben ?" << could_I_go_to(x,y - 1,obsarray) << endl;
+        if(could_I_go_to(x,y - 1,obsarray,persarray)){
+            T[1][0] = pow(k_S * S[x][y - 1],2) + exp(k_D * D[x][y - 1]);
+        }
+        //Eintrag rechts:
+        //cout << "rechts ?" << could_I_go_to(x + 1,y,obsarray) << endl;
+        if(could_I_go_to(x + 2,y + 1,obsarray,persarray)){
+            T[2][1] = pow(k_S * S[x + 1][y],2) + exp(k_D * D[x + 1][y]);
+        }
+        //Eintrag unten:
+        //cout << "unten ?" << could_I_go_to(x,y+1,obsarray) << endl;
+        if(could_I_go_to(x + 1,y + 2,obsarray,persarray)){
+            T[1][2] = pow(k_S * S[x][y + 1],2) + exp(k_D * D[x][y + 1]);
+        }
+        //Eintrag links:
+        //cout << "unten ?" << could_I_go_to(x,y+1,obsarray) << endl;
+        if(could_I_go_to(x - 1,y,obsarray,persarray)){
+            T[0][1] = pow(k_S * S[x - 1][y],2) + exp(k_D * D[x - 1][y]);
+        }
+        //mitte:
+        //cout << "hier bleiben ?" << could_I_go_to(x,y,obsarray) << endl;
+            T[1][1] = pow(k_S * S[x][y],2) + exp(k_D * D[x][y]);
+        //cout << "T befor normalization:" <<endl;
+        print_T();
     //Normalisierung der T-Matrix:
         //Finden der Summe der Einträge von T:
         double sum_T_entries = 0;
@@ -525,6 +627,8 @@ public:
     }
     void print_T(){
         cout << "--------------------------------------" << endl;
+        cout << "Koordinaten:(";
+        print_coords();
         cout << "transition matrix T:" << endl;
         for (int i = 0; i < 3; i++){
             for(int j = 0; j < 3; j++){
@@ -540,6 +644,19 @@ public:
         }
         return T[qx][qy];
     }
+
+// ###### time measurement for the analysis of movement of the person
+time_t time_start;
+time_t time_end;
+time_t evacuation_time;
+
+void start_time_measurement(){
+    time_start = time(NULL);
+}
+void end_time_measurement(){
+    time_end = time(NULL);
+    evacuation_time = difftime(time_end,time_start);
+}
 
 private:
 

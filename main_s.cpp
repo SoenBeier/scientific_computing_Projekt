@@ -181,26 +181,30 @@ persarray[0].print_S();
 persarray[0].set_T(obsarray,persarray);
 persarray[1].set_T(obsarray,persarray);
 */
-int p_d[1] = {2};
-persarray[0].set_w_S(true,1,p_d,0);
+//destarray[0].print_S_k();
+//destarray[1].print_S_k();
 //test
 
 
 
 for(int i = 0; i < number_of_iterations; i++){
 //################## iteration method
-cout << "ITERATION: " << i << endl;
-cout << "                                             x:" << persarray[0].x << " y:" << persarray[0].y << endl;
+//cout << "ITERATION: " << i << endl;
 
 move_people_sequential(persarray,obsarray,destarray);
 
+for(int i = 0; i < quantity_persons; i++){
+    //cout << "PErson " << i << " : " << endl;
+    //persarray[i].print_T();
+    //persarray[i].print_S(10,10);
+}
 //################## iteration method
 
 
 
 //################## visual output 2
         draw_grid(persarray,destarray,obsarray,renderer,2);
-        SDL_Delay(20);
+        SDL_Delay(1);
 
 }
     while (1) {
