@@ -5,8 +5,8 @@
 
 using namespace std;
 
-const int grid_width = 640;
-const int grid_height = 480;
+const int grid_width = 80;
+const int grid_height = 70;
 
 
 SDL_PixelFormat *fmt;
@@ -42,80 +42,63 @@ void close()
 
 
 
-
-
-
-void get_arrays()
+Uint32 getpixel(SDL_Surface *surface, int x, int y)
 {
-    fmt = gScreenSurface->format;
+    int bpp = surface->format->BytesPerPixel;
+    /* Here p is the address to the pixel we want to retrieve */
+    Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
 
-    Uint8 r=0;
-    Uint8 g=0;
-    Uint8 b=0;
+    switch(bpp) {
+    case 1:
+        return *p;
+        break;
 
-    //rgb der ersonen
-    Uint8 r_p=0;
-    Uint8 g_p=0;
-    Uint8 b_p=0;
+    case 2:
+        return *(Uint16 *)p;
+        break;
 
-    //rgb der obst
-    Uint8 r_o=0;
-    Uint8 g_o=0;
-    Uint8 b_o=0;
+    case 3:
+        if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+            return p[0] << 16 | p[1] << 8 | p[2];
+        else
+            return p[0] | p[1] << 8 | p[2] << 16;
+        break;
 
-    //rgb der dest
-    Uint8 r_d=0;
-    Uint8 g_d=0;
-    Uint8 b_d=0;
+    case 4:
+        return *(Uint32 *)p;
+        break;
 
-    //void SDL_GetRGB(Uint32 pixel, SDL_PixelFormat *fmt, Uint8 *r, Uint8 *g, Uint8 *b);
+    default:
+        return 0;       /* shouldn't happen, but avoids warnings */
+    }
+}
 
-    Uint32 pixel = 0;
 
+void get_arrays(SDL_Surface * surface, int p_x, int p_y, int d_x, int d_y, int o_x, int o_y)
+{
     for (int y=0; y< grid_height; y++)
     {
-        for (int x=0; x< grid_width; x++)
+        for (int x=3; x< grid_width; x++)
         {
-            int bpp = gScreenSurface->format->BytesPerPixel;
-            /* Here p is the address to the pixel we want to retrieve */
-            Uint8* p = (Uint8 *)gScreenSurface->pixels + y * gScreenSurface->pitch + x * bpp;
-
-            switch(bpp)
+            if (getpixel(surface, x, y)==getpixel(surface, p_x, p_y))
             {
-                case 3:
-                    if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
-                        return p[0] << 16 | p[1] << 8 | p[2];
-                    else
-                        return p[0] | p[1] << 8 | p[2] << 16;
-                    break;
-
-                case 4:
-                    return *(Uint32 *)p;
-                    break;
-
-                default:
-                    return 0;       /* shouldn't happen, but avoids warnings */
-
-            }
-            pixel=p;
-            SDL_GetRGB(pixel, fmt, &r, &g, &b);
-
-            if (r==r_p && g==g_p && b==b_p)
-            {
+                ith_coord.clear();
                 ith_coord.push_back(x);
                 ith_coord.push_back(y);
 
                 initcoord_pers_arr.push_back(ith_coord);
             }
-            if (r==r_o && g==g_o && b==b_o)
+            else if (getpixel(surface, x, y)==getpixel(surface, o_x, o_y))
             {
+                ith_coord.clear();
                 ith_coord.push_back(x);
                 ith_coord.push_back(y);
 
                 initcoord_obst_arr.push_back(ith_coord);
             }
-            if (r==r_d && g==g_d && b==b_d)
+            else if (getpixel(surface, x, y)==getpixel(surface, d_x, d_y))
             {
+                ith_coord.clear();
                 ith_coord.push_back(x);
                 ith_coord.push_back(y);
 
@@ -137,21 +120,73 @@ void get_arrays()
 
 
 
+
+
 main (int argc, char* args[])
 {
 
-    gWindow = SDL_CreateWindow( "Geladenes Bild", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, grid_width, grid_height, SDL_WINDOW_SHOWN );
+    gWindow = SDL_CreateWindow( "Grundriss", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, grid_width, grid_height, SDL_WINDOW_SHOWN );
     gScreenSurface = SDL_GetWindowSurface( gWindow );
     gHelloWorld = SDL_LoadBMP( "Haus.bmp" );
-
-
-
-    get_arrays();
 
 
     SDL_BlitSurface( gHelloWorld, NULL, gScreenSurface, NULL );
     SDL_UpdateWindowSurface( gWindow );
     SDL_Delay( 2000 );
 
+
+
+
+    get_arrays(gHelloWorld, 0, 0, 2, 0, 1, 0);
+
+
+
+
+    cout << "Destination Array:" << endl;
+    cout << " " << endl;
+    for (int i=0; i<initcoord_dest_arr.size(); i++)
+    {
+        for (int j=0; j<ith_coord.size(); j++)
+        {
+            cout << initcoord_dest_arr[i][j]<< ", ";
+        }
+        cout << endl;
+    }
+    cout << "Dest-Array Groesse: " << initcoord_dest_arr.size() << endl;
+    cout << " " << endl;
+    cout << " " << endl;
+
+
+    cout << "Obstacle Array:" << endl;
+    cout << " " << endl;
+    for (int i=0; i<initcoord_obst_arr.size(); i++)
+    {
+        for (int j=0; j<ith_coord.size(); j++)
+        {
+            cout << initcoord_obst_arr[i][j]<< ", ";
+        }
+        cout << endl;
+    }
+    cout << "Obst-Array Groesse: " << initcoord_obst_arr.size() << endl;
+    cout << " " << endl;
+    cout << " " << endl;
+
+
+    cout << "Person Array:" << endl;
+    cout << " " << endl;
+    for (int i=0; i<initcoord_pers_arr.size(); i++)
+    {
+        for (int j=0; j<ith_coord.size(); j++)
+        {
+            cout << initcoord_pers_arr[i][j]<< ", ";
+        }
+        cout << endl;
+    }
+    cout << "Pers-Array Groesse: " << initcoord_pers_arr.size() << endl;
+
     close();
+
+
+    return 0;
+
 }
