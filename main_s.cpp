@@ -28,7 +28,7 @@ void clear_drawing(SDL_Renderer *renderer){// clears the whole screen/pigment th
     const SDL_Rect scrrect = {0,0,grid_width*10,grid_height*10}; //declarate rectangle, which contains the whole screen -> NOCHMAL NACHBESSERN : NUR BENÖTIGTER PLATZ
     SDL_RenderFillRect(renderer, &scrrect);
 }
-void draw_grid(person pa[quantity_persons], destination da[quantity_destinations], obstacle oa[quantity_obstacles], SDL_Renderer *renderer){ //draw all objects on screen
+void draw_grid(person *pa, destination *da, obstacle *oa, SDL_Renderer *renderer){ //draw all objects on screen
 
     clear_drawing(renderer); // pigment the screen white
     for(int p = 0; p < quantity_persons; p++){
@@ -45,7 +45,7 @@ void draw_grid(person pa[quantity_persons], destination da[quantity_destinations
     }
     SDL_RenderPresent(renderer);
 }
-void draw_grid(person pa[quantity_persons], destination da[quantity_destinations], obstacle oa[quantity_obstacles], SDL_Renderer *renderer, int magnification_factor){//draw all objects on screen with a magnication ; möglicherweise eine größere Vergrößerung ermöglichen ?
+void draw_grid(person *pa, destination *da, obstacle *oa, SDL_Renderer *renderer, int magnification_factor){//draw all objects on screen with a magnication ; möglicherweise eine größere Vergrößerung ermöglichen ?
 
     clear_drawing(renderer); // pigment the screen white
     if (magnification_factor == 1){
@@ -91,7 +91,7 @@ void draw_grid(person pa[quantity_persons], destination da[quantity_destinations
         }
     SDL_RenderPresent(renderer);
 }
-void move_people_sequential(person *persarray, obstacle *obsarray){
+void move_people_sequential(person *persarray, obstacle *obsarray, destination *destarray){
     //cout << "SIND GERADE HIER AM ARBEITEN" << endl;
     //Vector wird mit allen Nummern gefüllt; jede Nummer kann genau einer Person zugeordnet werden kann
     vector<int> serial_number_pers;
@@ -102,6 +102,9 @@ void move_people_sequential(person *persarray, obstacle *obsarray){
     //cout << endl;
 //Bewegung jeder Person:
     for(int j = 0; j < quantity_persons; j++){
+    //Erneuern des statischen Feldes um auf Umweltänderungen reagieren zu können
+        persarray[j].renew_w_S(destarray);
+        persarray[j].set_S(destarray);
     //Aussuchen: wer ist dran?
         int l =  rand() % (quantity_persons - j);
         //cout << "l: " << l << endl;
@@ -110,7 +113,7 @@ void move_people_sequential(person *persarray, obstacle *obsarray){
         serial_number_pers.erase(serial_number_pers.begin() + l);
 
     //Abrufen: Erstellen der transition Matrix:
-    persarray[j].set_T(obsarray);
+    persarray[j].set_T(obsarray,persarray);
 
     //Aussuchen: Bewegungsrichtung:
     double r = ((rand() % 10000) / 10000.);
@@ -134,7 +137,9 @@ void move_people_sequential(person *persarray, obstacle *obsarray){
     }
 
 }
-
+bool has_pers_reached_destination(){
+    return false;
+}
 
 int main(int argc, char* args[]){
     srand (time(NULL));
@@ -166,12 +171,18 @@ int main(int argc, char* args[]){
 //################## visual output 1
 
 //test
+/*
+cout << "hier !!: ";
+cout << persarray[0].could_I_go_to(5,6,obsarray,persarray)<< endl;
+cout << persarray[0].is_there_a_person_on(5,6,persarray) << endl;
 destarray[0].print_S_k();
 destarray[1].print_S_k();
 persarray[0].print_S();
-move_people_sequential(persarray,obsarray);
-persarray[0].set_T(obsarray);
-persarray[1].set_T(obsarray);
+persarray[0].set_T(obsarray,persarray);
+persarray[1].set_T(obsarray,persarray);
+*/
+int p_d[1] = {2};
+persarray[0].set_w_S(true,1,p_d,0);
 //test
 
 
@@ -179,25 +190,17 @@ persarray[1].set_T(obsarray);
 for(int i = 0; i < number_of_iterations; i++){
 //################## iteration method
 cout << "ITERATION: " << i << endl;
-cout << "                                                           x:" << persarray[0].x << " y:" << persarray[0].y << endl;
-move_people_sequential(persarray,obsarray);
+cout << "                                             x:" << persarray[0].x << " y:" << persarray[0].y << endl;
 
-/*
-for(int h = 0; h < quantity_persons; h++){
-    int new_x = rand() % grid_width;
-    int new_y = rand() % grid_height;
-    persarray[h].moveto(new_x , new_y);
-    cout << new_x << " ; " << new_y << endl;
-}
-cout << "-------------------------------------" << endl;
-*/
+move_people_sequential(persarray,obsarray,destarray);
+
 //################## iteration method
 
 
 
 //################## visual output 2
         draw_grid(persarray,destarray,obsarray,renderer,2);
-        SDL_Delay(800);
+        SDL_Delay(20);
 
 }
     while (1) {
