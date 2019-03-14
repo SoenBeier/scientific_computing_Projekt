@@ -10,6 +10,7 @@
 using namespace std;
 
 
+
 class obstacle
 {
 public:
@@ -242,41 +243,53 @@ private:
 
 };
 
+
+
+
+
+
+
+
 class person
 {
 public:
 // constructors
     person(){};
-    person(int a, int b,destination *destarray){
-        x = a;
-        y = b;
+    person(int nx, int ny,destination *destarray){
+        x = nx;
+        y = ny;
         setrgb(0,0,200);
 
         //###Zu set_w_S
         int p_d[1]; //bevorzugtes Ziel
         p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zufällig ausgewählt
         set_w_S(true,1,p_d, rand() % (quantity_destinations ) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
-        //###Zu set_w_S
         renew_w_S(destarray);
+
         set_S(destarray);
 
         set_D();
+
+        evacuated = false;
+        number_of_conflicts = 0;
     };
-    person(int a, int b, int f1, int f2, int f3,destination *destarray){
-        x = a;
-        y = b;
+    person(int nx, int ny, int f1, int f2, int f3,destination *destarray){
+        x = nx;
+        y = ny;
         setrgb(f1,f2,f3);
 
         //###Zu set_w_S
         int p_d[1]; //bevorzugtes Ziel
         p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zufällig ausgewählt
         set_w_S(true,1,p_d, rand() % (quantity_destinations) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
-        //###Zu set_w_S
-
         renew_w_S(destarray);
+
         set_S(destarray);
 
         set_D();
+
+        evacuated = false;
+        number_of_conflicts = 0;
     };
 // constructors
 
@@ -287,9 +300,11 @@ public:
         b = f3;
     };
     void moveto(int xn, int yn){
-        x = xn;
-        y = yn;
-    }
+        if(evacuated == false){
+            x = xn;
+            y = yn;
+        }
+}
     bool is_it_here(int qx, int qy){
         if (x == qx && y == qy){
             return true;
@@ -333,7 +348,6 @@ public:
     void print_coords(){
         cout << "Ich bin bei x: " << x << "y: " << y << endl;
     }
-
 // methods
 
 //coordinates
@@ -370,6 +384,11 @@ public:
     double w_S[quantity_destinations]; // wie sehr kennt die Person die verschiedenen Eingänge; Eintrag ist zwischen 0,1
     double S[grid_width][grid_height];
 
+    void set_w_S(double w){// der Wissenstand der Personen wird für alle Ausgänge gleich groß gewählt (so groß wie w)
+        for(int i = 0; i < quantity_destinations; i++){
+            w_S[i] = w;
+        }
+    }
     void set_w_S(int quantity_known_dest, bool previously_set = false){//legt den anfänglicher Wissensstand der Person über die Ausgänge fest
         //
         for(int i = 0; i < quantity_destinations; i++){
@@ -421,7 +440,7 @@ public:
                 return;
             }
             for(int i = 0; i < quantity_preferred_dest; i++){
-                w_S[preferred_dest[i]] = 2;
+                w_S[preferred_dest[i]] = 1;
             }
             set_w_S(quantity_known_dest-quantity_preferred_dest, true);
 
@@ -466,10 +485,9 @@ public:
         for(int l = 0; l < quantity_destinations; l++){
             for(int xi = 0; xi < grid_width; xi++){
                 for(int yi = 0; yi < grid_height; yi++){
-                    S[xi][yi] = S[xi][yi] + destarray[l].get_S_k(xi,yi)*w_S[l];
+                    S[xi][yi] = S[xi][yi] + destarray[l].get_S_k(xi,yi) * w_S[l];
                     if(S[xi][yi] > max_S){
                         max_S = S[xi][yi];
-
                     }
                 }
             }
@@ -510,7 +528,8 @@ public:
 // ###### Transmission matrix
     long double T[3][3];
 
-    void set_T(obstacle* obsarray,person *persarray){
+    void set_T(obstacle* obsarray,person *persarray, char movement_mode = 's'){
+
     //füllt Einträge:
         //Alle Felder bekommen Wert 0; nicht benutzte Felder (nach Neumann Nachbarschaft) bleiben 0:
         for (int i = 0; i < 3; i++){
@@ -522,22 +541,22 @@ public:
         //print_T();
         //Eintrag oben:
         //cout << "oben ?" << could_I_go_to(x,y - 1,obsarray) << endl;
-        if(could_I_go_to(x,y - 1,obsarray,persarray)){
+        if((could_I_go_to(x,y - 1,obsarray,persarray) && movement_mode == 's' ) || ((could_I_go_to(x,y - 1,obsarray,persarray) || is_there_a_person_on(x,y - 1, persarray)) && movement_mode == 'p' )){ // entweder sequentieller Ablauf: dann could I go to; bei paralellen ist es egal ob auf dem Feld gerade eine andere Person steht
             T[1][0] = expl(k_S * S[x][y - 1]) + exp(k_D * D[x][y - 1]);
         }
         //Eintrag rechts:
         //cout << "rechts ?" << could_I_go_to(x + 1,y,obsarray) << endl;
-        if(could_I_go_to(x + 2,y + 1,obsarray,persarray)){
+        if((could_I_go_to(x + 1,y,obsarray,persarray) && movement_mode == 's' ) || ((could_I_go_to(x + 1,y,obsarray,persarray) || is_there_a_person_on(x + 1,y, persarray)) && movement_mode == 'p' )){
             T[2][1] = expl(k_S * S[x + 1][y]) + exp(k_D * D[x + 1][y]);
         }
         //Eintrag unten:
         //cout << "unten ?" << could_I_go_to(x,y+1,obsarray) << endl;
-        if(could_I_go_to(x + 1,y + 2,obsarray,persarray)){
+        if((could_I_go_to(x,y + 1,obsarray,persarray) && movement_mode == 's' ) || ((could_I_go_to(x,y + 1,obsarray,persarray) || is_there_a_person_on(x,y + 1, persarray)) && movement_mode == 'p' )){
             T[1][2] = expl(k_S * S[x][y + 1]) + exp(k_D * D[x][y + 1]);
         }
         //Eintrag links:
         //cout << "unten ?" << could_I_go_to(x,y+1,obsarray) << endl;
-        if(could_I_go_to(x - 1,y,obsarray,persarray)){
+        if((could_I_go_to(x - 1,y,obsarray,persarray)&& movement_mode == 's' ) || ((could_I_go_to(x - 1,y,obsarray,persarray) || is_there_a_person_on(x - 1,y, persarray)) && movement_mode == 'p' )){
             T[0][1] = expl(k_S * S[x - 1][y]) + exp(k_D * D[x - 1][y]);
         }
         //mitte:
@@ -573,58 +592,6 @@ public:
         //cout << "T after normalization:" <<endl;
         //print_T();
     }
-    void set_T_experimentell(obstacle* obsarray,person *persarray){
-    //füllt Einträge:
-        //Alle Felder bekommen Wert 0; nicht benutzte Felder (nach Neumann Nachbarschaft) bleiben 0:
-        for (int i = 0; i < 3; i++){
-            for(int j = 0; j < 3; j++){
-                T[i][j] = 0;
-            }
-        }
-        //cout << "hier müsste alles null sein:" << endl;
-        //print_T();
-        //Eintrag oben:
-        //cout << "oben ?" << could_I_go_to(x,y - 1,obsarray) << endl;
-        if(could_I_go_to(x,y - 1,obsarray,persarray)){
-            T[1][0] = pow(k_S * S[x][y - 1],2) + exp(k_D * D[x][y - 1]);
-        }
-        //Eintrag rechts:
-        //cout << "rechts ?" << could_I_go_to(x + 1,y,obsarray) << endl;
-        if(could_I_go_to(x + 2,y + 1,obsarray,persarray)){
-            T[2][1] = pow(k_S * S[x + 1][y],2) + exp(k_D * D[x + 1][y]);
-        }
-        //Eintrag unten:
-        //cout << "unten ?" << could_I_go_to(x,y+1,obsarray) << endl;
-        if(could_I_go_to(x + 1,y + 2,obsarray,persarray)){
-            T[1][2] = pow(k_S * S[x][y + 1],2) + exp(k_D * D[x][y + 1]);
-        }
-        //Eintrag links:
-        //cout << "unten ?" << could_I_go_to(x,y+1,obsarray) << endl;
-        if(could_I_go_to(x - 1,y,obsarray,persarray)){
-            T[0][1] = pow(k_S * S[x - 1][y],2) + exp(k_D * D[x - 1][y]);
-        }
-        //mitte:
-        //cout << "hier bleiben ?" << could_I_go_to(x,y,obsarray) << endl;
-            T[1][1] = pow(k_S * S[x][y],2) + exp(k_D * D[x][y]);
-        //cout << "T befor normalization:" <<endl;
-        print_T();
-    //Normalisierung der T-Matrix:
-        //Finden der Summe der Einträge von T:
-        double sum_T_entries = 0;
-        for (int i = 0; i < 3; i++){
-            for(int j = 0; j < 3; j++){
-                sum_T_entries = sum_T_entries + T[i][j];
-            }
-        }
-        //Normalisierung durchführen:
-        for(int i = 0; i < 3; i++){
-            for(int j = 0; j < 3; j++){
-                T[i][j] = T[i][j] / sum_T_entries;
-            }
-        }
-        //cout << "T after normalization:" <<endl;
-        //print_T();
-    }
     void print_T(){
         cout << "--------------------------------------" << endl;
         cout << "Koordinaten:(";
@@ -645,18 +612,26 @@ public:
         return T[qx][qy];
     }
 
-// ###### time measurement for the analysis of movement of the person
-time_t time_start;
-time_t time_end;
-time_t evacuation_time;
+// ##### desired coordinates; are used, when update rule is parallel
+    int desired_x;
+    int desired_y;
+    bool already_moved;
+    vector<int> conflict_partner;
+    int number_of_conflicts;
 
-void start_time_measurement(){
-    time_start = time(NULL);
-}
-void end_time_measurement(){
-    time_end = time(NULL);
-    evacuation_time = difftime(time_end,time_start);
-}
+// ###### time measurement for the analysis of movement of the person
+    time_t time_start;
+    time_t time_end;
+    time_t evacuation_time;
+    bool evacuated;
+
+    void start_time_measurement(){
+        time_start = time(NULL);
+    }
+    void end_time_measurement(){
+        time_end = time(NULL);
+        evacuation_time = difftime(time_end,time_start);
+    }
 
 private:
 
