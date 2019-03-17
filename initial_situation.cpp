@@ -8,13 +8,14 @@
 
 using namespace std;
 
-const static int grid_height = 75;
-const static int grid_width = 75;
+const static int grid_height = 100;
+const static int grid_width = 70;
 
-static int number_of_iterations = 5;
+static int number_of_iterations = 200;
 
 
-static const char plant_layout[] = "Haus.bmp";//Name des Gebäudeplans
+static const char plant_layout[] = "64x64_Haus_1eingang.bmp";//Name des Gebäudeplans
+static const char movement_update = 's'; //'s' - sequential, 'p' - parallel
 
 
 

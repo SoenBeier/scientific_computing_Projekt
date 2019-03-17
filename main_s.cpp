@@ -3,8 +3,10 @@
 #include <stdio.h>
 #include <iostream>
 #include <vector>
+#include <string>
 #include "klassen.cpp"
-
+#include <fstream>
+#include <time.h>
 
 
 using namespace std;
@@ -19,8 +21,77 @@ using namespace std;
 
 
 //#### Grundriss einlesen
+Uint32 getpixel_function(SDL_Surface *surface, int x, int y){ //Quelle: http://sdl.beuc.net/sdl.wiki/Pixel_Access; unter getpixel in SDL Paket enthalten, Liest Farbe eines Pixels aus
 
+        int bpp = surface->format->BytesPerPixel;
+        /* Here p is the address to the pixel we want to retrieve */
+        Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
 
+        switch(bpp) {
+        case 1:
+            return *p;
+            break;
+
+        case 2:
+            return *(Uint16 *)p;
+            break;
+
+        case 3:
+            if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+                return p[0] << 16 | p[1] << 8 | p[2];
+            else
+                return p[0] | p[1] << 8 | p[2] << 16;
+            break;
+
+        case 4:
+            return *(Uint32 *)p;
+            break;
+
+        default:
+            return 0;       /* shouldn't happen, but avoids warnings */
+    }
+}
+void set_init_vectors(SDL_Surface * surface,vector <vector <int>> &initcoord_pers_vec,vector <vector <int>> &initcoord_dest_vec,vector <vector <int>> &initcoord_obst_vec, int p_x, int p_y, int d_x, int d_y, int o_x, int o_y){//Liest den Grundriss ein
+    vector <int > ith_coord;
+    for (int y=0; y< grid_height; y++)
+    {
+        for (int x=3; x< grid_width; x++)
+        {
+            if (getpixel_function(surface, x, y)== getpixel_function(surface, p_x, p_y))
+            {
+                ith_coord.clear();
+                ith_coord.push_back(x);
+                ith_coord.push_back(y);
+
+                initcoord_pers_vec.push_back(ith_coord);
+            }
+            else if (getpixel_function(surface, x, y)== getpixel_function(surface, o_x, o_y))
+            {
+                ith_coord.clear();
+                ith_coord.push_back(x);
+                ith_coord.push_back(y);
+
+                initcoord_obst_vec.push_back(ith_coord);
+            }
+            else if (getpixel_function(surface, x, y)== getpixel_function(surface, d_x, d_y))
+            {
+                ith_coord.clear();
+                ith_coord.push_back(x);
+                ith_coord.push_back(y);
+
+                initcoord_dest_vec.push_back(ith_coord);
+            }
+        }
+    }
+
+}
+void print_init_vector(vector <vector<int>> &initcoord_vec){
+    cout << "Init Koordinaten sind:" << endl;
+    for(int i = 0; i < initcoord_vec.size(); i++){
+        cout << "(" << initcoord_vec[i][0] << ";" << initcoord_vec[i][1] << ")" << " ";
+    }
+    cout << endl;
+}
 //#### Grundriss einlesen
 
 
@@ -94,6 +165,7 @@ void draw_grid(vector <person> &pa, vector <destination> &da, vector<obstacle> &
     SDL_RenderPresent(renderer);
 }
 //#### Grafikausgabe
+
 
 //#### Vorgehen während Iteration
 void move_people_sequential(vector<person> &persvec, vector<obstacle> &obstvec, vector<destination> &destvec){
@@ -284,6 +356,7 @@ bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &
 }
 //#### Vorgehen während Iteration
 
+
 //#### Analyse
 void set_model_parameters(vector<person> &persvec){//setzt Parameter aller Personen; dies ist für die Analyse der Evakuierungszeit unabdingbar
     double k_S;
@@ -304,6 +377,23 @@ void set_model_parameters(vector<person> &persvec){//setzt Parameter aller Perso
     }
 }
 void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungszeit der Personen
+    fstream f;
+    f.open("daten.dat", ios::out);
+
+    f << "###Daten zur Analyse der Evakuierungsgeschwindigkeit" << endl;
+    f << "### Durchschnittliche Evakuierungszeit" << endl;
+
+    double average_evac_time = 0;
+    int  number_evac_pers = 0;
+    for(int i = 0; i < persvec.size(); i++){
+        if(persvec[i].evacuated == true){
+            average_evac_time = average_evac_time + persvec[i].evacuation_time;
+            number_evac_pers++;
+        }
+    }
+
+    f << average_evac_time << endl;
+    f.close();
 /*
 Density
 panic
@@ -320,37 +410,68 @@ omega
 int main(int argc, char* args[]){
     srand (time(NULL));
 
-static const int quantity_persons = 1;
-static const int quantity_destinations = 2;
-static const int quantity_obstacles = 14;
 
-static int initcoord_pers_array[quantity_persons][2] = {{15,2}};
-static int initcoord_dest_array[quantity_destinations][2] = {{13,14},{2,3}};
-static int initcoord_obst_array[quantity_obstacles][2] = {{3,4},{4,4},{5,4},{6,4},{7,4},{7,5},{7,6},{7,9},{7,10},{6,10},{5,10},{4,10},{3,10},{3,9}};
+    //Initialisation SDL um den gespeicherten Grundriss zu laden
+    SDL_Event Event;
+    SDL_Window* Window;
+    SDL_Surface* screen_surface;
+    SDL_Surface* bmp_surf;
+    SDL_PixelFormat *fmt;
+    SDL_Init( SDL_INIT_VIDEO );
+    Window = SDL_CreateWindow( "Grundriss", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, grid_width, grid_height, SDL_WINDOW_SHOWN );
+    screen_surface = SDL_GetWindowSurface( Window );
+    bmp_surf = SDL_LoadBMP(plant_layout);
+
+    //Zeigt Grundriss, mit dem das Programm arbeiten wird
+    SDL_BlitSurface( bmp_surf, NULL, screen_surface, NULL );
+    SDL_UpdateWindowSurface( Window );
+
+    //get start conditions
+    vector <vector <int >> initcoord_dest_vec;
+    vector <vector <int >> initcoord_pers_vec;
+    vector <vector <int >> initcoord_obst_vec;
+    set_init_vectors(bmp_surf,initcoord_pers_vec,initcoord_dest_vec,initcoord_obst_vec,2,0,1,0,0,0);
+    int quantity_persons = initcoord_pers_vec.size();
+    int quantity_destinations = initcoord_dest_vec.size();
+    int quantity_obstacles = initcoord_obst_vec.size();
+
+    //Ausgabe der Koordinaten der noch zu erstellenden Personen, Hindernissen, Zielen
+    print_init_vector(initcoord_dest_vec);
+    print_init_vector(initcoord_obst_vec);
+    print_init_vector(initcoord_pers_vec);
+
+    //Schließen des SDL_Fensters
+    while (true) {if (SDL_PollEvent(&Event) && Event.type == SDL_QUIT){break;}} //Hält Fenster so lange offen bis es per Hand geschlossen wird
+    SDL_FreeSurface( bmp_surf );
+	bmp_surf = NULL;
+	SDL_DestroyWindow( Window );
+	Window = NULL;
+	SDL_Quit();
+
 
 //################## object declaration 1
 //declaration of used objects:
-vector<person> persvec;
-persvec.resize(quantity_persons);
+    vector<person> persvec;
+    persvec.resize(quantity_persons);
 
-vector<destination> destvec;
-destvec.resize(quantity_destinations);
+    vector<destination> destvec;
+    destvec.resize(quantity_destinations);
 
-vector<obstacle> obstvec;
-obstvec.resize(quantity_obstacles);
+    vector<obstacle> obstvec;
+    obstvec.resize(quantity_obstacles);
 //################## object declaration 1
 
 
 //################## object declaration 2
 //construction of used objects
     for(int o = 0; o < quantity_obstacles; o++){
-        obstvec[o] = obstacle(initcoord_obst_array[o][0],initcoord_obst_array[o][1],quantity_obstacles,quantity_destinations,quantity_persons);
+        obstvec[o] = obstacle(initcoord_obst_vec[o][0],initcoord_obst_vec[o][1],quantity_obstacles,quantity_destinations,quantity_persons);
     }
     for(int d = 0; d < quantity_destinations; d++){
-        destvec[d] = destination(initcoord_dest_array[d][0],initcoord_dest_array[d][1],obstvec,quantity_obstacles,quantity_destinations,quantity_persons);
+        destvec[d] = destination(initcoord_dest_vec[d][0],initcoord_dest_vec[d][1],obstvec,quantity_obstacles,quantity_destinations,quantity_persons);
     }
     for(int p = 0; p < quantity_persons; p++){
-        persvec[p] = person(initcoord_pers_array[p][0],initcoord_pers_array[p][1],destvec,quantity_obstacles,quantity_destinations,quantity_persons);
+        persvec[p] = person(initcoord_pers_vec[p][0],initcoord_pers_vec[p][1],destvec,quantity_obstacles,quantity_destinations,quantity_persons);
     }
 //################## object declaration 2
 
@@ -373,17 +494,22 @@ for(int i = 0; i < number_of_iterations; i++){
 //################## iteration method
 //cout << "ITERATION: " << i << endl;
     has_pers_reached_destination(destvec,persvec);
-    move_people_sequential(persvec,obstvec,destvec);
+
+    if(movement_update == 's'){
+        move_people_sequential(persvec,obstvec,destvec);
+    }
+    else if(movement_update == 'p'){
+        move_people_parallel(persvec,obstvec,destvec);
+    }
+    else {
+        cout << "Fehler in der Eingabe; movement_update kann nur 'p' oder 's' sein"  << endl;
+    }
+
 
 
     for(int j = 0; j < quantity_persons; j++){
         persvec[j].renew_w_S(destvec);
     }
-
-/*//Erneuern des statischen Feldes um auf Umweltänderungen reagieren zu können
-    persarray[j].renew_w_S(destarray);
-    persarray[j].set_S(destarray);
-*/
 
 
 //################## iteration method
@@ -392,17 +518,19 @@ for(int i = 0; i < number_of_iterations; i++){
 
 //################## visual output 2
         draw_grid(persvec,destvec,obstvec,renderer,2);
-        SDL_Delay(200);
+        SDL_Delay(50);
 }
-
-    while (1) {
-        if (SDL_PollEvent(&event) && event.type == SDL_QUIT)
-            break;
-    }
+    while (true) {if (SDL_PollEvent(&event) && event.type == SDL_QUIT){break;}} //Hält Fenster so lange offen bis es per Hand geschlossen wird
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
-    return EXIT_SUCCESS;
+
 //################## visual output 2
 
+//################## Analyse
+    evacuation_analysis(persvec);
+//################## Analyse
+
+
+    return EXIT_SUCCESS;
 }

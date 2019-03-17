@@ -22,9 +22,9 @@ public:
 
         setrgb(200,200,200);
 
-        quantity_obst = q_obst;
-        quantity_dest = q_dest;
-        quantity_pers = q_pers;
+        quantity_obstacles = q_obst;
+        quantity_destinations = q_dest;
+        quantity_persons = q_pers;
     };
     obstacle(int nx, int ny, int f1, int f2, int f3, int q_obst, int q_dest, int q_pers){
         x = nx;
@@ -32,9 +32,9 @@ public:
 
         setrgb(f1,f2,f3);
 
-        quantity_obst = q_obst;
-        quantity_dest = q_dest;
-        quantity_pers = q_pers;
+        quantity_obstacles = q_obst;
+        quantity_destinations = q_dest;
+        quantity_persons = q_pers;
     };
 // constructors
 
@@ -59,9 +59,9 @@ public:
 // methods
 
 //quantities
-int quantity_obst;
-int quantity_dest;
-int quantity_pers;
+int quantity_obstacles;
+int quantity_destinations;
+int quantity_persons;
 
 //coordinates
     int x;
@@ -85,18 +85,18 @@ public:
         y = b;
         setrgb(0,200,0);
         set_static_field_k(obstvec);
-        quantity_obst = q_obst;
-        quantity_dest = q_dest;
-        quantity_pers = q_pers;
+        quantity_obstacles = q_obst;
+        quantity_destinations = q_dest;
+        quantity_persons = q_pers;
     };
     destination(int a, int b, int f1, int f2, int f3,vector<obstacle> &obstvec, int q_obst, int q_dest, int q_pers){
         x = a;
         y = b;
         setrgb(f1,f2,f3);
         set_static_field_k(obstvec);
-        quantity_obst = q_obst;
-        quantity_dest = q_dest;
-        quantity_pers = q_pers;
+        quantity_obstacles = q_obst;
+        quantity_destinations = q_dest;
+        quantity_persons = q_pers;
     };
 // constructors
 
@@ -121,9 +121,9 @@ public:
 // methods
 
 //quantities
-int quantity_obst;
-int quantity_dest;
-int quantity_pers;
+int quantity_obstacles;
+int quantity_destinations;
+int quantity_persons;
 //coordinates
     int x;
     int y;
@@ -147,7 +147,7 @@ int quantity_pers;
         }
     //###cells filled by an obstacle isnt available for a person:
         bool return_value = true;
-        for(int i = 0; i < quantity_obst; i++){
+        for(int i = 0; i < quantity_obstacles; i++){
             //cout << "x: " << obstvec[i].x << ", y: " << obstvec[i].y << endl;
             if((obstvec[i].x == qx) && (obstvec[i].y == qy)){
                 return_value = false;
@@ -285,14 +285,14 @@ public:
         y = ny;
         setrgb(0,0,200);
 
-        quantity_obst = q_obst;
-        quantity_dest = q_dest;
-        quantity_pers = q_pers;
+        quantity_obstacles = q_obst;
+        quantity_destinations = q_dest;
+        quantity_persons = q_pers;
 
         //###Zu set_w_S
         int p_d[1]; //bevorzugtes Ziel
-        p_d[0] = rand() % quantity_dest; // bevorzugtes Ziel wird zufällig ausgewählt
-        set_w_S(true,1,p_d, rand() % (quantity_dest) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
+        p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zufällig ausgewählt
+        set_w_S(true,1,p_d, rand() % (quantity_destinations) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
         renew_w_S(destvec);
 
         set_S(destvec);
@@ -308,14 +308,14 @@ public:
         y = ny;
         setrgb(f1,f2,f3);
 
-        quantity_obst = q_obst;
-        quantity_dest = q_dest;
-        quantity_pers = q_pers;
+        quantity_obstacles = q_obst;
+        quantity_destinations = q_dest;
+        quantity_persons = q_pers;
 
         //###Zu set_w_S
         int p_d[1]; //bevorzugtes Ziel
-        p_d[0] = rand() % quantity_dest; // bevorzugtes Ziel wird zufällig ausgewählt
-        set_w_S(true,1,p_d, rand() % (quantity_dest) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
+        p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zufällig ausgewählt
+        set_w_S(true,1,p_d, rand() % (quantity_destinations) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
         renew_w_S(destvec);
 
         set_S(destvec);
@@ -361,7 +361,7 @@ public:
         }
     //###cells filled by an obstacle arent available for a person:
         bool return_value = true;
-        for(int i = 0; i < quantity_obst; i++){
+        for(int i = 0; i < quantity_obstacles; i++){
             //cout << "x: " << obstvec[i].x << ", y: " << obstvec[i].y << endl;
             if((obstvec[i].x == qx) && (obstvec[i].y == qy)){
                 return_value = false;
@@ -372,7 +372,7 @@ public:
         return return_value;
     }
     bool is_there_a_person_on(int qx, int qy,vector<person> &persvec){
-        for(int i = 0; i < quantity_pers; i++){
+        for(int i = 0; i < quantity_persons; i++){
             if(qx == persvec[i].x && qy == persvec[i].y){
                 return true;
             }
@@ -385,9 +385,9 @@ public:
 // methods
 
 //quantities
-int quantity_dest;
-int quantity_obst;
-int quantity_pers;
+int quantity_destinations;
+int quantity_obstacles;
+int quantity_persons;
 //coordinates
     int x;
     int y;
@@ -423,26 +423,26 @@ int quantity_pers;
     double S[grid_width][grid_height];
 
     void set_w_S(double w){// der Wissenstand der Personen wird für alle Ausgänge gleich groß gewählt (so groß wie w)
-        w_S.resize(quantity_dest);
-        for(int i = 0; i < quantity_dest; i++){
+        w_S.resize(quantity_destinations);
+        for(int i = 0; i < quantity_destinations; i++){
             w_S[i] = w;
         }
     }
     void set_w_S(int quantity_known_dest, bool previously_set = false){//legt den anfänglicher Wissensstand der Person über die Ausgänge fest
-        w_S.resize(quantity_dest);
-        for(int i = 0; i < quantity_dest; i++){
+        w_S.resize(quantity_destinations);
+        for(int i = 0; i < quantity_destinations; i++){
             if(previously_set == false)
             w_S[i] = 0;
         }
         //Fehlervermeidung:
-        if(quantity_known_dest > quantity_dest){
+        if(quantity_known_dest > quantity_destinations){
             cout << "Fehler in set_w_S(int) Anzahl der bekannten Ziele ist größer, als die Anzahl der Ziele!!" << endl;
             return;
         }
         //Füllt vector selected_dest mit Nummern, die den Zielen zugeordnet werden, die schon einen Wert w_S erhalten haben:
         vector <int> selected_dest;
         for(int i = 0; i < quantity_known_dest; i++){
-            int r = (rand() % quantity_dest);
+            int r = (rand() % quantity_destinations);
             //jede Nummer darf nur ein mal vorkommen:
             bool used = false;
             for(int j = 0; j < selected_dest.size(); j++){
@@ -469,9 +469,9 @@ int quantity_pers;
         }*/
     }
     void set_w_S(bool prefer_a_dest, int quantity_preferred_dest, int *preferred_dest, int quantity_known_dest){//legt den anfänglichen Wissensstand der Person über die Ausgänge fest; preferierte Ziele werden bevorzugt nach der Festlegungangesteuert, qpd ist die Anzahl der übergebenen Ziele
-        w_S.resize(quantity_dest);
+        w_S.resize(quantity_destinations);
         // set all values of w_S = 0:
-        for(int i = 0; i < quantity_dest; i++){
+        for(int i = 0; i < quantity_destinations; i++){
             w_S[i] = 0;
         }
         if (prefer_a_dest == true){
@@ -497,7 +497,7 @@ int quantity_pers;
     void renew_w_S(vector<destination> &destvec){// erneuert die Einträge von w_S, wenn bestimmt Umstände eintreten
         //wenn sich die Person sehr nahe an einem Ausgang befindet bekommt der Wert w_S, der für das Wissen über diesen Ausgang steht, einen sehr hohen Wert, da die Person den Ausgang sieht o.Ä.
         int r_influence_sphere = 5;// legt fest, ab wann die Person den Ausgang sehen kann
-        for(int i = 0; i < quantity_dest; i++){
+        for(int i = 0; i < quantity_destinations; i++){
             if(destvec[i].x > x - r_influence_sphere && destvec[i].x < x + r_influence_sphere){
                 if(destvec[i].y > y - r_influence_sphere && destvec[i].y < y + r_influence_sphere){
                     w_S[i] = 5;
@@ -507,7 +507,7 @@ int quantity_pers;
     }
     void print_w_S(){
         cout << endl << "print_w_S:" << endl;
-        for(int i = 0; i < quantity_dest; i++){
+        for(int i = 0; i < quantity_destinations; i++){
             cout << w_S[i] << ";";
         }
         cout << endl;
@@ -522,7 +522,7 @@ int quantity_pers;
         }
 
         //Füllt die Einträge von S
-        for(int l = 0; l < quantity_dest; l++){
+        for(int l = 0; l < quantity_destinations; l++){
             for(int xi = 0; xi < grid_width; xi++){
                 for(int yi = 0; yi < grid_height; yi++){
                     S[xi][yi] = S[xi][yi] + destvec[l].get_S_k(xi,yi) * w_S[l];
@@ -536,7 +536,7 @@ int quantity_pers;
         //cout <<"max_S : " <<max_S << endl;
         // Beschränkt die Größe der Einträge, damit die größe der Zahlen nicht die Speichergrenze beim exponentieren überschreiten
         while (max_S > 200){
-            for(int l = 0; l < quantity_dest; l++){
+            for(int l = 0; l < quantity_destinations; l++){
                 for(int xi = 0; xi < grid_width; xi++){
                     for(int yi = 0; yi < grid_height; yi++){
                         S[xi][yi] = S[xi][yi]/2;
@@ -660,17 +660,17 @@ int quantity_pers;
     int number_of_conflicts;
 
 // ###### time measurement for the analysis of movement of the person
-    time_t time_start;
-    time_t time_end;
-    time_t evacuation_time;
+    double time_start;
+    double time_end;
+    double evacuation_time = 0;
     bool evacuated;
 
     void start_time_measurement(){
-        time_start = time(NULL);
+        time_start = clock()/CLOCKS_PER_SEC;
     }
     void end_time_measurement(){
-        time_end = time(NULL);
-        evacuation_time = difftime(time_end,time_start);
+        time_end = clock()/CLOCKS_PER_SEC;
+        evacuation_time = time_end - time_start;
     }
 
 private:
