@@ -1,25 +1,119 @@
 // FEHLER BEHEBEN : T BESITT KEINEN WERT FÜRS STEHEN BLEIBEN; DA PERs
 #ifndef initial_situation
 #define initial_situation
+#include <SDL.h>
+#include <SDL_image.h>
+#include <vector>
 
 
 
+using namespace std;
 
 const static int grid_height = 75;
 const static int grid_width = 75;
 
 
+class initialisation_data {
 
-static const int quantity_persons = 27;
-static const int quantity_destinations = 2;
-static const int quantity_obstacles = 14;
-static int number_of_iterations = 400;
+public:
+initialisation_data(){};
+
+vector <vector <int >> initcoord_dest_vec;
+vector <vector <int >> initcoord_pers_vec;
+vector <vector <int >> initcoord_obst_vec;
 
 
-//static int initcoord_pers_array[quantity_persons][2] = {{15,2}};
-static int initcoord_pers_array[quantity_persons][2] = {{2,2},{5,6},{1,1},{5,18},{5,7},{12,12},{15,15},{18,18},{18,2},{0,0},{70,54},{70,55},{70,56},{70,57},{70,58},{70,59},{70,60},{70,61},{70,62},{70,63},{71,52},{71,53},{71,63},{71,64},{71,65},{71,66},{72,50}};
-static int initcoord_dest_array[quantity_destinations][2] = {{13,14},{2,3}};
-static int initcoord_obst_array[quantity_obstacles][2] = {{3,4},{4,4},{5,4},{6,4},{7,4},{7,5},{7,6},{7,9},{7,10},{6,10},{5,10},{4,10},{3,10},{3,9}};
+void set_vectors(SDL_Surface * surface, int p_x, int p_y, int d_x, int d_y, int o_x, int o_y){//Liest den Grundriss ein
+    vector <int > ith_coord;
+    for (int y=0; y< grid_height; y++)
+    {
+        for (int x=3; x< grid_width; x++)
+        {
+            if (getpixel_function(surface, x, y)== getpixel_function(surface, p_x, p_y))
+            {
+                ith_coord.clear();
+                ith_coord.push_back(x);
+                ith_coord.push_back(y);
+
+                initcoord_pers_vec.push_back(ith_coord);
+            }
+            else if (getpixel_function(surface, x, y)== getpixel_function(surface, o_x, o_y))
+            {
+                ith_coord.clear();
+                ith_coord.push_back(x);
+                ith_coord.push_back(y);
+
+                initcoord_obst_vec.push_back(ith_coord);
+            }
+            else if (getpixel_function(surface, x, y)== getpixel_function(surface, d_x, d_y))
+            {
+                ith_coord.clear();
+                ith_coord.push_back(x);
+                ith_coord.push_back(y);
+
+                initcoord_dest_vec.push_back(ith_coord);
+            }
+        }
+    }
+
+}
+Uint32 getpixel_function(SDL_Surface *surface, int x, int y){ //Quelle: http://sdl.beuc.net/sdl.wiki/Pixel_Access; unter getpixel in SDL Paket enthalten, Liest Farbe eines Pixels aus
+
+        int bpp = surface->format->BytesPerPixel;
+        /* Here p is the address to the pixel we want to retrieve */
+        Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
+
+        switch(bpp) {
+        case 1:
+            return *p;
+            break;
+
+        case 2:
+            return *(Uint16 *)p;
+            break;
+
+        case 3:
+            if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+                return p[0] << 16 | p[1] << 8 | p[2];
+            else
+                return p[0] | p[1] << 8 | p[2] << 16;
+            break;
+
+        case 4:
+            return *(Uint32 *)p;
+            break;
+
+        default:
+            return 0;       /* shouldn't happen, but avoids warnings */
+    }
+}
+int set_quantity_persons(){
+    return initcoord_pers_vec.size();
+}
+int set_quantity_destinations(){
+    return initcoord_dest_vec.size();
+}
+int set_quantity_obstacles(){
+    return initcoord_obst_vec.size();
+}
+
+
+
+
+private:
+
+};
+
+
+
+static int number_of_iterations = 10;
+
+
+
+
+
+
+
 
 
 
