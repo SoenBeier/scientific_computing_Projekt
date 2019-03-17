@@ -16,15 +16,25 @@ class obstacle
 public:
 // constructors
     obstacle(){};
-    obstacle(int a, int b){
-        x = a;
-        y = b;
+    obstacle(int nx, int ny, int q_obst, int q_dest, int q_pers){
+        x = nx;
+        y = ny;
+
         setrgb(200,200,200);
+
+        quantity_obstacles = q_obst;
+        quantity_destinations = q_dest;
+        quantity_persons = q_pers;
     };
-    obstacle(int a, int b, int f1, int f2, int f3){
-        x = a;
-        y = b;
+    obstacle(int nx, int ny, int f1, int f2, int f3, int q_obst, int q_dest, int q_pers){
+        x = nx;
+        y = ny;
+
         setrgb(f1,f2,f3);
+
+        quantity_obstacles = q_obst;
+        quantity_destinations = q_dest;
+        quantity_persons = q_pers;
     };
 // constructors
 
@@ -48,6 +58,11 @@ public:
     }
 // methods
 
+//quantities
+int quantity_obstacles;
+int quantity_destinations;
+int quantity_persons;
+
 //coordinates
     int x;
     int y;
@@ -65,17 +80,23 @@ class destination
 public:
 // constructors
     destination(){};
-    destination(int a, int b,obstacle* obsarray){
+    destination(int a, int b,vector<obstacle> &obstvec, int q_obst, int q_dest, int q_pers){
         x = a;
         y = b;
         setrgb(0,200,0);
-        set_static_field_k(obsarray);
+        set_static_field_k(obstvec);
+        quantity_obstacles = q_obst;
+        quantity_destinations = q_dest;
+        quantity_persons = q_pers;
     };
-    destination(int a, int b, int f1, int f2, int f3,obstacle* obsarray){
+    destination(int a, int b, int f1, int f2, int f3,vector<obstacle> &obstvec, int q_obst, int q_dest, int q_pers){
         x = a;
         y = b;
         setrgb(f1,f2,f3);
-        set_static_field_k(obsarray);
+        set_static_field_k(obstvec);
+        quantity_obstacles = q_obst;
+        quantity_destinations = q_dest;
+        quantity_persons = q_pers;
     };
 // constructors
 
@@ -99,6 +120,10 @@ public:
     }
 // methods
 
+//quantities
+int quantity_obstacles;
+int quantity_destinations;
+int quantity_persons;
 //coordinates
     int x;
     int y;
@@ -112,7 +137,7 @@ public:
     int S_k[grid_width][grid_height];
 
 
-    bool could_a_person_go_to (int qx, int qy, obstacle *obsarray){//delivers true, if the person could stay at (x,y)/ could move to this cell
+    bool could_a_person_go_to (int qx, int qy, vector<obstacle> &obstvec){//delivers true, if the person could stay at (x,y)/ could move to this cell
     //###cells out of borders arent available for a person:
         if ((qy >= grid_height) || (qx >= grid_width)){
             return false;
@@ -123,8 +148,8 @@ public:
     //###cells filled by an obstacle isnt available for a person:
         bool return_value = true;
         for(int i = 0; i < quantity_obstacles; i++){
-            //cout << "x: " << obsarray[i].x << ", y: " << obsarray[i].y << endl;
-            if((obsarray[i].x == qx) && (obsarray[i].y == qy)){
+            //cout << "x: " << obstvec[i].x << ", y: " << obstvec[i].y << endl;
+            if((obstvec[i].x == qx) && (obstvec[i].y == qy)){
                 return_value = false;
             }
         }
@@ -134,7 +159,7 @@ public:
     }
     vector<int> to_do;
     vector<int> processed;
-    void set_static_field_k(obstacle *obsarray){
+    void set_static_field_k(vector<obstacle> &obstvec){
         //Setzt alle Einträge von S_k auf 0
         for(int g = 0; g < grid_width; g++){
             for(int h = 0; h< grid_height; h++){
@@ -168,7 +193,7 @@ public:
                     to_do[0] - 1,to_do[1]
                     };
                 for (int l = 0; l < 4; l++){//für jeden möglichen Nachbarn folgt:
-                    if (could_a_person_go_to(nh[2*l],nh[2*l+1],obsarray) == false){// wenn eine Person hier nicht drauf darf
+                    if (could_a_person_go_to(nh[2*l],nh[2*l+1],obstvec) == false){// wenn eine Person hier nicht drauf darf
                         //cout << "Nicht erlaubte Felder could: " << nh[2*l]<< ";" << nh[2*l+1] <<endl;
                         continue;
                     }
@@ -213,7 +238,7 @@ public:
         //"umkehren" der Einträge: also Potential verläuft vom Eingang aus gesehen von groß nach klein
         for(int i = 0; i < grid_width; i++){
             for(int j = 0; j < grid_height; j++){
-                    if(could_a_person_go_to(i,j,obsarray)){
+                    if(could_a_person_go_to(i,j,obstvec)){
                         S_k[i][j] = max_pot - S_k[i][j];
                     }
 
@@ -255,36 +280,45 @@ class person
 public:
 // constructors
     person(){};
-    person(int nx, int ny,destination *destarray){
+    person(int nx, int ny,vector<destination> &destvec, int q_obst, int q_dest, int q_pers){
         x = nx;
         y = ny;
         setrgb(0,0,200);
 
-        //###Zu set_w_S
-        int p_d[1]; //bevorzugtes Ziel
-        p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zufällig ausgewählt
-        set_w_S(true,1,p_d, rand() % (quantity_destinations ) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
-        renew_w_S(destarray);
-
-        set_S(destarray);
-
-        set_D();
-
-        evacuated = false;
-        number_of_conflicts = 0;
-    };
-    person(int nx, int ny, int f1, int f2, int f3,destination *destarray){
-        x = nx;
-        y = ny;
-        setrgb(f1,f2,f3);
+        quantity_obstacles = q_obst;
+        quantity_destinations = q_dest;
+        quantity_persons = q_pers;
 
         //###Zu set_w_S
         int p_d[1]; //bevorzugtes Ziel
         p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zufällig ausgewählt
         set_w_S(true,1,p_d, rand() % (quantity_destinations) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
-        renew_w_S(destarray);
+        renew_w_S(destvec);
 
-        set_S(destarray);
+        set_S(destvec);
+
+        set_D();
+
+        evacuated = false;
+        number_of_conflicts = 0;
+
+    };
+    person(int nx, int ny, int f1, int f2, int f3,vector<destination> &destvec, int q_obst, int q_dest, int q_pers){
+        x = nx;
+        y = ny;
+        setrgb(f1,f2,f3);
+
+        quantity_obstacles = q_obst;
+        quantity_destinations = q_dest;
+        quantity_persons = q_pers;
+
+        //###Zu set_w_S
+        int p_d[1]; //bevorzugtes Ziel
+        p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zufällig ausgewählt
+        set_w_S(true,1,p_d, rand() % (quantity_destinations) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
+        renew_w_S(destvec);
+
+        set_S(destvec);
 
         set_D();
 
@@ -313,7 +347,7 @@ public:
             return false;
         }
     }
-    bool could_I_go_to (int qx, int qy, obstacle *obsarray, person *persarray){//delivers true, if the person could stay at (x,y)/ could move to this cell
+    bool could_I_go_to (int qx, int qy, vector<obstacle> &obstvec, vector<person> &persvec){//delivers true, if the person could stay at (x,y)/ could move to this cell
     //###cells out of borders arent available for a person:
         if ((qy >= grid_height) || (qx >= grid_width)){
             return false;
@@ -322,14 +356,14 @@ public:
             return false;
         }
     //###cells filled by a person arent available for a person:
-        if(is_there_a_person_on(qx,qy,persarray)){
+        if(is_there_a_person_on(qx,qy,persvec)){
             return false;
         }
     //###cells filled by an obstacle arent available for a person:
         bool return_value = true;
         for(int i = 0; i < quantity_obstacles; i++){
-            //cout << "x: " << obsarray[i].x << ", y: " << obsarray[i].y << endl;
-            if((obsarray[i].x == qx) && (obsarray[i].y == qy)){
+            //cout << "x: " << obstvec[i].x << ", y: " << obstvec[i].y << endl;
+            if((obstvec[i].x == qx) && (obstvec[i].y == qy)){
                 return_value = false;
             }
         }
@@ -337,19 +371,23 @@ public:
     // in all other cases:
         return return_value;
     }
-    bool is_there_a_person_on(int qx, int qy,person *persarray){
+    bool is_there_a_person_on(int qx, int qy,vector<person> &persvec){
         for(int i = 0; i < quantity_persons; i++){
-            if(qx == persarray[i].x && qy == persarray[i].y){
+            if(qx == persvec[i].x && qy == persvec[i].y){
                 return true;
             }
         }
         return false;
     }
     void print_coords(){
-        cout << "Ich bin bei x: " << x << "y: " << y << endl;
+        cout <<endl << "Ich bin bei x: " << x << "y: " << y << endl;
     }
 // methods
 
+//quantities
+int quantity_destinations;
+int quantity_obstacles;
+int quantity_persons;
 //coordinates
     int x;
     int y;
@@ -381,16 +419,17 @@ public:
 
 // ####### Static field S
     double k_S = 1;
-    double w_S[quantity_destinations]; // wie sehr kennt die Person die verschiedenen Eingänge; Eintrag ist zwischen 0,1
+    vector <double> w_S;// wie sehr kennt die Person die verschiedenen Eingänge; Eintrag ist zwischen 0,1
     double S[grid_width][grid_height];
 
     void set_w_S(double w){// der Wissenstand der Personen wird für alle Ausgänge gleich groß gewählt (so groß wie w)
+        w_S.resize(quantity_destinations);
         for(int i = 0; i < quantity_destinations; i++){
             w_S[i] = w;
         }
     }
     void set_w_S(int quantity_known_dest, bool previously_set = false){//legt den anfänglicher Wissensstand der Person über die Ausgänge fest
-        //
+        w_S.resize(quantity_destinations);
         for(int i = 0; i < quantity_destinations; i++){
             if(previously_set == false)
             w_S[i] = 0;
@@ -429,7 +468,8 @@ public:
             cout <<"w_S ist:" <<w_S[i] << endl;
         }*/
     }
-    void set_w_S(bool prefer_a_dest, int quantity_preferred_dest, int *preferred_dest, int quantity_known_dest){//legt den anfänglichen Wissensstand der Person über die Ausgänge fest; preferierte Ziele werden bevorzugt nach der Festlegung bevorzugt angesteuert, qpd ist die Anzahl der übergebenen Ziele
+    void set_w_S(bool prefer_a_dest, int quantity_preferred_dest, int *preferred_dest, int quantity_known_dest){//legt den anfänglichen Wissensstand der Person über die Ausgänge fest; preferierte Ziele werden bevorzugt nach der Festlegungangesteuert, qpd ist die Anzahl der übergebenen Ziele
+        w_S.resize(quantity_destinations);
         // set all values of w_S = 0:
         for(int i = 0; i < quantity_destinations; i++){
             w_S[i] = 0;
@@ -454,12 +494,12 @@ public:
 
 
     }
-    void renew_w_S(destination *destarray){// erneuert die Einträge von w_S, wenn bestimmt Umstände eintreten
+    void renew_w_S(vector<destination> &destvec){// erneuert die Einträge von w_S, wenn bestimmt Umstände eintreten
         //wenn sich die Person sehr nahe an einem Ausgang befindet bekommt der Wert w_S, der für das Wissen über diesen Ausgang steht, einen sehr hohen Wert, da die Person den Ausgang sieht o.Ä.
         int r_influence_sphere = 5;// legt fest, ab wann die Person den Ausgang sehen kann
         for(int i = 0; i < quantity_destinations; i++){
-            if(destarray[i].x > x - r_influence_sphere && destarray[i].x < x + r_influence_sphere){
-                if(destarray[i].y > y - r_influence_sphere && destarray[i].y < y + r_influence_sphere){
+            if(destvec[i].x > x - r_influence_sphere && destvec[i].x < x + r_influence_sphere){
+                if(destvec[i].y > y - r_influence_sphere && destvec[i].y < y + r_influence_sphere){
                     w_S[i] = 5;
                 }
             }
@@ -472,7 +512,7 @@ public:
         }
         cout << endl;
     }
-    void set_S(destination *destarray){//Addiere alle S_k Arrays der einzelnen destinations zum S Array hinzu; dies verläuft nach Gewichtung
+    void set_S(vector<destination> &destvec){//Addiere alle S_k Arrays der einzelnen destinations zum S Array hinzu; dies verläuft nach Gewichtung
         double max_S = 0;
         //setze alle Einträge von S auf 0:
         for(int xi = 0; xi < grid_width; xi++){
@@ -485,7 +525,7 @@ public:
         for(int l = 0; l < quantity_destinations; l++){
             for(int xi = 0; xi < grid_width; xi++){
                 for(int yi = 0; yi < grid_height; yi++){
-                    S[xi][yi] = S[xi][yi] + destarray[l].get_S_k(xi,yi) * w_S[l];
+                    S[xi][yi] = S[xi][yi] + destvec[l].get_S_k(xi,yi) * w_S[l];
                     if(S[xi][yi] > max_S){
                         max_S = S[xi][yi];
                     }
@@ -528,7 +568,7 @@ public:
 // ###### Transmission matrix
     long double T[3][3];
 
-    void set_T(obstacle* obsarray,person *persarray, char movement_mode = 's'){
+    void set_T(vector<obstacle> &obstvec,vector<person> &persvec, char movement_mode = 's'){
 
     //füllt Einträge:
         //Alle Felder bekommen Wert 0; nicht benutzte Felder (nach Neumann Nachbarschaft) bleiben 0:
@@ -540,27 +580,27 @@ public:
         //cout << "hier müsste alles null sein:" << endl;
         //print_T();
         //Eintrag oben:
-        //cout << "oben ?" << could_I_go_to(x,y - 1,obsarray) << endl;
-        if((could_I_go_to(x,y - 1,obsarray,persarray) && movement_mode == 's' ) || ((could_I_go_to(x,y - 1,obsarray,persarray) || is_there_a_person_on(x,y - 1, persarray)) && movement_mode == 'p' )){ // entweder sequentieller Ablauf: dann could I go to; bei paralellen ist es egal ob auf dem Feld gerade eine andere Person steht
+        //cout << "oben ?" << could_I_go_to(x,y - 1,obstvec) << endl;
+        if((could_I_go_to(x,y - 1,obstvec,persvec) && movement_mode == 's' ) || ((could_I_go_to(x,y - 1,obstvec,persvec) || is_there_a_person_on(x,y - 1, persvec)) && movement_mode == 'p' )){ // entweder sequentieller Ablauf: dann could I go to; bei paralellen ist es egal ob auf dem Feld gerade eine andere Person steht
             T[1][0] = expl(k_S * S[x][y - 1]) + exp(k_D * D[x][y - 1]);
         }
         //Eintrag rechts:
-        //cout << "rechts ?" << could_I_go_to(x + 1,y,obsarray) << endl;
-        if((could_I_go_to(x + 1,y,obsarray,persarray) && movement_mode == 's' ) || ((could_I_go_to(x + 1,y,obsarray,persarray) || is_there_a_person_on(x + 1,y, persarray)) && movement_mode == 'p' )){
+        //cout << "rechts ?" << could_I_go_to(x + 1,y,obstvec) << endl;
+        if((could_I_go_to(x + 1,y,obstvec,persvec) && movement_mode == 's' ) || ((could_I_go_to(x + 1,y,obstvec,persvec) || is_there_a_person_on(x + 1,y, persvec)) && movement_mode == 'p' )){
             T[2][1] = expl(k_S * S[x + 1][y]) + exp(k_D * D[x + 1][y]);
         }
         //Eintrag unten:
-        //cout << "unten ?" << could_I_go_to(x,y+1,obsarray) << endl;
-        if((could_I_go_to(x,y + 1,obsarray,persarray) && movement_mode == 's' ) || ((could_I_go_to(x,y + 1,obsarray,persarray) || is_there_a_person_on(x,y + 1, persarray)) && movement_mode == 'p' )){
+        //cout << "unten ?" << could_I_go_to(x,y+1,obstvec) << endl;
+        if((could_I_go_to(x,y + 1,obstvec,persvec) && movement_mode == 's' ) || ((could_I_go_to(x,y + 1,obstvec,persvec) || is_there_a_person_on(x,y + 1, persvec)) && movement_mode == 'p' )){
             T[1][2] = expl(k_S * S[x][y + 1]) + exp(k_D * D[x][y + 1]);
         }
         //Eintrag links:
-        //cout << "unten ?" << could_I_go_to(x,y+1,obsarray) << endl;
-        if((could_I_go_to(x - 1,y,obsarray,persarray)&& movement_mode == 's' ) || ((could_I_go_to(x - 1,y,obsarray,persarray) || is_there_a_person_on(x - 1,y, persarray)) && movement_mode == 'p' )){
+        //cout << "unten ?" << could_I_go_to(x,y+1,obstvec) << endl;
+        if((could_I_go_to(x - 1,y,obstvec,persvec)&& movement_mode == 's' ) || ((could_I_go_to(x - 1,y,obstvec,persvec) || is_there_a_person_on(x - 1,y, persvec)) && movement_mode == 'p' )){
             T[0][1] = expl(k_S * S[x - 1][y]) + exp(k_D * D[x - 1][y]);
         }
         //mitte:
-        //cout << "hier bleiben ?" << could_I_go_to(x,y,obsarray) << endl;
+        //cout << "hier bleiben ?" << could_I_go_to(x,y,obstvec) << endl;
             T[1][1] = expl(k_S * S[x][y]) + exp(k_D * D[x][y]);
 
 
@@ -620,17 +660,17 @@ public:
     int number_of_conflicts;
 
 // ###### time measurement for the analysis of movement of the person
-    time_t time_start;
-    time_t time_end;
-    time_t evacuation_time;
+    double time_start;
+    double time_end;
+    double evacuation_time = 0;
     bool evacuated;
 
     void start_time_measurement(){
-        time_start = time(NULL);
+        time_start = clock()/CLOCKS_PER_SEC;
     }
     void end_time_measurement(){
-        time_end = time(NULL);
-        evacuation_time = difftime(time_end,time_start);
+        time_end = clock()/CLOCKS_PER_SEC;
+        evacuation_time = time_end - time_start;
     }
 
 private:
