@@ -11,8 +11,9 @@ Nächste Ziele:
 
 
   
-- Schreiben einer Funktion, die Datensätze zur Auswertung der Evakuierungsgeschwindigkeit bereitstellt
+- Schreiben einer Funktion, die Datensätze zur Auswertung der Evakuierungsgeschwindigkeit bereitstellt; w_S muss hierbei nicht 
+  gleich gesetzt werden
   - Wie könnte man die Dichte der Figuren herausfinden/beschreiben (Personen durch freie Felder)
-- Einfügen des friction Parameters 
+- Einfügen des friction Parameters und der Abweichung jeder Person von k_S, Test von w_S
    - vierte geforderte Situation "effect of an obstacle on ecit from a closed room"
    - nach der Erstellung des D-Felds: Wiederholung der Situation
