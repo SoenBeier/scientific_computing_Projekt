@@ -84,19 +84,23 @@ public:
         x = a;
         y = b;
         setrgb(0,200,0);
-        set_static_field_k(obstvec);
+
         quantity_obstacles = q_obst;
         quantity_destinations = q_dest;
         quantity_persons = q_pers;
+
+        set_static_field_k(obstvec);
     };
     destination(int a, int b, int f1, int f2, int f3,vector<obstacle> &obstvec, int q_obst, int q_dest, int q_pers){
         x = a;
         y = b;
         setrgb(f1,f2,f3);
-        set_static_field_k(obstvec);
+
         quantity_obstacles = q_obst;
         quantity_destinations = q_dest;
         quantity_persons = q_pers;
+
+        set_static_field_k(obstvec);
     };
 // constructors
 
@@ -153,8 +157,6 @@ int quantity_persons;
                 return_value = false;
             }
         }
-
-    // in all other cases:
         return return_value;
     }
     vector<int> to_do;
@@ -182,6 +184,8 @@ int quantity_persons;
 
                 //Schriebe das zugehörige Potential in das statische Feld:
                 S_k[to_do[0]][to_do[1]] = counter;
+//cout << S_k[8][8] << endl;
+//if(counter == 3){print_S_k();}
                 //Diese Koordinaten sind nun abgearbeitet und werden dem vector processed übergeben
                 processed.push_back(to_do[0]);
                 processed.push_back(to_do[1]);
@@ -276,7 +280,8 @@ public:
     person(int nx, int ny,vector<destination> &destvec, int q_obst, int q_dest, int q_pers){
         x = nx;
         y = ny;
-        setrgb(0,0,200);
+        int colour_variation = (rand() % 150) - 75; //leichte Farbvariation, damit die einzelnen Personen voneinander unterschieden werden können
+        setrgb(0,0,150 + colour_variation);
 
         quantity_obstacles = q_obst;
         quantity_destinations = q_dest;
@@ -558,7 +563,7 @@ int quantity_persons;
         }
     }
 
-// ###### Transmission matrix
+// ###### Transition matrix
     long double T[3][3];
 
     void set_T(vector<obstacle> &obstvec,vector<person> &persvec, char movement_mode = 's'){
