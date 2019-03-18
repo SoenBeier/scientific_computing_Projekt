@@ -377,22 +377,26 @@ void set_model_parameters(vector<person> &persvec){//setzt Parameter aller Perso
     }
 }
 void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungszeit der Personen
+    //Öffnet ein Dokument, in dem alle Daten gespeichert werden:
     fstream f;
-    f.open("daten.dat", ios::out);
+    f.open("daten.dat", ios::app);
 
-    f << "###Daten zur Analyse der Evakuierungsgeschwindigkeit" << endl;
-    f << "### Durchschnittliche Evakuierungszeit" << endl;
-
+    // Berechnet die durchschnittliche Evakuierungszeit der Personen, die ihre Ziele erreichen
     double average_evac_time = 0;
     int  number_evac_pers = 0;
     for(int i = 0; i < persvec.size(); i++){
         if(persvec[i].evacuated == true){
+            cout << i << " endtime: " << persvec[i].time_end << endl;
             average_evac_time = average_evac_time + persvec[i].evacuation_time;
             number_evac_pers++;
         }
     }
+    average_evac_time = average_evac_time / number_evac_pers;
 
-    f << average_evac_time << endl;
+    //Schreibt berechnete Daten in das geöffnete Dokument
+    f << "###Daten zur Analyse der Evakuierungsgeschwindigkeit beim Grundriss '" << (string) plant_layout << "'" << endl;
+    f << "### Durchschnittliche Evakuierungszeit, Anzahl der Personen, die das Ziel nicht erreichen" << endl;
+    f << average_evac_time << "," << persvec.size() - number_evac_pers << "," << endl;
     f.close();
 /*
 Density
@@ -400,7 +404,7 @@ panic
 k_D
 k_S
 w_S - Wissen über das Ziel
-omega
+omega - steht für w_S
 */
 }
 //#### Analyse
@@ -449,7 +453,7 @@ int main(int argc, char* args[]){
 	SDL_Quit();
 
 
-//################## object declaration 1
+//################## object declaration
 //declaration of used objects:
     vector<person> persvec;
     persvec.resize(quantity_persons);
@@ -459,10 +463,7 @@ int main(int argc, char* args[]){
 
     vector<obstacle> obstvec;
     obstvec.resize(quantity_obstacles);
-//################## object declaration 1
 
-
-//################## object declaration 2
 //construction of used objects
     for(int o = 0; o < quantity_obstacles; o++){
         obstvec[o] = obstacle(initcoord_obst_vec[o][0],initcoord_obst_vec[o][1],quantity_obstacles,quantity_destinations,quantity_persons);
@@ -473,7 +474,15 @@ int main(int argc, char* args[]){
     for(int p = 0; p < quantity_persons; p++){
         persvec[p] = person(initcoord_pers_vec[p][0],initcoord_pers_vec[p][1],destvec,quantity_obstacles,quantity_destinations,quantity_persons);
     }
-//################## object declaration 2
+
+//Bei einem Durchlauf des Programms, bei dem Daten entnommen und Analysiert werden müssen, müssen gleichwertige Bedingungen hergestellt werden
+//Deshalb werden dabei einige Parameter nochmals umgeändert:
+    if(analysis_run == true){
+        grafic_delay = 20;
+
+    }
+
+//################## object declaration
 
 
 //################## visual output 1
@@ -486,13 +495,13 @@ int main(int argc, char* args[]){
 
 
 //test
+
 //test
 
 
 for(int i = 0; i < number_of_iterations; i++){
     cout << i << endl;
 //################## iteration method
-//cout << "ITERATION: " << i << endl;
     has_pers_reached_destination(destvec,persvec);
 
     if(movement_update == 's'){
@@ -518,7 +527,7 @@ for(int i = 0; i < number_of_iterations; i++){
 
 //################## visual output 2
         draw_grid(persvec,destvec,obstvec,renderer,2);
-        SDL_Delay(50);
+        SDL_Delay(grafic_delay);
 }
     while (true) {if (SDL_PollEvent(&event) && event.type == SDL_QUIT){break;}} //Hält Fenster so lange offen bis es per Hand geschlossen wird
     SDL_DestroyRenderer(renderer);

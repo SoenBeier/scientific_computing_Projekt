@@ -268,13 +268,6 @@ private:
 
 };
 
-
-
-
-
-
-
-
 class person
 {
 public:
@@ -569,7 +562,8 @@ int quantity_persons;
     long double T[3][3];
 
     void set_T(vector<obstacle> &obstvec,vector<person> &persvec, char movement_mode = 's'){
-
+    //in der Funktion wird zwischen dem Erstellen des T Arrays für eine parallele Update-Regel und einer sequentiellen Update-Regel unterschieden
+    //Bei der paralellen Update-Regel wird nicht abgefragt ob sich eine Person auf dem angefragen Fehld befindet
     //füllt Einträge:
         //Alle Felder bekommen Wert 0; nicht benutzte Felder (nach Neumann Nachbarschaft) bleiben 0:
         for (int i = 0; i < 3; i++){
@@ -582,29 +576,29 @@ int quantity_persons;
         //Eintrag oben:
         //cout << "oben ?" << could_I_go_to(x,y - 1,obstvec) << endl;
         if((could_I_go_to(x,y - 1,obstvec,persvec) && movement_mode == 's' ) || ((could_I_go_to(x,y - 1,obstvec,persvec) || is_there_a_person_on(x,y - 1, persvec)) && movement_mode == 'p' )){ // entweder sequentieller Ablauf: dann could I go to; bei paralellen ist es egal ob auf dem Feld gerade eine andere Person steht
-            T[1][0] = expl(k_S * S[x][y - 1]) + exp(k_D * D[x][y - 1]);
+            T[1][0] = expl(k_S * S[x][y - 1]) + exp((k_D /*+ number_of_conflicts*/) * D[x][y - 1]);
         }
         //Eintrag rechts:
         //cout << "rechts ?" << could_I_go_to(x + 1,y,obstvec) << endl;
         if((could_I_go_to(x + 1,y,obstvec,persvec) && movement_mode == 's' ) || ((could_I_go_to(x + 1,y,obstvec,persvec) || is_there_a_person_on(x + 1,y, persvec)) && movement_mode == 'p' )){
-            T[2][1] = expl(k_S * S[x + 1][y]) + exp(k_D * D[x + 1][y]);
+            T[2][1] = expl(k_S * S[x + 1][y]) + exp((k_D /*+ number_of_conflicts*/) * D[x + 1][y]);
         }
         //Eintrag unten:
         //cout << "unten ?" << could_I_go_to(x,y+1,obstvec) << endl;
         if((could_I_go_to(x,y + 1,obstvec,persvec) && movement_mode == 's' ) || ((could_I_go_to(x,y + 1,obstvec,persvec) || is_there_a_person_on(x,y + 1, persvec)) && movement_mode == 'p' )){
-            T[1][2] = expl(k_S * S[x][y + 1]) + exp(k_D * D[x][y + 1]);
+            T[1][2] = expl(k_S * S[x][y + 1]) + exp((k_D/* + number_of_conflicts*/) * D[x][y + 1]);
         }
         //Eintrag links:
         //cout << "unten ?" << could_I_go_to(x,y+1,obstvec) << endl;
         if((could_I_go_to(x - 1,y,obstvec,persvec)&& movement_mode == 's' ) || ((could_I_go_to(x - 1,y,obstvec,persvec) || is_there_a_person_on(x - 1,y, persvec)) && movement_mode == 'p' )){
-            T[0][1] = expl(k_S * S[x - 1][y]) + exp(k_D * D[x - 1][y]);
+            T[0][1] = expl(k_S * S[x - 1][y]) + exp((k_D/* + number_of_conflicts*/) * D[x - 1][y]);
         }
         //mitte:
         //cout << "hier bleiben ?" << could_I_go_to(x,y,obstvec) << endl;
-            T[1][1] = expl(k_S * S[x][y]) + exp(k_D * D[x][y]);
+            T[1][1] = expl(k_S * S[x][y]) + exp((k_D/* + number_of_conflicts*/) * D[x][y]);
 
 
-    //Überprüfung ob das Feld zu groß ist und deswegen T fehlerhaft erstellt wird:
+    //Überprüfung ob die Einträge des Feldes zu groß sind und deswegen T fehlerhaft erstellt wird:
         for (int i = 0; i < 3; i++){
             for(int j = 0; j < 3; j++){
                 if (isinf(T[i][j])){
