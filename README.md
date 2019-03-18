@@ -17,3 +17,6 @@ Nächste Ziele:
 - Einfügen des friction Parameters und der Abweichung jeder Person von k_S, Test von w_S
    - vierte geforderte Situation "effect of an obstacle on ecit from a closed room"
    - nach der Erstellung des D-Felds: Wiederholung der Situation
+
+Projektbericht:
+https://v2.overleaf.com/read/cktwqchnvcdd
