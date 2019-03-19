@@ -291,11 +291,14 @@ public:
         int p_d[1]; //bevorzugtes Ziel
         p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zufällig ausgewählt
         set_w_S(true,1,p_d, rand() % (quantity_destinations) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
-        renew_w_S(destvec);
+        renew_w_S_and_S(destvec);
 
         set_S(destvec);
 
         set_D();
+
+        //Zufälliges setzen des "Friction" Parameters:
+        friction = (rand() % 300) / 1000;
 
         evacuated = false;
         number_of_conflicts = 0;
@@ -314,11 +317,14 @@ public:
         int p_d[1]; //bevorzugtes Ziel
         p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zufällig ausgewählt
         set_w_S(true,1,p_d, rand() % (quantity_destinations) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
-        renew_w_S(destvec);
+        renew_w_S_and_S(destvec);
 
         set_S(destvec);
 
         set_D();
+
+        //Zufälliges setzen des "Friction" Parameters:
+        friction = (rand() % 300) / 1000;
 
         evacuated = false;
         number_of_conflicts = 0;
@@ -331,8 +337,10 @@ public:
         g = f2;
         b = f3;
     };
+    double friction = 0.0; // Wahrscheinlichkeit, dass sich die Person nicht bewegt, obwohl sie sich bewegen sollte
     void moveto(int xn, int yn){
-        if(evacuated == false){
+        double r = (rand() % 1000) / 1000.0; // Zufallszahl
+        if(evacuated == false && r >= friction){
             x = xn;
             y = yn;
         }
@@ -492,7 +500,7 @@ int quantity_persons;
 
 
     }
-    void renew_w_S(vector<destination> &destvec){// erneuert die Einträge von w_S, wenn bestimmt Umstände eintreten
+    void renew_w_S_and_S(vector<destination> &destvec){// erneuert die Einträge von w_S, wenn bestimmt Umstände eintreten
         //wenn sich die Person sehr nahe an einem Ausgang befindet bekommt der Wert w_S, der für das Wissen über diesen Ausgang steht, einen sehr hohen Wert, da die Person den Ausgang sieht o.Ä.
         int r_influence_sphere = 5;// legt fest, ab wann die Person den Ausgang sehen kann
         for(int i = 0; i < quantity_destinations; i++){
@@ -502,6 +510,7 @@ int quantity_persons;
                 }
             }
         }
+        set_S(destvec);
     }
     void print_w_S(){
         cout << endl << "print_w_S:" << endl;
@@ -662,6 +671,8 @@ int quantity_persons;
     double time_start;
     double time_end;
     double evacuation_time = 0;
+    int iteration;
+    int iteration_when_evacuated;
     bool evacuated;
 
     void start_time_measurement(){

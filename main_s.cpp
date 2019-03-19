@@ -190,7 +190,7 @@ void move_people_sequential(vector<person> &persvec, vector<obstacle> &obstvec, 
     persvec[j].set_T(obstvec,persvec);
 
     //Aussuchen: Bewegungsrichtung:
-    double r = ((rand() % 10000) / 10000.);
+    double r = ((rand() % 100) / 100.);
     //cout << "Zufallszahl r: " << r << endl;
 
     if(r < persvec[j].get_T(1,0)){// Bewegung nach oben?
@@ -346,6 +346,7 @@ bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &
                         persvec[i].x = destvec[j].x;//setzt Person in das Feld mit den Koordinaten des Ziels
                         persvec[i].y = destvec[j].y;
                         persvec[i].evacuated = true; //damit sich die Person nicht mehr aus dem Ziel hinausbewegt
+                        persvec[i].iteration_when_evacuated = persvec[i].iteration; // Stoppt "Iterationsmessung"
                         persvec[i].end_time_measurement();// Stoppt Zeitmessung
                         return_value = true;
                     }
@@ -354,29 +355,49 @@ bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &
         }
         return return_value;
 }
+void update_object_parameters(int iteration, vector<person> &persvec, vector<destination> &destvec){
+
+    for(int j = 0; j < persvec.size(); j++){
+        persvec[j].iteration = iteration;
+        persvec[j].renew_w_S_and_S(destvec);
+    }
+}
 //#### Vorgehen während Iteration
 
 
 //#### Analyse
-void set_model_parameters(vector<person> &persvec){//setzt Parameter aller Personen; dies ist für die Analyse der Evakuierungszeit unabdingbar
-    double k_S;
-    double k_D;
-    double w_S;
+void set_analyse_parameters(analysis_run &ana_run, char *k_S, char *k_D, char *w_S, char *friction){//setzt Parameter aus einem Ausruf aus der Shell
+    ana_run.k_S = atoi(k_S) / 1000.;
+    ana_run.k_D = atoi(k_D) / 1000.;
+    ana_run.w_S = atoi(w_S) / 1000.;
+    ana_run.friction = atoi(friction) / 1000.;
+    cout << ana_run.k_S << ";" << ana_run.k_D << ";" << ana_run.w_S<< ";" << ana_run.friction << endl;
+}
+void set_model_parameters(vector<person> &persvec, double k_S, double k_D, double w_S, double friction){//setzt Parameter aller Personen; dies ist für die Analyse der Evakuierungszeit unabdingbar
 
-    cout << "Legen Sie den Einfluss des statischen Feldes k_S fest :" << endl;
-    cin >> k_S;
-    cout << "Legen Sie den Einfluss des dynamischen Feldes k_D fest :" << endl;
-    cin >> k_D;
-    cout << "Legen Sie den Wissensstand aller Personen zum Ausgang fest (w_S):" << endl;
-    cin >> w_S;
 
     for(int i = 0; i < persvec.size(); i++){
-        persvec[i].k_S = k_S;
-        persvec[i].k_D = k_D;
-        persvec[i].set_w_S(w_S);
+        if(k_S > 0){
+            persvec[i].k_S = k_S;
+        }
+        if(k_D > 0){
+            persvec[i].k_D = k_D;
+        }
+        if(w_S > 0){
+            persvec[i].set_w_S(w_S);
+        }
+        if(friction > 0){
+            if(friction <= 1){
+                persvec[i].friction = friction;
+            }
+            else{
+                cout << "Fehler - der Friction Parameter kann nicht größer als 1 sein!" << endl;
+                break;
+            }
+        }
     }
 }
-void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungszeit der Personen
+void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungszeit der Personen, sollte nur ausgefürt werden, wenn vorher "set_model_parameters" angewendet wurde, also analysis_run.execute aktiviert ist
     //Öffnet ein Dokument, in dem alle Daten gespeichert werden:
     fstream f;
     f.open("daten.dat", ios::app);
@@ -392,11 +413,19 @@ void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungs
         }
     }
     average_evac_time = average_evac_time / number_evac_pers;
+    // Berechnet die durchschnittlich benötigte Iterationsanzahl, damit die Personen ans Ziel kommen:
+    double average_evac_iteration = 0;
+    for(int i = 0; i < persvec.size(); i++){
+        if(persvec[i].evacuated == true){
+            cout << i << "enditeration: " << persvec[i].iteration_when_evacuated << endl;
+            average_evac_iteration = average_evac_iteration + persvec[i].iteration_when_evacuated;
+        }
+    }
+    average_evac_iteration = average_evac_iteration / number_evac_pers;
 
     //Schreibt berechnete Daten in das geöffnete Dokument
-    f << "###Daten zur Analyse der Evakuierungsgeschwindigkeit beim Grundriss '" << (string) plant_layout << "'" << endl;
-    f << "### Durchschnittliche Evakuierungszeit, Anzahl der Personen, die das Ziel nicht erreichen" << endl;
-    f << average_evac_time << "," << persvec.size() - number_evac_pers << "," << endl;
+    //Reihenfolge der Daten ist: Name Grundris, Durchschnittliche Evakuierungszeit, Durchschnittliche Iteration bei Evakuierung, Anzahl der Personen, die das Ziel nicht erreichen, k_S, k_D, w_S, friction, Update Regel
+    f << (string) plant_layout << "," << average_evac_time << "," << average_evac_iteration << "," << persvec.size() - number_evac_pers << "," << persvec[0].k_S << "," << persvec[0].k_D << "," << persvec[0].w_S[0] << "," << persvec[0].friction << "," << movement_update << endl;
     f.close();
 /*
 Density
@@ -413,6 +442,12 @@ omega - steht für w_S
 
 int main(int argc, char* args[]){
     srand (time(NULL));
+
+    analysis_run ana_run;
+
+    if(ana_run.foreign_call == true){
+        set_analyse_parameters(ana_run, args[1], args[2], args[3], args[4]);
+    }
 
 
     //Initialisation SDL um den gespeicherten Grundriss zu laden
@@ -445,7 +480,7 @@ int main(int argc, char* args[]){
     print_init_vector(initcoord_pers_vec);
 
     //Schließen des SDL_Fensters
-    while (true) {if (SDL_PollEvent(&Event) && Event.type == SDL_QUIT){break;}} //Hält Fenster so lange offen bis es per Hand geschlossen wird
+    while (ana_run.execute == false) {if (SDL_PollEvent(&Event) && Event.type == SDL_QUIT){break;}} //Hält Fenster so lange offen bis es per Hand geschlossen wird
     SDL_FreeSurface( bmp_surf );
 	bmp_surf = NULL;
 	SDL_DestroyWindow( Window );
@@ -477,9 +512,8 @@ int main(int argc, char* args[]){
 
 //Bei einem Durchlauf des Programms, bei dem Daten entnommen und Analysiert werden müssen, müssen gleichwertige Bedingungen hergestellt werden
 //Deshalb werden dabei einige Parameter nochmals umgeändert:
-    if(analysis_run == true){
-        grafic_delay = 20;
-
+    if(ana_run.execute == true){
+        set_model_parameters(persvec,ana_run.k_S,ana_run.k_D,ana_run.w_S,ana_run.friction);
     }
 
 //################## object declaration
@@ -495,12 +529,10 @@ int main(int argc, char* args[]){
 
 
 //test
-
 //test
 
 
 for(int i = 0; i < number_of_iterations; i++){
-    cout << i << endl;
 //################## iteration method
     has_pers_reached_destination(destvec,persvec);
 
@@ -514,13 +546,19 @@ for(int i = 0; i < number_of_iterations; i++){
         cout << "Fehler in der Eingabe; movement_update kann nur 'p' oder 's' sein"  << endl;
     }
 
-
-
-    for(int j = 0; j < quantity_persons; j++){
-        persvec[j].renew_w_S(destvec);
+    //Abbruchbedingung, wenn die number_of_iterations zu hoch gewählt wurde
+    bool b_c = true;
+    for (int j = 0; j < persvec.size(); j++){
+        if(persvec[j].evacuated == false){
+            b_c = false;
+        }
+    }
+    if (b_c == true){
+        break;
     }
 
 
+    update_object_parameters(i,persvec,destvec);
 //################## iteration method
 
 
@@ -529,7 +567,8 @@ for(int i = 0; i < number_of_iterations; i++){
         draw_grid(persvec,destvec,obstvec,renderer,2);
         SDL_Delay(grafic_delay);
 }
-    while (true) {if (SDL_PollEvent(&event) && event.type == SDL_QUIT){break;}} //Hält Fenster so lange offen bis es per Hand geschlossen wird
+    cout << "Durchlauf abgeschlossen" << endl;
+    while (ana_run.execute == false) {if (SDL_PollEvent(&event) && event.type == SDL_QUIT){break;}} //Hält Fenster so lange offen bis es per Hand geschlossen wird
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
@@ -537,8 +576,11 @@ for(int i = 0; i < number_of_iterations; i++){
 //################## visual output 2
 
 //################## Analyse
-    evacuation_analysis(persvec);
+    if(ana_run.execute == true){
+        evacuation_analysis(persvec);
+    }
 //################## Analyse
+
 
 
     return EXIT_SUCCESS;
