@@ -75,6 +75,9 @@ private:
 
 };
 
+//##################################################################################################################################
+//##################################################################################################################################
+
 class destination
 {
 public:
@@ -84,19 +87,19 @@ public:
         x = a;
         y = b;
         setrgb(0,200,0);
-        set_static_field_k(obstvec);
         quantity_obstacles = q_obst;
         quantity_destinations = q_dest;
         quantity_persons = q_pers;
+        set_static_field_k(obstvec);
     };
     destination(int a, int b, int f1, int f2, int f3,vector<obstacle> &obstvec, int q_obst, int q_dest, int q_pers){
         x = a;
         y = b;
         setrgb(f1,f2,f3);
-        set_static_field_k(obstvec);
         quantity_obstacles = q_obst;
         quantity_destinations = q_dest;
         quantity_persons = q_pers;
+        set_static_field_k(obstvec);
     };
 // constructors
 
@@ -268,6 +271,9 @@ private:
 
 };
 
+//##################################################################################################################################
+//##################################################################################################################################
+
 class person
 {
 public:
@@ -290,7 +296,7 @@ public:
 
         set_S(destvec);
 
-        set_D();
+        set_D_on_zero();
 
         evacuated = false;
         number_of_conflicts = 0;
@@ -313,7 +319,7 @@ public:
 
         set_S(destvec);
 
-        set_D();
+        set_D_on_zero();
 
         evacuated = false;
         number_of_conflicts = 0;
@@ -326,12 +332,17 @@ public:
         g = f2;
         b = f3;
     };
-    void moveto(int xn, int yn){
-        if(evacuated == false){
+
+    void moveto(int xn, int yn, vector<person> &persvec, vector <int > &propability_arr_diff, vector<int> &propability_arr_dec)
+    {
+        if(evacuated == false)
+        {
+            set_D(persvec, xn, yn, propability_arr_diff, propability_arr_dec);
             x = xn;
             y = yn;
         }
-}
+    }
+
     bool is_it_here(int qx, int qy){
         if (x == qx && y == qy){
             return true;
@@ -389,20 +400,169 @@ int quantity_persons;
     int g;
     int b;
 
+
+
 // ###### Dynamic floor field DZur Uni Potsdam(Brandenburg):
     double k_D = 1;
     int D[grid_width][grid_height];
 
-    void set_D(){
-        for (int i = 0; i < grid_width; i++){
+    void set_D_on_zero()
+    {
+        //setzt D feld auf null
+        for (int i = 0; i < grid_width; i++)
+        {
             for(int j = 0; j < grid_height; j++){
                 D[i][j] = 0;
             }
         }
     }
-    void print_D(){
-        for (int i = 0; i < grid_height; i++){
-            for(int j = 0; j < grid_width; j++){
+
+    void set_D(vector<person> &persvec, int xn, int yn, vector<int> &propability_arr_diff, vector<int> &propability_arr_dec)
+    {
+        for (int k=0; k< quantity_persons; k++)
+        {
+            if (persvec[k].x != x && persvec[k].y != y)
+            {
+                persvec[k].D[x][y]++;
+            }
+        }
+
+        //nach jeder bewegung wird an jedem ort geprüft ob sich das dfeld verteilt oder zerfällt
+        for (int i=0; i< persvec.size(); i++)
+        {
+            for (int x=0; x< grid_width; x++)
+            {
+                for (int y=0; y< grid_height; y++)
+                {
+                    if (persvec[i].D[x][y]!=0)
+                    {
+                        //Verteilung des D-Felds
+                        //vector <int > propability_arr_diff(10); steht in der main damit in shell ausgegeben werden kann
+                        for (int k=0; k <propability_arr_diff.size(); k++)
+                        {
+                            propability_arr_diff[k]=0;
+                        }
+                        if (diffusion_param!=0)
+                        {
+                            for (int k=0; k<diffusion_param ; k++)
+                            {
+                                propability_arr_diff[k]=1;
+                            }
+                        }
+
+                        int r_1=rand () %100;
+                        if (propability_arr_diff[r_1]==1) //verifikation: D feld soll sich verteilen
+                        {
+                            int which_cell=rand ()%4; //zu welcher zelle propagiert das d-feld?
+
+                            if (which_cell==0)
+                            {
+                                if (x-1!=xn && y!=yn)
+                                {
+                                    persvec[i].D[x-1][y]++;
+                                }
+                                else if (x+1!=xn && y!=yn)
+                                {
+                                    persvec[i].D[x+1][y]++;
+                                }
+                                else if (x!=xn && y-1!=yn)
+                                {
+                                    persvec[i].D[x][y-1]++;
+                                }
+                                else if (x!=xn && y+1!=yn)
+                                {
+                                    persvec[i].D[x][y+1]++;
+                                }
+                            }
+                            else if (which_cell==1)
+                            {
+                                if (x+1!=xn && y!=yn)
+                                {
+                                    persvec[i].D[x+1][y]++;
+                                }
+                                else if (x!=xn && y-1!=yn)
+                                {
+                                    persvec[i].D[x][y-1]++;
+                                }
+                                else if (x!=xn && y+1!=yn)
+                                {
+                                    persvec[i].D[x][y+1]++;
+                                }
+                                else if (x-1!=xn && y!=yn)
+                                {
+                                    persvec[i].D[x-1][y]++;
+                                }
+                            }
+                            else if (which_cell==2)
+                            {
+                                if (x!=xn && y-1!=yn)
+                                {
+                                    persvec[i].D[x][y-1]++;
+                                }
+                                else if (x!=xn && y+1!=yn)
+                                {
+                                    persvec[i].D[x][y+1]++;
+                                }
+                                else if (x-1!=xn && y!=yn)
+                                {
+                                    persvec[i].D[x-1][y]++;
+                                }
+                                else if (x+1!=xn && y!=yn)
+                                {
+                                    persvec[i].D[x+1][y]++;
+                                }
+                            }
+                            else if (which_cell==3)
+                            {
+                                if (x!=xn && y+1!=yn)
+                                {
+                                    persvec[i].D[x][y+1]++;
+                                }
+                                else if (x-1!=xn && y!=yn)
+                                {
+                                    persvec[i].D[x-1][y]++;
+                                }
+                                else if (x+1!=xn && y!=yn)
+                                {
+                                    persvec[i].D[x+1][y]++;
+                                }
+                                else if (x!=xn && y-1!=yn)
+                                {
+                                    persvec[i].D[x][y-1]++;
+                                }
+                            }
+                        }
+
+                        //zerfall des d Feldes:
+                        for (int k=0; k < propability_arr_dec.size(); k++)
+                        {
+                            propability_arr_dec[k]=0;
+                        }
+                        if (decay_param!=0)
+                        {
+                            for (int k=0; k<decay_param ; k++)
+                            {
+                                propability_arr_dec[k]=1;
+                            }
+                        }
+                        int r_2=rand()%100;
+                        if (propability_arr_diff[r_2]==1) //verifikation: D feld soll sich auflösen
+                        {
+                            if (/*falls 1 Nachbar frei ist*/ persvec[i].D[x][y+1]==0 || persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==0 || persvec[i].D[x-1][y]==0 || /*falls 2 Nachbarn frei sind*/ persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==persvec[i].D[x][y-1]==0 || /*falls 3 Nachbarn frei sind*/ persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0)
+                            {
+                                persvec[i].D[x][y]=0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    void print_D()
+    {
+        for (int i = 0; i < grid_width; i++){
+            for(int j = 0; j < grid_height; j++){
                 cout << D[i][j] << ":";
             }
             cout << endl;
@@ -602,7 +762,7 @@ int quantity_persons;
         for (int i = 0; i < 3; i++){
             for(int j = 0; j < 3; j++){
                 if (isinf(T[i][j])){
-                    cout << "Fehler beim Erstellen der Matrix T aufgetreten ! Die Größe der Einträge übersteigt die maximale Größe des long double Zahlentyps." << endl << "Versuchen sie die Simulation mit einem kleineren Feld zu wiederholen" << endl;
+                    cout << "Fehler beim Erstellen der Matrix T aufgetreten ! Die Größe der Einträge übersteigt die maximale Größe des long double Zahlentyps." << endl << "Versuchen sie die Simulation mit einem kleineren Feld zu wiederholen." << endl;
                 }
             }
         }

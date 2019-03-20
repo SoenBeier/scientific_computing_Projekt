@@ -23,6 +23,7 @@ using namespace std;
 //#### Grundriss einlesen
 Uint32 getpixel_function(SDL_Surface *surface, int x, int y){ //Quelle: http://sdl.beuc.net/sdl.wiki/Pixel_Access; unter getpixel in SDL Paket enthalten, Liest Farbe eines Pixels aus
 
+
         int bpp = surface->format->BytesPerPixel;
         /* Here p is the address to the pixel we want to retrieve */
         Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
@@ -52,6 +53,7 @@ Uint32 getpixel_function(SDL_Surface *surface, int x, int y){ //Quelle: http://s
     }
 }
 void set_init_vectors(SDL_Surface * surface,vector <vector <int>> &initcoord_pers_vec,vector <vector <int>> &initcoord_dest_vec,vector <vector <int>> &initcoord_obst_vec, int p_x, int p_y, int d_x, int d_y, int o_x, int o_y){//Liest den Grundriss ein
+
     vector <int > ith_coord;
     for (int y=0; y< grid_height; y++)
     {
@@ -93,6 +95,7 @@ void print_init_vector(vector <vector<int>> &initcoord_vec){
     cout << endl;
 }
 //#### Grundriss einlesen
+
 
 
 //#### Grafikausgabe
@@ -168,7 +171,7 @@ void draw_grid(vector <person> &pa, vector <destination> &da, vector<obstacle> &
 
 
 //#### Vorgehen während Iteration
-void move_people_sequential(vector<person> &persvec, vector<obstacle> &obstvec, vector<destination> &destvec){
+void move_people_sequential(vector<person> &persvec, vector<obstacle> &obstvec, vector<destination> &destvec, vector <int > &propability_arr_diff, vector<int> &propability_arr_dec){
     //cout << "SIND GERADE HIER AM ARBEITEN" << endl;
     //Vector wird mit allen Nummern gefüllt; jede Nummer kann genau einer Person zugeordnet werden kann
     vector<int> serial_number_pers;
@@ -194,16 +197,16 @@ void move_people_sequential(vector<person> &persvec, vector<obstacle> &obstvec, 
     //cout << "Zufallszahl r: " << r << endl;
 
     if(r < persvec[j].get_T(1,0)){// Bewegung nach oben?
-        persvec[j].moveto(persvec[j].x, persvec[j].y - 1);
+        persvec[j].moveto(persvec[j].x, persvec[j].y - 1, persvec, propability_arr_diff, propability_arr_dec);
     }
     else if(r < (persvec[j].get_T(1,0) + persvec[j].get_T(2,1))){//nach rechts?
-        persvec[j].moveto(persvec[j].x + 1, persvec[j].y);
+        persvec[j].moveto(persvec[j].x + 1, persvec[j].y, persvec, propability_arr_diff, propability_arr_dec);
     }
     else if(r < (persvec[j].get_T(1,0) + persvec[j].get_T(2,1) + persvec[j].get_T(1,2))){//nach unten?
-        persvec[j].moveto(persvec[j].x, persvec[j].y + 1);
+        persvec[j].moveto(persvec[j].x, persvec[j].y + 1, persvec, propability_arr_diff, propability_arr_dec);
     }
     else if(r < (persvec[j].get_T(1,0) + persvec[j].get_T(2,1) + persvec[j].get_T(1,2) + persvec[j].get_T(0,1))){//nach links?
-        persvec[j].moveto(persvec[j].x - 1, persvec[j].y);
+        persvec[j].moveto(persvec[j].x - 1, persvec[j].y, persvec, propability_arr_diff, propability_arr_dec);
     }
     else{//stehen bleiben
     }
@@ -211,7 +214,7 @@ void move_people_sequential(vector<person> &persvec, vector<obstacle> &obstvec, 
     }
 
 }
-void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, vector<destination> &destvec){
+void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, vector<destination> &destvec, vector <int > &propability_arr_diff, vector<int> &propability_arr_dec){
     double r;
     vector<char> direction;
     // Für Jede Person:
@@ -266,7 +269,7 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
         //Hat die ite Person als einzige einen Anspruch auf (desired_x,desired_y)?, dann:
         if(only_one_desired == true){
             if(persvec[i].already_moved == false){
-                persvec[i].moveto(persvec[i].desired_x,persvec[i].desired_y);
+                persvec[i].moveto(persvec[i].desired_x,persvec[i].desired_y, persvec,propability_arr_diff, propability_arr_dec);
                 persvec[i].already_moved = true;
                 persvec[i].conflict_partner.clear();
             }
@@ -316,7 +319,7 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
                     }
                 }
 
-                persvec[persvec[i].conflict_partner[index_max_C]].moveto(x,y);
+                persvec[persvec[i].conflict_partner[index_max_C]].moveto(x,y, persvec, propability_arr_diff, propability_arr_dec);
                 persvec[i].conflict_partner.clear();
             }
             //Erstelle eine Konfliktmatrix:
@@ -411,6 +414,62 @@ omega - steht für w_S
 
 
 
+//test
+
+void lege_und_printe_grunriss_auf_dfeld (vector <person> &persvec, vector <obstacle > &obstvec, vector <destination > &destvec, int ith_person, vector <vector<int>> &initcoord_pers_vec)
+{
+    //erzeugt grundriss
+    int static Grundriss [grid_width][grid_height];
+    for (int x=0; x<grid_width; x++)
+    {
+        for (int y=0; y<grid_height; y++)
+        {
+            Grundriss[x][y]=0;
+        }
+    }
+
+
+    for (int i=0; i< obstvec.size(); i++)
+    {
+        Grundriss [obstvec[i].x][obstvec[i].y]=-10;
+    }
+
+    for (int j=0; j< destvec.size(); j++)
+    {
+        Grundriss [destvec[j].x][destvec[j].y]=-20;
+    }
+
+    for (int k=0; k < persvec.size(); k++)
+    {
+        Grundriss [initcoord_pers_vec[k][0]][initcoord_pers_vec[k][1]]=-30;
+    }
+
+    // addiert grundriss mit d feld
+    int static Grundriss_D_Feld[grid_width][grid_height];
+    for (int x=0; x<grid_width; x++)
+    {
+        for (int y=0; y<grid_height; y++)
+        {
+            Grundriss_D_Feld[x][y]=persvec[ith_person].D[x][y]+Grundriss[x][y];
+        }
+    }
+    //print
+    for (int x=0; x<grid_width; x++)
+    {
+        for (int y=0; y<grid_height; y++)
+        {
+            cout << Grundriss_D_Feld[x][y] << ";" ;
+        }
+        cout << endl;
+    }
+}
+
+
+
+//test
+
+
+
 int main(int argc, char* args[]){
     srand (time(NULL));
 
@@ -440,8 +499,11 @@ int main(int argc, char* args[]){
     int quantity_obstacles = initcoord_obst_vec.size();
 
     //Ausgabe der Koordinaten der noch zu erstellenden Personen, Hindernissen, Zielen
+    cout << "person " ;
     print_init_vector(initcoord_dest_vec);
+    cout << "dest " ;
     print_init_vector(initcoord_obst_vec);
+    cout << "obstacle " ;
     print_init_vector(initcoord_pers_vec);
 
     //Schließen des SDL_Fensters
@@ -452,6 +514,16 @@ int main(int argc, char* args[]){
 	Window = NULL;
 	SDL_Quit();
 
+
+
+
+
+//test
+
+vector <int > propability_arr_diff(100);
+vector <int> propability_arr_dec(100);
+
+//test
 
 //################## object declaration
 //declaration of used objects:
@@ -494,9 +566,6 @@ int main(int argc, char* args[]){
 //################## visual output 1
 
 
-//test
-
-//test
 
 
 for(int i = 0; i < number_of_iterations; i++){
@@ -505,10 +574,10 @@ for(int i = 0; i < number_of_iterations; i++){
     has_pers_reached_destination(destvec,persvec);
 
     if(movement_update == 's'){
-        move_people_sequential(persvec,obstvec,destvec);
+        move_people_sequential(persvec,obstvec,destvec, propability_arr_diff, propability_arr_dec);
     }
     else if(movement_update == 'p'){
-        move_people_parallel(persvec,obstvec,destvec);
+        move_people_parallel(persvec,obstvec,destvec, propability_arr_diff, propability_arr_dec);
     }
     else {
         cout << "Fehler in der Eingabe; movement_update kann nur 'p' oder 's' sein"  << endl;
@@ -529,10 +598,46 @@ for(int i = 0; i < number_of_iterations; i++){
         draw_grid(persvec,destvec,obstvec,renderer,2);
         SDL_Delay(grafic_delay);
 }
+
     while (true) {if (SDL_PollEvent(&event) && event.type == SDL_QUIT){break;}} //Hält Fenster so lange offen bis es per Hand geschlossen wird
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+
+
+//test
+
+
+cout << "anzahl personen:" << quantity_persons<< endl;
+int i;
+    for (i=0; i< 1  /*quantity_persons*/; i++)
+    {
+        cout << i<<". " << "Person:"  << endl;
+        persvec[i].print_D();
+    }
+
+    cout << " " << endl;
+    cout << "Grundriss + dfeld von Person:" << i << endl;
+    lege_und_printe_grunriss_auf_dfeld(persvec, obstvec, destvec, 0, initcoord_pers_vec);
+
+    cout << " " <<endl;
+    cout << "diff parameter: " << diffusion_param << endl;
+    cout << "propabillity arr diff" << endl;
+    for (int i=0; i<propability_arr_diff.size(); i++)
+    {
+        cout << propability_arr_diff[i] << "; ";
+    }
+
+    cout << " " <<endl;
+    cout << "dec parameter: " << decay_param << endl;
+    cout << "propabillity arr dec" << endl;
+    for (int i=0; i<propability_arr_dec.size(); i++)
+    {
+        cout << propability_arr_dec[i] << "; ";
+    }
+
+//test
+
 
 //################## visual output 2
 
