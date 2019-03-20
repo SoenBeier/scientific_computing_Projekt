@@ -436,7 +436,43 @@ int quantity_persons;
                 {
                     if (persvec[i].D[x][y]!=0)
                     {
-                        //Verteilung des D-Felds
+                        //diffusion_dyn_f(propability_arr_diff, persvec, xn, yn, i);
+                        //decay_dyn_f(propability_arr_dec, persvec, i);
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    void decay_dyn_f(vector <int> &propability_arr_dec, vector <person> &persvec, int i)
+    {
+        //zerfall des d Feldes:
+                        for (int k=0; k < propability_arr_dec.size(); k++)
+                        {
+                            propability_arr_dec[k]=0;
+                        }
+                        if (decay_param!=0)
+                        {
+                            for (int k=0; k<decay_param ; k++)
+                            {
+                                propability_arr_dec[k]=1;
+                            }
+                        }
+                        int r_2=rand()%100;
+                        if (propability_arr_dec[r_2]==1) //verifikation: D feld soll sich auflösen
+                        {
+                            if (/*falls 1 Nachbar frei ist*/ persvec[i].D[x][y+1]==0 || persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==0 || persvec[i].D[x-1][y]==0 || /*falls 2 Nachbarn frei sind*/ persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==persvec[i].D[x][y-1]==0 || /*falls 3 Nachbarn frei sind*/ persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0)
+                            {
+                                persvec[i].D[x][y]=0;
+                            }
+                        }
+    }
+
+    void diffusion_dyn_f(vector <int > &propability_arr_diff, vector <person> &persvec,int ax, int ay, int xn, int yn, int i)
+    {
+        //Verteilung des D-Felds
                         //vector <int > propability_arr_diff(10); steht in der main damit in shell ausgegeben werden kann
                         for (int k=0; k <propability_arr_diff.size(); k++)
                         {
@@ -457,107 +493,83 @@ int quantity_persons;
 
                             if (which_cell==0)
                             {
-                                if (x-1!=xn && y!=yn)
+                                if (ax-1!=xn && ay!=yn)
                                 {
-                                    persvec[i].D[x-1][y]++;
+                                    persvec[i].D[ax-1][ay]++;
                                 }
-                                else if (x+1!=xn && y!=yn)
+                                else if (ax+1!=xn && ay!=yn)
                                 {
-                                    persvec[i].D[x+1][y]++;
+                                    persvec[i].D[ax+1][ay]++;
                                 }
-                                else if (x!=xn && y-1!=yn)
+                                else if (ax!=xn && ay-1!=yn)
                                 {
-                                    persvec[i].D[x][y-1]++;
+                                    persvec[i].D[ax][ay-1]++;
                                 }
-                                else if (x!=xn && y+1!=yn)
+                                else if (ax!=xn && ay+1!=yn)
                                 {
-                                    persvec[i].D[x][y+1]++;
+                                    persvec[i].D[ax][ay+1]++;
                                 }
                             }
                             else if (which_cell==1)
                             {
-                                if (x+1!=xn && y!=yn)
+                                if (ax+1!=xn && ay!=yn)
                                 {
-                                    persvec[i].D[x+1][y]++;
+                                    persvec[i].D[ax+1][ay]++;
                                 }
-                                else if (x!=xn && y-1!=yn)
+                                else if (ax!=xn && ay-1!=yn)
                                 {
-                                    persvec[i].D[x][y-1]++;
+                                    persvec[i].D[ax][ay-1]++;
                                 }
-                                else if (x!=xn && y+1!=yn)
+                                else if (ax!=xn && ay+1!=yn)
                                 {
-                                    persvec[i].D[x][y+1]++;
+                                    persvec[i].D[ax][ay+1]++;
                                 }
-                                else if (x-1!=xn && y!=yn)
+                                else if (ax-1!=xn && ay!=yn)
                                 {
-                                    persvec[i].D[x-1][y]++;
+                                    persvec[i].D[ax-1][ay]++;
                                 }
                             }
                             else if (which_cell==2)
                             {
-                                if (x!=xn && y-1!=yn)
+                                if (ax!=xn && ay-1!=yn)
                                 {
-                                    persvec[i].D[x][y-1]++;
+                                    persvec[i].D[ax][ay-1]++;
                                 }
-                                else if (x!=xn && y+1!=yn)
+                                else if (ax!=xn && ay+1!=yn)
                                 {
-                                    persvec[i].D[x][y+1]++;
+                                    persvec[i].D[ax][ay+1]++;
                                 }
-                                else if (x-1!=xn && y!=yn)
+                                else if (ax-1!=xn && ay!=yn)
                                 {
-                                    persvec[i].D[x-1][y]++;
+                                    persvec[i].D[ax-1][ay]++;
                                 }
-                                else if (x+1!=xn && y!=yn)
+                                else if (ax+1!=xn && ay!=yn)
                                 {
-                                    persvec[i].D[x+1][y]++;
+                                    persvec[i].D[ax+1][ay]++;
                                 }
                             }
                             else if (which_cell==3)
                             {
-                                if (x!=xn && y+1!=yn)
+                                if (ax!=xn && ay+1!=yn)
                                 {
-                                    persvec[i].D[x][y+1]++;
+                                    persvec[i].D[ax][ay+1]++;
                                 }
-                                else if (x-1!=xn && y!=yn)
+                                else if (ax-1!=xn && ay!=yn)
                                 {
-                                    persvec[i].D[x-1][y]++;
+                                    persvec[i].D[ax-1][ay]++;
                                 }
-                                else if (x+1!=xn && y!=yn)
+                                else if (ax+1!=xn && ay!=yn)
                                 {
-                                    persvec[i].D[x+1][y]++;
+                                    persvec[i].D[ax+1][ay]++;
                                 }
-                                else if (x!=xn && y-1!=yn)
+                                else if (ax!=xn && ay-1!=yn)
                                 {
-                                    persvec[i].D[x][y-1]++;
+                                    persvec[i].D[ax][ay-1]++;
                                 }
                             }
                         }
-
-                        //zerfall des d Feldes:
-                        for (int k=0; k < propability_arr_dec.size(); k++)
-                        {
-                            propability_arr_dec[k]=0;
-                        }
-                        if (decay_param!=0)
-                        {
-                            for (int k=0; k<decay_param ; k++)
-                            {
-                                propability_arr_dec[k]=1;
-                            }
-                        }
-                        int r_2=rand()%100;
-                        if (propability_arr_diff[r_2]==1) //verifikation: D feld soll sich auflösen
-                        {
-                            if (/*falls 1 Nachbar frei ist*/ persvec[i].D[x][y+1]==0 || persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==0 || persvec[i].D[x-1][y]==0 || /*falls 2 Nachbarn frei sind*/ persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==persvec[i].D[x][y-1]==0 || /*falls 3 Nachbarn frei sind*/ persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0)
-                            {
-                                persvec[i].D[x][y]=0;
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
+
 
     void print_D()
     {
