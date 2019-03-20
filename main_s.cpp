@@ -381,27 +381,32 @@ void update_object_parameters(int iteration, vector<person> &persvec, vector<des
 
 
 //#### Analyse
-void set_analyse_parameters(analysis_run &ana_run, char *k_S, char *k_D, char *w_S, char *friction){//setzt Parameter aus einem Ausruf aus der Shell
+void set_analyse_parameters(analysis_run &ana_run, char *k_S, char *k_D, char *w_S, char *friction, char *w_decay, char *w_diffusion){//setzt Parameter aus einem Ausruf aus der Shell
     ana_run.k_S = atoi(k_S) / 1000.;
     ana_run.k_D = atoi(k_D) / 1000.;
     ana_run.w_S = atoi(w_S) / 1000.;
     ana_run.friction = atoi(friction) / 1000.;
-    cout << ana_run.k_S << ";" << ana_run.k_D << ";" << ana_run.w_S<< ";" << ana_run.friction << endl;
+
+    decay_param = atoi(w_decay);
+    diffusion_param = atoi(w_diffusion);
+
+    cout << ana_run.k_S << ";" << ana_run.k_D << ";" << ana_run.w_S<< ";" << ana_run.friction << ";" << decay_param << ";" << diffusion_param << endl;
 }
 void set_model_parameters(vector<person> &persvec, double k_S, double k_D, double w_S, double friction){//setzt Parameter aller Personen; dies ist für die Analyse der Evakuierungszeit unabdingbar
-
+    cout << "BIS HIER! " << k_D << endl;
 
     for(int i = 0; i < persvec.size(); i++){
-        if(k_S > 0){
+        if(k_S >= 0){
             persvec[i].k_S = k_S;
         }
-        if(k_D > 0){
+        if(k_D >= 0){
             persvec[i].k_D = k_D;
+            cout << "HIER !!!:" << k_D << endl;
         }
-        if(w_S > 0){
+        if(w_S >= 0){
             persvec[i].set_w_S(w_S);
         }
-        if(friction > 0){
+        if(friction >= 0){
             if(friction <= 1){
                 persvec[i].friction = friction;
             }
@@ -439,8 +444,8 @@ void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungs
     average_evac_iteration = average_evac_iteration / number_evac_pers;
 
     //Schreibt berechnete Daten in das geöffnete Dokument
-    //Reihenfolge der Daten ist: Name Grundris, Durchschnittliche Evakuierungszeit, Durchschnittliche Iteration bei Evakuierung, Anzahl der Personen, die das Ziel nicht erreichen, k_S, k_D, w_S, friction, Update Regel, Grafik_Delay
-    f << (string) plant_layout << " " << average_evac_time << " " << average_evac_iteration << " " << persvec.size() - number_evac_pers << " " << persvec[0].k_S << " " << persvec[0].k_D << " " << persvec[0].w_S[0] << " " << persvec[0].friction << " " << movement_update << " " << grafic_delay << endl;
+    //Reihenfolge der Daten ist: Name Grundris, Durchschnittliche Evakuierungszeit, Durchschnittliche Iteration bei Evakuierung, Anzahl der Personen, die das Ziel nicht erreichen, k_S, k_D, w_S, friction, decay, diffusion Update Regel, Grafik_Delay
+    f << (string) plant_layout << " " << average_evac_time << " " << average_evac_iteration << " " << persvec.size() - number_evac_pers << " " << persvec[0].k_S << " " << persvec[0].k_D << " " << persvec[0].w_S[0] << " " << persvec[0].friction <<" " <<decay_param << " " <<diffusion_param << " " << movement_update << " " << grafic_delay << endl;
     f.close();
 /*
 Density
@@ -526,7 +531,7 @@ int main(int argc, char* args[]){
     analysis_run ana_run;
     //Für den Aufruf über die Shell, bzw für den Aufruf über die Batch Datei:
     if(ana_run.foreign_call == true){
-        set_analyse_parameters(ana_run, args[1], args[2], args[3], args[4]);
+        set_analyse_parameters(ana_run, args[1], args[2], args[3], args[4], args[5], args[6]);
     }
 
 
@@ -661,8 +666,10 @@ for(int i = 0; i < max_number_of_iterations; i++){
         draw_grid(persvec,destvec,obstvec,renderer,2);
         SDL_Delay(grafic_delay);
 }
-
+    cout << "k_D: " << persvec[0].k_D;
     cout << "Durchlauf abgeschlossen" << endl;
+    SDL_Delay(500);
+
     while (ana_run.execute == false) {if (SDL_PollEvent(&event) && event.type == SDL_QUIT){break;}} //Hält Fenster so lange offen bis es per Hand geschlossen wird
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
@@ -670,11 +677,9 @@ for(int i = 0; i < max_number_of_iterations; i++){
 
 
 //test
-
-
 cout << "anzahl personen:" << quantity_persons<< endl;
 int i;
-    for (i=0; i< 1  /*quantity_persons*/; i++)
+    for (i=0; i< 1  ; i++)
     {
         cout << i<<". " << "Person:"  << endl;
         persvec[i].print_D();
@@ -699,7 +704,6 @@ int i;
     {
         cout << propability_arr_dec[i] << "; ";
     }
-
 //test
 
 
