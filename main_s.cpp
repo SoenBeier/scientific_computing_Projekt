@@ -101,7 +101,7 @@ void print_init_vector(vector <vector<int>> &initcoord_vec){
 //#### Grafikausgabe
 void clear_drawing(SDL_Renderer *renderer){// clears the whole screen/pigment the whole screen white //NOCHMAL DURCH RICHTIGEN BEFEHL ERSETZEN
     SDL_SetRenderDrawColor(renderer,250,250,250,0);
-    const SDL_Rect scrrect = {0,0,grid_width*10,grid_height*10}; //declarate rectangle, which contains the whole screen -> NOCHMAL NACHBESSERN : NUR BENÖTIGTER PLATZ
+    const SDL_Rect scrrect = {0,0,grid_width*10,grid_height*10}; //declarate rectangle, which contains the whole screen -> NOCHMAL NACHBESSERN : NUR BENÃ–TIGTER PLATZ
     SDL_RenderFillRect(renderer, &scrrect);
 }
 void draw_grid(vector <person> &pa, vector <destination> &da, vector<obstacle> &oa, SDL_Renderer *renderer){ //draw all objects on screen
@@ -121,7 +121,7 @@ void draw_grid(vector <person> &pa, vector <destination> &da, vector<obstacle> &
     }
     SDL_RenderPresent(renderer);
 }
-void draw_grid(vector <person> &pa, vector <destination> &da, vector<obstacle> &oa, SDL_Renderer *renderer, int magnification_factor){//draw all objects on screen with a magnication ; möglicherweise eine größere Vergrößerung ermöglichen ?
+void draw_grid(vector <person> &pa, vector <destination> &da, vector<obstacle> &oa, SDL_Renderer *renderer, int magnification_factor){//draw all objects on screen with a magnication ; mÃ¶glicherweise eine grÃ¶ÃŸere VergrÃ¶ÃŸerung ermÃ¶glichen ?
 
     clear_drawing(renderer); // pigment the screen white
     if (magnification_factor == 1){
@@ -170,10 +170,10 @@ void draw_grid(vector <person> &pa, vector <destination> &da, vector<obstacle> &
 //#### Grafikausgabe
 
 
-//#### Vorgehen während Iteration
+//#### Vorgehen wÃ¤hrend Iteration
 void move_people_sequential(vector<person> &persvec, vector<obstacle> &obstvec, vector<destination> &destvec, vector <int > &propability_arr_diff, vector<int> &propability_arr_dec){
     //cout << "SIND GERADE HIER AM ARBEITEN" << endl;
-    //Vector wird mit allen Nummern gefüllt; jede Nummer kann genau einer Person zugeordnet werden kann
+    //Vector wird mit allen Nummern gefÃ¼llt; jede Nummer kann genau einer Person zugeordnet werden kann
     vector<int> serial_number_pers;
     for(int i = 0; i < persvec.size(); i++){
         serial_number_pers.push_back(i);
@@ -193,7 +193,7 @@ void move_people_sequential(vector<person> &persvec, vector<obstacle> &obstvec, 
     persvec[j].set_T(obstvec,persvec);
 
     //Aussuchen: Bewegungsrichtung:
-    double r = ((rand() % 10000) / 10000.);
+    double r = ((rand() % 100) / 100.);
     //cout << "Zufallszahl r: " << r << endl;
 
     if(r < persvec[j].get_T(1,0)){// Bewegung nach oben?
@@ -217,7 +217,7 @@ void move_people_sequential(vector<person> &persvec, vector<obstacle> &obstvec, 
 void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, vector<destination> &destvec, vector <int > &propability_arr_diff, vector<int> &propability_arr_dec){
     double r;
     vector<char> direction;
-    // Für Jede Person:
+    // FÃ¼r Jede Person:
     for(int i = 0; i < persvec.size(); i++){
         persvec[i].already_moved = false;
         //Erstellt die transmission Matrix:
@@ -256,7 +256,7 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
 
     //geht alle Personen durch:
     for(int i = 0; i < persvec.size(); i++){
-        //Sind die gewünschten Koordinaten der iten Person (desired x, desired y) auch gewünschte Koordinaten einer anderen Person?:
+        //Sind die gewÃ¼nschten Koordinaten der iten Person (desired x, desired y) auch gewÃ¼nschte Koordinaten einer anderen Person?:
         bool only_one_desired = true;
         persvec[i].conflict_partner.push_back(i);
         for(int j = 0; j < persvec.size(); j++){
@@ -281,7 +281,7 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
                 cout << x << ";" << y << endl;
                 //initialisiere Konfliktvektor C
                 vector<double> C;
-                // Fülle Konfliktvektor C; T-Matrix-Wert wird hierfür verwendet
+                // FÃ¼lle Konfliktvektor C; T-Matrix-Wert wird hierfÃ¼r verwendet
                 for(int t = 0; t < persvec[i].conflict_partner.size(); t++){
                     if(direction[persvec[i].conflict_partner[t]] == 'o'){
                         C.push_back(persvec[persvec[i].conflict_partner[t]].get_T(1,0));
@@ -332,7 +332,7 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
     }
 
 }
-bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &persvec){//Überprüft ob die Person das Ziel erreicht hat
+bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &persvec){//ÃœberprÃ¼ft ob die Person das Ziel erreicht hat
         bool return_value = false;
 
         for(int i = 0; i < persvec.size(); i++){
@@ -349,6 +349,7 @@ bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &
                         persvec[i].x = destvec[j].x;//setzt Person in das Feld mit den Koordinaten des Ziels
                         persvec[i].y = destvec[j].y;
                         persvec[i].evacuated = true; //damit sich die Person nicht mehr aus dem Ziel hinausbewegt
+                        persvec[i].iteration_when_evacuated = persvec[i].iteration; // Stoppt "Iterationsmessung"
                         persvec[i].end_time_measurement();// Stoppt Zeitmessung
                         return_value = true;
                     }
@@ -357,30 +358,50 @@ bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &
         }
         return return_value;
 }
-//#### Vorgehen während Iteration
+void update_object_parameters(int iteration, vector<person> &persvec, vector<destination> &destvec){
+
+    for(int j = 0; j < persvec.size(); j++){
+        persvec[j].iteration = iteration;
+        persvec[j].renew_w_S_and_S(destvec);
+    }
+}
+//#### Vorgehen wÃ¤hrend Iteration
 
 
 //#### Analyse
-void set_model_parameters(vector<person> &persvec){//setzt Parameter aller Personen; dies ist für die Analyse der Evakuierungszeit unabdingbar
-    double k_S;
-    double k_D;
-    double w_S;
+void set_analyse_parameters(analysis_run &ana_run, char *k_S, char *k_D, char *w_S, char *friction){//setzt Parameter aus einem Ausruf aus der Shell
+    ana_run.k_S = atoi(k_S) / 1000.;
+    ana_run.k_D = atoi(k_D) / 1000.;
+    ana_run.w_S = atoi(w_S) / 1000.;
+    ana_run.friction = atoi(friction) / 1000.;
+    cout << ana_run.k_S << ";" << ana_run.k_D << ";" << ana_run.w_S<< ";" << ana_run.friction << endl;
+}
+void set_model_parameters(vector<person> &persvec, double k_S, double k_D, double w_S, double friction){//setzt Parameter aller Personen; dies ist fÃ¼r die Analyse der Evakuierungszeit unabdingbar
 
-    cout << "Legen Sie den Einfluss des statischen Feldes k_S fest :" << endl;
-    cin >> k_S;
-    cout << "Legen Sie den Einfluss des dynamischen Feldes k_D fest :" << endl;
-    cin >> k_D;
-    cout << "Legen Sie den Wissensstand aller Personen zum Ausgang fest (w_S):" << endl;
-    cin >> w_S;
 
     for(int i = 0; i < persvec.size(); i++){
-        persvec[i].k_S = k_S;
-        persvec[i].k_D = k_D;
-        persvec[i].set_w_S(w_S);
+        if(k_S > 0){
+            persvec[i].k_S = k_S;
+        }
+        if(k_D > 0){
+            persvec[i].k_D = k_D;
+        }
+        if(w_S > 0){
+            persvec[i].set_w_S(w_S);
+        }
+        if(friction > 0){
+            if(friction <= 1){
+                persvec[i].friction = friction;
+            }
+            else{
+                cout << "Fehler - der Friction Parameter kann nicht grÃ¶ÃŸer als 1 sein!" << endl;
+                break;
+            }
+        }
     }
 }
-void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungszeit der Personen
-    //Öffnet ein Dokument, in dem alle Daten gespeichert werden:
+void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungszeit der Personen, sollte nur ausgefÃ¼rt werden, wenn vorher "set_model_parameters" angewendet wurde, also analysis_run.execute aktiviert ist
+    //Ã–ffnet ein Dokument, in dem alle Daten gespeichert werden:
     fstream f;
     f.open("daten.dat", ios::app);
 
@@ -395,19 +416,27 @@ void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungs
         }
     }
     average_evac_time = average_evac_time / number_evac_pers;
+    // Berechnet die durchschnittlich benÃ¶tigte Iterationsanzahl, damit die Personen ans Ziel kommen:
+    double average_evac_iteration = 0;
+    for(int i = 0; i < persvec.size(); i++){
+        if(persvec[i].evacuated == true){
+            cout << i << "enditeration: " << persvec[i].iteration_when_evacuated << endl;
+            average_evac_iteration = average_evac_iteration + persvec[i].iteration_when_evacuated;
+        }
+    }
+    average_evac_iteration = average_evac_iteration / number_evac_pers;
 
-    //Schreibt berechnete Daten in das geöffnete Dokument
-    f << "###Daten zur Analyse der Evakuierungsgeschwindigkeit beim Grundriss '" << (string) plant_layout << "'" << endl;
-    f << "### Durchschnittliche Evakuierungszeit, Anzahl der Personen, die das Ziel nicht erreichen" << endl;
-    f << average_evac_time << "," << persvec.size() - number_evac_pers << "," << endl;
+    //Schreibt berechnete Daten in das geÃ¶ffnete Dokument
+    //Reihenfolge der Daten ist: Name Grundris, Durchschnittliche Evakuierungszeit, Durchschnittliche Iteration bei Evakuierung, Anzahl der Personen, die das Ziel nicht erreichen, k_S, k_D, w_S, friction, Update Regel, Grafik_Delay
+    f << (string) plant_layout << " " << average_evac_time << " " << average_evac_iteration << " " << persvec.size() - number_evac_pers << " " << persvec[0].k_S << " " << persvec[0].k_D << " " << persvec[0].w_S[0] << " " << persvec[0].friction << " " << movement_update << " " << grafic_delay << endl;
     f.close();
 /*
 Density
 panic
 k_D
 k_S
-w_S - Wissen über das Ziel
-omega - steht für w_S
+w_S - Wissen Ã¼ber das Ziel
+omega - steht fÃ¼r w_S
 */
 }
 //#### Analyse
@@ -471,7 +500,22 @@ void lege_und_printe_grunriss_auf_dfeld (vector <person> &persvec, vector <obsta
 
 
 int main(int argc, char* args[]){
+    //ÃœberprÃ¼fung der angegebenen Parameter:
+    ifstream file_test(plant_layout);
+    if(!file_test){
+        std::cout << "Der Name des Gebaeudeplans wurde falsch eingegeben oder diese Datei existiert nicht. Korrigieren Sie die Eingabe der Variable plant_layout! " << endl;
+        return EXIT_SUCCESS;
+    }
+
+
     srand (time(NULL));
+
+
+    analysis_run ana_run;
+    //FÃ¼r den Aufruf Ã¼ber die Shell, bzw fÃ¼r den Aufruf Ã¼ber die Batch Datei:
+    if(ana_run.foreign_call == true){
+        set_analyse_parameters(ana_run, args[1], args[2], args[3], args[4]);
+    }
 
 
     //Initialisation SDL um den gespeicherten Grundriss zu laden
@@ -493,7 +537,7 @@ int main(int argc, char* args[]){
     vector <vector <int >> initcoord_dest_vec;
     vector <vector <int >> initcoord_pers_vec;
     vector <vector <int >> initcoord_obst_vec;
-    set_init_vectors(bmp_surf,initcoord_pers_vec,initcoord_dest_vec,initcoord_obst_vec,2,0,1,0,0,0);
+    set_init_vectors(bmp_surf,initcoord_pers_vec,initcoord_dest_vec,initcoord_obst_vec,2,0,1,0,0,0); //befÃ¼llt die initcoord Vektoren
     int quantity_persons = initcoord_pers_vec.size();
     int quantity_destinations = initcoord_dest_vec.size();
     int quantity_obstacles = initcoord_obst_vec.size();
@@ -506,8 +550,8 @@ int main(int argc, char* args[]){
     cout << "obstacle " ;
     print_init_vector(initcoord_pers_vec);
 
-    //Schließen des SDL_Fensters
-    while (true) {if (SDL_PollEvent(&Event) && Event.type == SDL_QUIT){break;}} //Hält Fenster so lange offen bis es per Hand geschlossen wird
+    //SchlieÃŸen des SDL_Fensters
+    while (ana_run.execute == false) {if (SDL_PollEvent(&Event) && Event.type == SDL_QUIT){break;}} //HÃ¤lt Fenster so lange offen bis es per Hand geschlossen wird
     SDL_FreeSurface( bmp_surf );
 	bmp_surf = NULL;
 	SDL_DestroyWindow( Window );
@@ -547,11 +591,10 @@ vector <int> propability_arr_dec(100);
         persvec[p] = person(initcoord_pers_vec[p][0],initcoord_pers_vec[p][1],destvec,quantity_obstacles,quantity_destinations,quantity_persons);
     }
 
-//Bei einem Durchlauf des Programms, bei dem Daten entnommen und Analysiert werden müssen, müssen gleichwertige Bedingungen hergestellt werden
-//Deshalb werden dabei einige Parameter nochmals umgeändert:
-    if(analysis_run == true){
-        grafic_delay = 20;
-
+//Bei einem Durchlauf des Programms, bei dem Daten entnommen und Analysiert werden mÃ¼ssen, mÃ¼ssen gleichwertige Bedingungen hergestellt werden
+//Deshalb werden dabei einige Parameter nochmals umgeÃ¤ndert:
+    if(ana_run.execute == true){
+        set_model_parameters(persvec,ana_run.k_S,ana_run.k_D,ana_run.w_S,ana_run.friction);
     }
 
 //################## object declaration
@@ -567,9 +610,11 @@ vector <int> propability_arr_dec(100);
 
 
 
+//test
+//test
 
-for(int i = 0; i < number_of_iterations; i++){
-    cout << i << endl;
+
+for(int i = 0; i < max_number_of_iterations; i++){
 //################## iteration method
     has_pers_reached_destination(destvec,persvec);
 
@@ -583,13 +628,19 @@ for(int i = 0; i < number_of_iterations; i++){
         cout << "Fehler in der Eingabe; movement_update kann nur 'p' oder 's' sein"  << endl;
     }
 
-
-
-    for(int j = 0; j < quantity_persons; j++){
-        persvec[j].renew_w_S(destvec);
+    //Abbruchbedingung, wenn die max_number_of_iterations zu hoch gewÃ¤hlt wurde
+    bool b_c = true;
+    for (int j = 0; j < persvec.size(); j++){
+        if(persvec[j].evacuated == false){
+            b_c = false;
+        }
+    }
+    if (b_c == true){
+        break;
     }
 
 
+    update_object_parameters(i,persvec,destvec);
 //################## iteration method
 
 
@@ -599,7 +650,8 @@ for(int i = 0; i < number_of_iterations; i++){
         SDL_Delay(grafic_delay);
 }
 
-    while (true) {if (SDL_PollEvent(&event) && event.type == SDL_QUIT){break;}} //Hält Fenster so lange offen bis es per Hand geschlossen wird
+    cout << "Durchlauf abgeschlossen" << endl;
+    while (ana_run.execute == false) {if (SDL_PollEvent(&event) && event.type == SDL_QUIT){break;}} //HÃ¤lt Fenster so lange offen bis es per Hand geschlossen wird
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
@@ -642,8 +694,11 @@ int i;
 //################## visual output 2
 
 //################## Analyse
-    evacuation_analysis(persvec);
+    if(ana_run.execute == true){
+        evacuation_analysis(persvec);
+    }
 //################## Analyse
+
 
 
     return EXIT_SUCCESS;

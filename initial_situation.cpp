@@ -1,4 +1,4 @@
-// FEHLER BEHEBEN : T BESITT KEINEN WERT F�RS STEHEN BLEIBEN; DA PERs
+// FEHLER BEHEBEN : T BESITT KEINEN WERT FÜRS STEHEN BLEIBEN; DA PERs
 #ifndef initial_situation
 #define initial_situation
 #include <SDL.h>
@@ -7,20 +7,78 @@
 
 using namespace std;
 
-const static int grid_height = 100;
-const static int grid_width = 100;
+/*
+Erklärung der Parameter:
+grid_height: Gibt die Höhe des Feldes wieder, in dem die Personen simuliert werden
+grid_width: Gibt die Breite des Feldes wieder, in dem die Personen simuliert werden
+max_number_of_iterations: Gibt die maximale Anzahl der Simulationsschritte an, die durchlaufen werden
+iteration_break_condition: Gibt an ob die Simulation auch schon vorher gestoppt werden soll, wenn alle Personen ihre Ziele erreicht haben
+plant_layout: Gibt den Namen des Bildes an, welches den Anfangssituation der Hindernisse, Personen und Ziele darstellt. Dieses Bild wird im Laufe der Simulation geladen
+movement_update: Gibt an ob sich die Personen parallel oder hintereinander Bewegen sollen. Verschiedene Effekte sind nur mit der parallelen Methode möglich (z.B. das Ausbrechen von Panik)
+grafic_delay: Gibt an wie schnell die Iterationsschritte abgearbeitet werden [in ms]
 
-static int number_of_iterations = 150;
+Wie setze ich die Variablen richtig?
+Schritt:
+1 - plant_layout wählen; Ist die Datei nicht vorhanden, so wird eine Fehlermeldung beim Ausführen angezeigt.
+2 - grid_heigth und grid_width an die Situation anpassen; Damit die Simulation richtig funtktioniert muss der gesammte Grundriss im von der Höhe und der Breite gesetzten Rechteck liegen
 
-static const char plant_layout[] = "einzel_Haus.bmp";//Name des Geb�udeplans
+Die restlichen Optionen können nach Belieben eingestellt werden und werden zu keinem Fehler in der Simulation führen.
+*/
+
+
+const static int grid_height = 33;
+const static int grid_width = 33;
+
+static int max_number_of_iterations = 6000;
+static bool iteration_break_condition = true; //kann das Program auch vorher schon abbrechen(wenn alle Personen im Ziel sind)?
+
+static const char plant_layout[] = "25x25_Haus.bmp";//Name des Gebäudeplans
 static const char movement_update = 's'; //'s' - sequential, 'p' - parallel
 
-static int decay_param=70; //Zerfallsparameter f�rs dynamische Feld [0,100]
-static int diffusion_param=50; //Verteilungsparameter f�rs dynamische Feld [0,100]
+static int grafic_delay = 10;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
 
-static int grafic_delay = 20;// Je h�her, desto langsamer aktuallisiert sich die grafische Anzeige
+static int decay_param=70; //Zerfallsparameter fürs dynamische Feld [0,100]
+static int diffusion_param=50; //Verteilungsparameter fürs dynamische Feld [0,100]
 
-static const bool analysis_run = true;
+
+/*
+Erklärung zur Benutzung des Analysedurchlaufs:
+Wenn die Daten des Simulationslaufs gespeichert werden sollen, so muss "execute" aktiviert sein.
+
+Wenn die Parameter der Simulation so verändert werden sollen, dass die unten aufgeführten Werte von jedem Objekt angenommen werden,
+so muss "execute" aktiviert sein und der jeweilige Parameter muss positiv sein. Alle so gewählten Parameter werden immer in allen Objekten verändert.
+Einzelne Zuweisungen sind also nicht möglich.
+
+Wenn das Programm über die Shell aufgerufen werden soll, bzw. der Aufruf durch die vorher programmierte batch Datei(auf einem Windows Rechner)
+stammt, so muss der Parameter foreign_call aktiviert sein. Die angegebenen Parameter werden dann ignoriert und die Eingabe der Parameter erfolgt über
+die Batch Datei, bzw. den Aufruf.
+Die Parameter bei einem solchen Aufruf sind der Reihe nach: k_S, k_D, w_S, friction.
+
+Ist fälschlicherweise der Paramter "foreign_call" aktiviert wird das Programm abstürzen.
+
+
+
+Erklärung der Effekte der einzelnen Paramter auf die Bewegung einer Person:
+k_S: Einfluss des statischen Feldes auf die Bewegungen der Personen
+k_D: Einfluss des dynamischen Feldes auf die Bewegungen der Personen
+w_S: Wissensstand der Personen über die einzelnen Ausgänge (wenn der Einfluss vom statischen Feld nicht beeinflusst werden soll, sollte w_S = 1 gewählt sein !!!
+friction: Gibt die Wahrscheinlichkeit an, dass sich eine Person in einem Iterationsschritt nicht bewegt, obwohl sie es dürfte
+alpha:
+delta:
+*/
+
+
+ struct analysis_run{
+    bool execute = true; //wenn true: Werte in dieser Strukturen werden dann an die Objekte übergeben und die Abfrage an den Benutzer entfallen
+    bool foreign_call = true; //experimentell; Werte werden mit der Konsole hinzugefügt, dies kann für die Analyse benutzt werden
+    // wird hier ein negativer eintrag gewählt, so wird dieser Parameter nicht gesetzt
+    double k_S = 1; //Einfluss von s auf die Bewegung der Personen
+    double k_D = -1; //Einfluss von D auf die Bewegung der Personen
+    double w_S = 1; //Wissen der Personen über die Ausgänge
+    double friction = 0;
+    double alpha = -1; // Ausbreiten von D
+    double delta = -1; // Verschwinden von D
+};
 
 #endif
 

@@ -90,6 +90,7 @@ public:
         quantity_obstacles = q_obst;
         quantity_destinations = q_dest;
         quantity_persons = q_pers;
+
         set_static_field_k(obstvec);
     };
     destination(int a, int b, int f1, int f2, int f3,vector<obstacle> &obstvec, int q_obst, int q_dest, int q_pers){
@@ -99,6 +100,7 @@ public:
         quantity_obstacles = q_obst;
         quantity_destinations = q_dest;
         quantity_persons = q_pers;
+
         set_static_field_k(obstvec);
     };
 // constructors
@@ -156,51 +158,51 @@ int quantity_persons;
                 return_value = false;
             }
         }
-
-    // in all other cases:
         return return_value;
     }
     vector<int> to_do;
     vector<int> processed;
     void set_static_field_k(vector<obstacle> &obstvec){
-        //Setzt alle Eintr‰ge von S_k auf 0
+        //Setzt alle Eintr√§ge von S_k auf 0
         for(int g = 0; g < grid_width; g++){
             for(int h = 0; h< grid_height; h++){
                 S_k[g][h] = 0;
             }
         }
-        //Tr‰gt Anfangskoorinaten in den vector ein
+        //Tr√§gt Anfangskoorinaten in den vector ein
         to_do.push_back(x);
         to_do.push_back(y);
 
         int counter = 0;
 
         while(true){
-            // sichert die aktuelle Grˆﬂe des vectors to_do f¸r die n‰chste for-Schleife
+            // sichert die aktuelle Gr√∂√üe des vectors to_do f√ºr die n√§chste for-Schleife
             int ntodo = to_do.size();
-            if (ntodo % 2 != 0){//Fehleranzeige, falls was schief l‰uft
+            if (ntodo % 2 != 0){//Fehleranzeige, falls was schief l√§uft
                     cout << "Ein Fehler ist augetreten! die Anzahl ntodo ist nicht durch zwei teilbar." << endl;
                 }
             for(int j = 0; j < (ntodo / 2); j++){
 
-                //Schriebe das zugehˆrige Potential in das statische Feld:
+                //Schriebe das zugeh√∂rige Potential in das statische Feld:
                 S_k[to_do[0]][to_do[1]] = counter;
-                //Diese Koordinaten sind nun abgearbeitet und werden dem vector processed ¸bergeben
+//cout << S_k[8][8] << endl;
+//if(counter == 3){print_S_k();}
+                //Diese Koordinaten sind nun abgearbeitet und werden dem vector processed √ºbergeben
                 processed.push_back(to_do[0]);
                 processed.push_back(to_do[1]);
-                //Suche Nachbarn f¸r das Feld S_k mit den Koordinaten (to_do[0],to_do[1}) und schreibe diese in den vector to_do
-                int nh[8] = {//sind alle mˆglichen Nachbarn
+                //Suche Nachbarn f√ºr das Feld S_k mit den Koordinaten (to_do[0],to_do[1}) und schreibe diese in den vector to_do
+                int nh[8] = {//sind alle m√∂glichen Nachbarn
                     to_do[0],to_do[1] + 1,
                     to_do[0] + 1,to_do[1],
                     to_do[0],to_do[1] - 1,
                     to_do[0] - 1,to_do[1]
                     };
-                for (int l = 0; l < 4; l++){//f¸r jeden mˆglichen Nachbarn folgt:
+                for (int l = 0; l < 4; l++){//f√ºr jeden m√∂glichen Nachbarn folgt:
                     if (could_a_person_go_to(nh[2*l],nh[2*l+1],obstvec) == false){// wenn eine Person hier nicht drauf darf
                         //cout << "Nicht erlaubte Felder could: " << nh[2*l]<< ";" << nh[2*l+1] <<endl;
                         continue;
                     }
-                    //Ist der aktuell ausgew‰hlte Nachbar schon im Vector processed oder to_do enthalten:
+                    //Ist der aktuell ausgew√§hlte Nachbar schon im Vector processed oder to_do enthalten:
                     int con = false;
                     for(int a = 0; a < processed.size()/2; a++){
                         if (processed[2*a] == nh[2*l] && processed[2*a+1] == nh[2*l+1]){
@@ -219,7 +221,7 @@ int quantity_persons;
                     to_do.push_back(nh[2*l+1]);
                 }
 
-                //Lˆsche nun die bearbeiteten Koordinaten (to_do[0],to_do[1])
+                //L√∂sche nun die bearbeiteten Koordinaten (to_do[0],to_do[1])
                 to_do.erase(to_do.begin());
                 to_do.erase(to_do.begin());
             }
@@ -228,8 +230,8 @@ int quantity_persons;
             }
         counter++;
         }
-    //Potentialfeld besitzt am Ausgang das grˆﬂte Potential und nimmt von da an ab; also Werte m¸ssen noch "umgekehrt" werden:
-        //Finden des grˆﬂten Eintrags in S_k:
+    //Potentialfeld besitzt am Ausgang das gr√∂√üte Potential und nimmt von da an ab; also Werte m√ºssen noch "umgekehrt" werden:
+        //Finden des gr√∂√üten Eintrags in S_k:
         int max_pot = 0;
         for(int i = 0; i < grid_width; i++){
             for(int j = 0; j < grid_height; j++){
@@ -238,7 +240,7 @@ int quantity_persons;
                 }
             }
         }
-        //"umkehren" der Eintr‰ge: also Potential verl‰uft vom Eingang aus gesehen von groﬂ nach klein
+        //"umkehren" der Eintr√§ge: also Potential verl√§uft vom Eingang aus gesehen von gro√ü nach klein
         for(int i = 0; i < grid_width; i++){
             for(int j = 0; j < grid_height; j++){
                     if(could_a_person_go_to(i,j,obstvec)){
@@ -282,7 +284,8 @@ public:
     person(int nx, int ny,vector<destination> &destvec, int q_obst, int q_dest, int q_pers){
         x = nx;
         y = ny;
-        setrgb(0,0,200);
+        int colour_variation = (rand() % 150) - 75; //leichte Farbvariation, damit die einzelnen Personen voneinander unterschieden werden k√∂nnen
+        setrgb(0,0,150 + colour_variation);
 
         quantity_obstacles = q_obst;
         quantity_destinations = q_dest;
@@ -290,13 +293,16 @@ public:
 
         //###Zu set_w_S
         int p_d[1]; //bevorzugtes Ziel
-        p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zuf‰llig ausgew‰hlt
-        set_w_S(true,1,p_d, rand() % (quantity_destinations) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zuf‰llig entschieden
-        renew_w_S(destvec);
+        p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zuf√§llig ausgew√§hlt
+        set_w_S(true,1,p_d, rand() % (quantity_destinations) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zuf√§llig entschieden
+        renew_w_S_and_S(destvec);
 
         set_S(destvec);
 
         set_D_on_zero();
+
+        //Zuf√§lliges setzen des "Friction" Parameters:
+        friction = (rand() % 300) / 1000;
 
         evacuated = false;
         number_of_conflicts = 0;
@@ -313,13 +319,16 @@ public:
 
         //###Zu set_w_S
         int p_d[1]; //bevorzugtes Ziel
-        p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zuf‰llig ausgew‰hlt
-        set_w_S(true,1,p_d, rand() % (quantity_destinations) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zuf‰llig entschieden
-        renew_w_S(destvec);
+        p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zuf√§llig ausgew√§hlt
+        set_w_S(true,1,p_d, rand() % (quantity_destinations) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zuf√§llig entschieden
+        renew_w_S_and_S(destvec);
 
         set_S(destvec);
 
         set_D_on_zero();
+
+        //Zuf√§lliges setzen des "Friction" Parameters:
+        friction = (rand() % 300) / 1000;
 
         evacuated = false;
         number_of_conflicts = 0;
@@ -333,10 +342,10 @@ public:
         b = f3;
     };
 
-    void moveto(int xn, int yn, vector<person> &persvec, vector <int > &propability_arr_diff, vector<int> &propability_arr_dec)
-    {
-        if(evacuated == false)
-        {
+    double friction = 0.0; // Wahrscheinlichkeit, dass sich die Person nicht bewegt, obwohl sie sich bewegen sollte
+    void moveto(int xn, int yn, vector<person> &persvec, vector <int > &propability_arr_diff, vector<int> &propability_arr_dec){
+        double r = (rand() % 1000) / 1000.0; // Zufallszahl
+        if(evacuated == false && r >= friction){
             set_D(persvec, xn, yn, propability_arr_diff, propability_arr_dec);
             x = xn;
             y = yn;
@@ -427,7 +436,7 @@ int quantity_persons;
             }
         }
 
-        //nach jeder bewegung wird an jedem ort gepr¸ft ob sich das dfeld verteilt oder zerf‰llt
+        //nach jeder bewegung wird an jedem ort gepr√ºft ob sich das dfeld verteilt oder zerf√§llt
         for (int i=0; i< persvec.size(); i++)
         {
             for (int x=0; x< grid_width; x++)
@@ -461,7 +470,7 @@ int quantity_persons;
                             }
                         }
                         int r_2=rand()%100;
-                        if (propability_arr_dec[r_2]==1) //verifikation: D feld soll sich auflˆsen
+                        if (propability_arr_dec[r_2]==1) //verifikation: D feld soll sich aufl√∂sen
                         {
                             if (/*falls 1 Nachbar frei ist*/ persvec[i].D[x][y+1]==0 || persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==0 || persvec[i].D[x-1][y]==0 || /*falls 2 Nachbarn frei sind*/ persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==persvec[i].D[x][y-1]==0 || /*falls 3 Nachbarn frei sind*/ persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0)
                             {
@@ -584,16 +593,16 @@ int quantity_persons;
 
 // ####### Static field S
     double k_S = 1;
-    vector <double> w_S;// wie sehr kennt die Person die verschiedenen Eing‰nge; Eintrag ist zwischen 0,1
+    vector <double> w_S;// wie sehr kennt die Person die verschiedenen Eing√§nge; Eintrag ist zwischen 0,1
     double S[grid_width][grid_height];
 
-    void set_w_S(double w){// der Wissenstand der Personen wird f¸r alle Ausg‰nge gleich groﬂ gew‰hlt (so groﬂ wie w)
+    void set_w_S(double w){// der Wissenstand der Personen wird f√ºr alle Ausg√§nge gleich gro√ü gew√§hlt (so gro√ü wie w)
         w_S.resize(quantity_destinations);
         for(int i = 0; i < quantity_destinations; i++){
             w_S[i] = w;
         }
     }
-    void set_w_S(int quantity_known_dest, bool previously_set = false){//legt den anf‰nglicher Wissensstand der Person ¸ber die Ausg‰nge fest
+    void set_w_S(int quantity_known_dest, bool previously_set = false){//legt den anf√§nglicher Wissensstand der Person √ºber die Ausg√§nge fest
         w_S.resize(quantity_destinations);
         for(int i = 0; i < quantity_destinations; i++){
             if(previously_set == false)
@@ -601,10 +610,10 @@ int quantity_persons;
         }
         //Fehlervermeidung:
         if(quantity_known_dest > quantity_destinations){
-            cout << "Fehler in set_w_S(int) Anzahl der bekannten Ziele ist grˆﬂer, als die Anzahl der Ziele!!" << endl;
+            cout << "Fehler in set_w_S(int) Anzahl der bekannten Ziele ist gr√∂√üer, als die Anzahl der Ziele!!" << endl;
             return;
         }
-        //F¸llt vector selected_dest mit Nummern, die den Zielen zugeordnet werden, die schon einen Wert w_S erhalten haben:
+        //F√ºllt vector selected_dest mit Nummern, die den Zielen zugeordnet werden, die schon einen Wert w_S erhalten haben:
         vector <int> selected_dest;
         for(int i = 0; i < quantity_known_dest; i++){
             int r = (rand() % quantity_destinations);
@@ -616,24 +625,24 @@ int quantity_persons;
                 }
             }
             if(used == false && (previously_set == false || (previously_set == true && w_S[r] == 0))){
-                //F¸llen von w_S zum ausgew‰hlen Ziel mit einer Zuf‰lligen Zahl von (0 bis 1]
+                //F√ºllen von w_S zum ausgew√§hlen Ziel mit einer Zuf√§lligen Zahl von (0 bis 1]
                 w_S[r] = (double) (rand() % 10) / 10 + 0.1;
                 cout <<"w_S[r] ist:" << w_S[r] <<" mit r =" << r << endl;
                 selected_dest.push_back(r);
             }
             else{
-                i--;//kˆnnte eine Endlosscheife verursachen -> nicht so schˆn ;) aber geht
+                i--;//k√∂nnte eine Endlosscheife verursachen -> nicht so sch√∂n ;) aber geht
             }
         }
 
         /*
         for(int i = 0; i < quantity_known_dest; i++){
-            //Gibt dem Wert w_S f¸r das jeweilige Ziele einen zuf‰lligen Wert zwischen 0 und 1; w_S stellt hier das Wissen der Person ¸ber den ort des Ausgangs da
+            //Gibt dem Wert w_S f√ºr das jeweilige Ziele einen zuf√§lligen Wert zwischen 0 und 1; w_S stellt hier das Wissen der Person √ºber den ort des Ausgangs da
             w_S[i] = (double)(rand() % 10) / 10;
             cout <<"w_S ist:" <<w_S[i] << endl;
         }*/
     }
-    void set_w_S(bool prefer_a_dest, int quantity_preferred_dest, int *preferred_dest, int quantity_known_dest){//legt den anf‰nglichen Wissensstand der Person ¸ber die Ausg‰nge fest; preferierte Ziele werden bevorzugt nach der Festlegungangesteuert, qpd ist die Anzahl der ¸bergebenen Ziele
+    void set_w_S(bool prefer_a_dest, int quantity_preferred_dest, int *preferred_dest, int quantity_known_dest){//legt den anf√§nglichen Wissensstand der Person √ºber die Ausg√§nge fest; preferierte Ziele werden bevorzugt nach der Festlegungangesteuert, qpd ist die Anzahl der √ºbergebenen Ziele
         w_S.resize(quantity_destinations);
         // set all values of w_S = 0:
         for(int i = 0; i < quantity_destinations; i++){
@@ -659,8 +668,8 @@ int quantity_persons;
 
 
     }
-    void renew_w_S(vector<destination> &destvec){// erneuert die Eintr‰ge von w_S, wenn bestimmt Umst‰nde eintreten
-        //wenn sich die Person sehr nahe an einem Ausgang befindet bekommt der Wert w_S, der f¸r das Wissen ¸ber diesen Ausgang steht, einen sehr hohen Wert, da die Person den Ausgang sieht o.ƒ.
+    void renew_w_S_and_S(vector<destination> &destvec){// erneuert die Eintr√§ge von w_S, wenn bestimmt Umst√§nde eintreten
+        //wenn sich die Person sehr nahe an einem Ausgang befindet bekommt der Wert w_S, der f√ºr das Wissen √ºber diesen Ausgang steht, einen sehr hohen Wert, da die Person den Ausgang sieht o.√Ñ.
         int r_influence_sphere = 5;// legt fest, ab wann die Person den Ausgang sehen kann
         for(int i = 0; i < quantity_destinations; i++){
             if(destvec[i].x > x - r_influence_sphere && destvec[i].x < x + r_influence_sphere){
@@ -669,6 +678,7 @@ int quantity_persons;
                 }
             }
         }
+        set_S(destvec);
     }
     void print_w_S(){
         cout << endl << "print_w_S:" << endl;
@@ -677,16 +687,16 @@ int quantity_persons;
         }
         cout << endl;
     }
-    void set_S(vector<destination> &destvec){//Addiere alle S_k Arrays der einzelnen destinations zum S Array hinzu; dies verl‰uft nach Gewichtung
+    void set_S(vector<destination> &destvec){//Addiere alle S_k Arrays der einzelnen destinations zum S Array hinzu; dies verl√§uft nach Gewichtung
         double max_S = 0;
-        //setze alle Eintr‰ge von S auf 0:
+        //setze alle Eintr√§ge von S auf 0:
         for(int xi = 0; xi < grid_width; xi++){
             for(int yi = 0; yi < grid_height; yi++){
                 S[xi][yi] = 0;
             }
         }
 
-        //F¸llt die Eintr‰ge von S
+        //F√ºllt die Eintr√§ge von S
         for(int l = 0; l < quantity_destinations; l++){
             for(int xi = 0; xi < grid_width; xi++){
                 for(int yi = 0; yi < grid_height; yi++){
@@ -699,7 +709,7 @@ int quantity_persons;
         }
         /*
         //cout <<"max_S : " <<max_S << endl;
-        // Beschr‰nkt die Grˆﬂe der Eintr‰ge, damit die grˆﬂe der Zahlen nicht die Speichergrenze beim exponentieren ¸berschreiten
+        // Beschr√§nkt die Gr√∂√üe der Eintr√§ge, damit die gr√∂√üe der Zahlen nicht die Speichergrenze beim exponentieren √ºberschreiten
         while (max_S > 200){
             for(int l = 0; l < quantity_destinations; l++){
                 for(int xi = 0; xi < grid_width; xi++){
@@ -730,20 +740,20 @@ int quantity_persons;
         }
     }
 
-// ###### Transmission matrix
+// ###### Transition matrix
     long double T[3][3];
 
     void set_T(vector<obstacle> &obstvec,vector<person> &persvec, char movement_mode = 's'){
-    //in der Funktion wird zwischen dem Erstellen des T Arrays f¸r eine parallele Update-Regel und einer sequentiellen Update-Regel unterschieden
+    //in der Funktion wird zwischen dem Erstellen des T Arrays f√ºr eine parallele Update-Regel und einer sequentiellen Update-Regel unterschieden
     //Bei der paralellen Update-Regel wird nicht abgefragt ob sich eine Person auf dem angefragen Fehld befindet
-    //f¸llt Eintr‰ge:
+    //f√ºllt Eintr√§ge:
         //Alle Felder bekommen Wert 0; nicht benutzte Felder (nach Neumann Nachbarschaft) bleiben 0:
         for (int i = 0; i < 3; i++){
             for(int j = 0; j < 3; j++){
                 T[i][j] = 0;
             }
         }
-        //cout << "hier m¸sste alles null sein:" << endl;
+        //cout << "hier m√ºsste alles null sein:" << endl;
         //print_T();
         //Eintrag oben:
         //cout << "oben ?" << could_I_go_to(x,y - 1,obstvec) << endl;
@@ -770,11 +780,11 @@ int quantity_persons;
             T[1][1] = expl(k_S * S[x][y]) + exp((k_D/* + number_of_conflicts*/) * D[x][y]);
 
 
-    //‹berpr¸fung ob die Eintr‰ge des Feldes zu groﬂ sind und deswegen T fehlerhaft erstellt wird:
+    //√úberpr√ºfung ob die Eintr√§ge des Feldes zu gro√ü sind und deswegen T fehlerhaft erstellt wird:
         for (int i = 0; i < 3; i++){
             for(int j = 0; j < 3; j++){
                 if (isinf(T[i][j])){
-                    cout << "Fehler beim Erstellen der Matrix T aufgetreten ! Die Grˆﬂe der Eintr‰ge ¸bersteigt die maximale Grˆﬂe des long double Zahlentyps." << endl << "Versuchen sie die Simulation mit einem kleineren Feld zu wiederholen." << endl;
+                    cout << "Fehler beim Erstellen der Matrix T aufgetreten ! Die Gr√∂√üe der Eintr√§ge √ºbersteigt die maximale Gr√∂√üe des long double Zahlentyps." << endl << "Versuchen sie die Simulation mit einem kleineren Feld zu wiederholen." << endl;
                 }
             }
         }
@@ -782,14 +792,14 @@ int quantity_persons;
         //cout << "T befor normalization:" <<endl;
         //print_T();
     //Normalisierung der T-Matrix:
-        //Finden der Summe der Eintr‰ge von T:
+        //Finden der Summe der Eintr√§ge von T:
         long double sum_T_entries = 0;
         for (int i = 0; i < 3; i++){
             for(int j = 0; j < 3; j++){
                 sum_T_entries = sum_T_entries + T[i][j];
             }
         }
-        //Normalisierung durchf¸hren:
+        //Normalisierung durchf√ºhren:
         for(int i = 0; i < 3; i++){
             for(int j = 0; j < 3; j++){
                 T[i][j] = T[i][j] / sum_T_entries;
@@ -829,6 +839,8 @@ int quantity_persons;
     double time_start;
     double time_end;
     double evacuation_time = 0;
+    int iteration;
+    int iteration_when_evacuated;
     bool evacuated;
 
     void start_time_measurement(){
