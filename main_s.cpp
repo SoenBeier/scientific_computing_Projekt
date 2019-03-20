@@ -424,8 +424,8 @@ void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungs
     average_evac_iteration = average_evac_iteration / number_evac_pers;
 
     //Schreibt berechnete Daten in das geöffnete Dokument
-    //Reihenfolge der Daten ist: Name Grundris, Durchschnittliche Evakuierungszeit, Durchschnittliche Iteration bei Evakuierung, Anzahl der Personen, die das Ziel nicht erreichen, k_S, k_D, w_S, friction, Update Regel
-    f << (string) plant_layout << "," << average_evac_time << "," << average_evac_iteration << "," << persvec.size() - number_evac_pers << "," << persvec[0].k_S << "," << persvec[0].k_D << "," << persvec[0].w_S[0] << "," << persvec[0].friction << "," << movement_update << endl;
+    //Reihenfolge der Daten ist: Name Grundris, Durchschnittliche Evakuierungszeit, Durchschnittliche Iteration bei Evakuierung, Anzahl der Personen, die das Ziel nicht erreichen, k_S, k_D, w_S, friction, Update Regel, Grafik_Delay
+    f << (string) plant_layout << " " << average_evac_time << " " << average_evac_iteration << " " << persvec.size() - number_evac_pers << " " << persvec[0].k_S << " " << persvec[0].k_D << " " << persvec[0].w_S[0] << " " << persvec[0].friction << " " << movement_update << " " << grafic_delay << endl;
     f.close();
 /*
 Density
@@ -441,10 +441,19 @@ omega - steht für w_S
 
 
 int main(int argc, char* args[]){
+    //Überprüfung der angegebenen Parameter:
+    ifstream file_test(plant_layout);
+    if(!file_test){
+        std::cout << "Der Name des Gebaeudeplans wurde falsch eingegeben oder diese Datei existiert nicht. Korrigieren Sie die Eingabe der Variable plant_layout! " << endl;
+        return EXIT_SUCCESS;
+    }
+
+
     srand (time(NULL));
 
-    analysis_run ana_run;
 
+    analysis_run ana_run;
+    //Für den Aufruf über die Shell, bzw für den Aufruf über die Batch Datei:
     if(ana_run.foreign_call == true){
         set_analyse_parameters(ana_run, args[1], args[2], args[3], args[4]);
     }
@@ -469,7 +478,7 @@ int main(int argc, char* args[]){
     vector <vector <int >> initcoord_dest_vec;
     vector <vector <int >> initcoord_pers_vec;
     vector <vector <int >> initcoord_obst_vec;
-    set_init_vectors(bmp_surf,initcoord_pers_vec,initcoord_dest_vec,initcoord_obst_vec,2,0,1,0,0,0);
+    set_init_vectors(bmp_surf,initcoord_pers_vec,initcoord_dest_vec,initcoord_obst_vec,2,0,1,0,0,0); //befüllt die initcoord Vektoren
     int quantity_persons = initcoord_pers_vec.size();
     int quantity_destinations = initcoord_dest_vec.size();
     int quantity_obstacles = initcoord_obst_vec.size();
@@ -532,7 +541,7 @@ int main(int argc, char* args[]){
 //test
 
 
-for(int i = 0; i < number_of_iterations; i++){
+for(int i = 0; i < max_number_of_iterations; i++){
 //################## iteration method
     has_pers_reached_destination(destvec,persvec);
 
@@ -546,7 +555,7 @@ for(int i = 0; i < number_of_iterations; i++){
         cout << "Fehler in der Eingabe; movement_update kann nur 'p' oder 's' sein"  << endl;
     }
 
-    //Abbruchbedingung, wenn die number_of_iterations zu hoch gewählt wurde
+    //Abbruchbedingung, wenn die max_number_of_iterations zu hoch gewählt wurde
     bool b_c = true;
     for (int j = 0; j < persvec.size(); j++){
         if(persvec[j].evacuated == false){
