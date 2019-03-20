@@ -358,11 +358,23 @@ bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &
         }
         return return_value;
 }
-void update_object_parameters(int iteration, vector<person> &persvec, vector<destination> &destvec){
+void update_object_parameters(int iteration, vector<person> &persvec, vector<destination> &destvec, vector<int> &propability_arr_diff, vector<int> &propability_arr_dec){
 
     for(int j = 0; j < persvec.size(); j++){
         persvec[j].iteration = iteration;
         persvec[j].renew_w_S_and_S(destvec);
+
+            for (int x=0; x< grid_width; x++)
+            {
+                for (int y=0; y< grid_height; y++)
+                {
+                    if (persvec[j].D[x][y]!=0)
+                    {
+                        persvec[j].diffusion_dyn_f(propability_arr_diff, persvec, x, y, persvec[j].x, persvec[j].y,j);
+                        persvec[j].decay_dyn_f(propability_arr_dec, persvec, j, x, y);
+                    }
+                }
+            }
     }
 }
 //#### Vorgehen während Iteration
@@ -640,7 +652,7 @@ for(int i = 0; i < max_number_of_iterations; i++){
     }
 
 
-    update_object_parameters(i,persvec,destvec);
+    update_object_parameters(i,persvec,destvec,propability_arr_diff,propability_arr_dec);
 //################## iteration method
 
 
