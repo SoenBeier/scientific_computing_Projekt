@@ -37,8 +37,8 @@ static const char movement_update = 's'; //'s' - sequential, 'p' - parallel
 
 static int grafic_delay = 10;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
 
-static int decay_param=70; //Zerfallsparameter fürs dynamische Feld [0,100]
-static int diffusion_param=50; //Verteilungsparameter fürs dynamische Feld [0,100]
+static int decay_param = 5; //Zerfallsparameter fürs dynamische Feld [0,100]
+static int diffusion_param = 5; //Verteilungsparameter fürs dynamische Feld [0,100]
 
 
 /*
@@ -69,8 +69,8 @@ delta:
 
 
  struct analysis_run{
-    bool execute = true; //wenn true: Werte in dieser Strukturen werden dann an die Objekte übergeben und die Abfrage an den Benutzer entfallen
-    bool foreign_call = true; //experimentell; Werte werden mit der Konsole hinzugefügt, dies kann für die Analyse benutzt werden
+    bool execute = false; //wenn true: Werte in dieser Strukturen werden dann an die Objekte übergeben und die Abfrage an den Benutzer entfallen
+    bool foreign_call = false; //experimentell; Werte werden mit der Konsole hinzugefügt, dies kann für die Analyse benutzt werden
     // wird hier ein negativer eintrag gewählt, so wird dieser Parameter nicht gesetzt
     double k_S = 1; //Einfluss von s auf die Bewegung der Personen
     double k_D = -1; //Einfluss von D auf die Bewegung der Personen

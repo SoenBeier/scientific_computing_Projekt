@@ -347,6 +347,8 @@ public:
         double r = (rand() % 1000) / 1000.0; // Zufallszahl
         if(evacuated == false && r >= friction){
             set_D(persvec, xn, yn, propability_arr_diff, propability_arr_dec);
+            ax = x;
+            ay = y;
             x = xn;
             y = yn;
         }
@@ -404,6 +406,9 @@ int quantity_persons;
 //coordinates
     int x;
     int y;
+//alte Koordinaten
+    int ax;
+    int ay;
 //colour
     int r;
     int g;
@@ -435,27 +440,11 @@ int quantity_persons;
                 persvec[k].D[x][y]++;
             }
         }
-
-        //nach jeder bewegung wird an jedem ort geprüft ob sich das dfeld verteilt oder zerfällt
-        for (int i=0; i< persvec.size(); i++)
-        {
-            for (int x=0; x< grid_width; x++)
-            {
-                for (int y=0; y< grid_height; y++)
-                {
-                    if (persvec[i].D[x][y]!=0)
-                    {
-                        //diffusion_dyn_f(propability_arr_diff, persvec, xn, yn, i);
-                        //decay_dyn_f(propability_arr_dec, persvec, i);
-                    }
-                }
-            }
-        }
     }
 
 
 
-    void decay_dyn_f(vector <int> &propability_arr_dec, vector <person> &persvec, int i)
+    void decay_dyn_f(vector <int> &propability_arr_dec, vector <person> &persvec, int i, int x, int y)
     {
         //zerfall des d Feldes:
                         for (int k=0; k < propability_arr_dec.size(); k++)
