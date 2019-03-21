@@ -31,13 +31,13 @@ Die restlichen Optionen können nach Belieben eingestellt werden und werden zu k
 const static int grid_height = 33;
 const static int grid_width = 33;
 
-static int max_number_of_iterations = 6000;
+static int max_number_of_iterations = 75;
 static bool iteration_break_condition = true; //kann das Program auch vorher schon abbrechen(wenn alle Personen im Ziel sind)?
 
 static const char plant_layout[] = "25x25_Haus.bmp";//Name des Gebäudeplans
-static const char movement_update = 's'; //'s' - sequential, 'p' - parallel
+static const char movement_update = 'p'; //'s' - sequential, 'p' - parallel
 
-static int grafic_delay = 10;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
+static int grafic_delay = 400;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
 
 //zum D-Feld:
 static int decay_param = 0; //Zerfallsparameter fürs dynamische Feld [0,100]
