@@ -417,7 +417,7 @@ int quantity_persons;
 
 
 // ###### Dynamic floor field DZur Uni Potsdam(Brandenburg):
-    double k_D = 1;
+    double k_D = 0;
     int D[grid_width][grid_height];
 
     void set_D_on_zero()
@@ -820,6 +820,7 @@ int quantity_persons;
 // ##### desired coordinates; are used, when update rule is parallel
     int desired_x;
     int desired_y;
+    char desired_direction;
     int number_of_conflicts;
     bool wins_conflict;
 
@@ -875,35 +876,7 @@ public:
     double C_pers_numb[3][3];
 
 
-    void set_C(vector<person> &persvec){
-        //Setzt Einträge der Matrizen auf 0
-        for(int k = 0; k < 3; k++){
-            for(int l = 0; l < 3; l++){
-                C[k][l] = 0;
-                C_pers_numb[k][l] = 0;
-            }
-        }
 
-        //Füllt Einträge von C:
-        for(int i = 0; i < conflict_partner.size(); i++){
-            C[persvec[conflict_partner[i]].x - x + 1][persvec[conflict_partner[i]].y - y + 1] = persvec[i].get_T(persvec[conflict_partner[i]].x - x + 1, persvec[conflict_partner[i]].y - y + 1);
-            C_pers_numb[persvec[conflict_partner[i]].x - x + 1][persvec[conflict_partner[i]].y - y + 1] =  conflict_partner[i];
-        }
-        //Normalisierung der C-Matrix:
-         //Finden der Summe der Einträge von C:
-        double sum_C_entries = 0;
-        for (int i = 0; i < 3; i++){
-            for(int j = 0; j < 3; j++){
-                sum_C_entries = sum_C_entries + C[i][j];
-            }
-        }
-         //Normalisierung durchführen:
-        for(int i = 0; i < 3; i++){
-            for(int j = 0; j < 3; j++){
-                C[i][j] = C[i][j] / sum_C_entries;
-            }
-        }
-    }
     void print_C(){
         cout << "----------------C---------------" << endl;
         cout << "An der Stelle: " << x << ";" << y << endl;
@@ -934,6 +907,36 @@ public:
     }
 
 private:
+    void set_C(vector<person> &persvec){
+
+        //Setzt Einträge der Matrizen auf 0
+        for(int k = 0; k < 3; k++){
+            for(int l = 0; l < 3; l++){
+                C[k][l] = 0;
+                C_pers_numb[k][l] = 0;
+            }
+        }
+
+        //Füllt Einträge von C, die Werte von der Transitionmatrix, die dazu geführt haben, dass sich die Person auf das Feld Conflict.x,Conflict.y bewegen will wird in die Konfliktmatrix C eingetragen
+        for(int i = 0; i < conflict_partner.size(); i++){
+            C[persvec[conflict_partner[i]].x - x + 1][persvec[conflict_partner[i]].y - y + 1] = persvec[conflict_partner[i]].get_T(x - persvec[conflict_partner[i]].x + 1, y - persvec[conflict_partner[i]].y + 1);
+            C_pers_numb[persvec[conflict_partner[i]].x - x + 1][persvec[conflict_partner[i]].y - y + 1] =  conflict_partner[i];
+        }
+        //Normalisierung der C-Matrix:
+         //Finden der Summe der Einträge von C:
+        double sum_C_entries = 0;
+        for (int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                sum_C_entries = sum_C_entries + C[i][j];
+            }
+        }
+         //Normalisierung durchführen:
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                C[i][j] = C[i][j] / sum_C_entries;
+            }
+        }
+    }
     int who_winns_conflict(){
         double r = rand() % 1000 / 1000.;
         if(r < get_C(1,0)){

@@ -230,23 +230,29 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
         if(r < persvec[i].get_T(1,0)){ //nach oben?
             persvec[i].desired_x = persvec[i].x;
             persvec[i].desired_y = persvec[i].y - 1;
+            persvec[i].desired_direction = 'o';
         }
         else if(r < (persvec[i].get_T(1,0) + persvec[i].get_T(2,1))){//nach rechts?
             persvec[i].desired_x = persvec[i].x + 1;
             persvec[i].desired_y = persvec[i].y;
+            persvec[i].desired_direction = 'r';
         }
         else if(r < (persvec[i].get_T(1,0) + persvec[i].get_T(2,1) + persvec[i].get_T(1,2))){//nach unten?
             persvec[i].desired_x = persvec[i].x;
             persvec[i].desired_y = persvec[i].y + 1;
+            persvec[i].desired_direction = 'u';
         }
         else if(r < (persvec[i].get_T(1,0) + persvec[i].get_T(2,1) + persvec[i].get_T(1,2) + persvec[i].get_T(0,1))){//nach links?
             persvec[i].desired_x = persvec[i].x - 1;
             persvec[i].desired_y = persvec[i].y;
+            persvec[i].desired_direction = 'l';
         }
         else{//stehen bleiben
+            //Aufgrund dieses Falls dürfte kein Konflikt entstehen, da dies schon vorher aussortiert wird (durch das setzen des T Feldes, dort wird überprüft ob eine Person auf dem Feld steht und wenn ja wird dieser Zug aussortiert)
             persvec[i].desired_x = persvec[i].x;
             persvec[i].desired_y = persvec[i].y;
             persvec[i].wins_conflict = true; //Möchte die Person stehen bleiben, so gewinnt diese Person immer den Konflikt
+            persvec[i].desired_direction = 's';
         }
     }
 
@@ -599,7 +605,6 @@ vector <int> propability_arr_dec(100);
 
 for(int i = 0; i < max_number_of_iterations; i++){
 //################## iteration method
-cout << i << endl;
     has_pers_reached_destination(destvec,persvec);
 
     if(movement_update == 's'){
@@ -632,6 +637,10 @@ cout << i << endl;
 //################## visual output 2
         draw_grid(persvec,destvec,obstvec,renderer,2);
         SDL_Delay(grafic_delay);
+/*        SDL_RendererInfo *ri = new SDL_RendererInfo;
+        if(SDL_GetRendererInfo(renderer,ri) < 0){
+           cout << "hey" << SDL_GetError() << endl;
+           }*/
 }
     cout << "k_D: " << persvec[0].k_D;
     cout << "Durchlauf abgeschlossen" << endl;
@@ -644,6 +653,9 @@ cout << i << endl;
 
 
 //test
+for (int i = 0; i < persvec.size(); i++){
+    cout << "Anzahl Konflikte von: " << i << " ist:" << persvec[i].number_of_conflicts << endl;
+}
 cout << "anzahl personen:" << quantity_persons<< endl;
 int i;
     for (i=0; i< 1  ; i++)
