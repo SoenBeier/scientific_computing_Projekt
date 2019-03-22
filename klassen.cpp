@@ -417,7 +417,7 @@ int quantity_persons;
 
 
 // ###### Dynamic floor field DZur Uni Potsdam(Brandenburg):
-    double k_D = 1;
+    double k_D = 0;
     int D[grid_width][grid_height];
 
     void set_D_on_zero()
@@ -732,7 +732,7 @@ int quantity_persons;
 // ###### Transition matrix
     long double T[3][3];
 
-    void set_T(vector<obstacle> &obstvec,vector<person> &persvec, char movement_mode = 's'){
+    void set_T(vector<obstacle> &obstvec,vector<person> &persvec){
     //in der Funktion wird zwischen dem Erstellen des T Arrays für eine parallele Update-Regel und einer sequentiellen Update-Regel unterschieden
     //Bei der paralellen Update-Regel wird nicht abgefragt ob sich eine Person auf dem angefragen Fehld befindet
     //füllt Einträge:
@@ -746,22 +746,22 @@ int quantity_persons;
         //print_T();
         //Eintrag oben:
         //cout << "oben ?" << could_I_go_to(x,y - 1,obstvec) << endl;
-        if((could_I_go_to(x,y - 1,obstvec,persvec) && movement_mode == 's' ) || ((could_I_go_to(x,y - 1,obstvec,persvec) || is_there_a_person_on(x,y - 1, persvec)) && movement_mode == 'p' )){ // entweder sequentieller Ablauf: dann could I go to; bei paralellen ist es egal ob auf dem Feld gerade eine andere Person steht
+        if(could_I_go_to(x,y - 1,obstvec,persvec)){ // entweder sequentieller Ablauf: dann could I go to; bei paralellen ist es egal ob auf dem Feld gerade eine andere Person steht
             T[1][0] = expl(k_S * S[x][y - 1]) + exp((k_D /*+ number_of_conflicts*/) * D[x][y - 1]);
         }
         //Eintrag rechts:
         //cout << "rechts ?" << could_I_go_to(x + 1,y,obstvec) << endl;
-        if((could_I_go_to(x + 1,y,obstvec,persvec) && movement_mode == 's' ) || ((could_I_go_to(x + 1,y,obstvec,persvec) || is_there_a_person_on(x + 1,y, persvec)) && movement_mode == 'p' )){
+        if(could_I_go_to(x + 1,y,obstvec,persvec)){
             T[2][1] = expl(k_S * S[x + 1][y]) + exp((k_D /*+ number_of_conflicts*/) * D[x + 1][y]);
         }
         //Eintrag unten:
         //cout << "unten ?" << could_I_go_to(x,y+1,obstvec) << endl;
-        if((could_I_go_to(x,y + 1,obstvec,persvec) && movement_mode == 's' ) || ((could_I_go_to(x,y + 1,obstvec,persvec) || is_there_a_person_on(x,y + 1, persvec)) && movement_mode == 'p' )){
+        if(could_I_go_to(x,y + 1,obstvec,persvec)){
             T[1][2] = expl(k_S * S[x][y + 1]) + exp((k_D/* + number_of_conflicts*/) * D[x][y + 1]);
         }
         //Eintrag links:
         //cout << "unten ?" << could_I_go_to(x,y+1,obstvec) << endl;
-        if((could_I_go_to(x - 1,y,obstvec,persvec)&& movement_mode == 's' ) || ((could_I_go_to(x - 1,y,obstvec,persvec) || is_there_a_person_on(x - 1,y, persvec)) && movement_mode == 'p' )){
+        if(could_I_go_to(x - 1,y,obstvec,persvec)){
             T[0][1] = expl(k_S * S[x - 1][y]) + exp((k_D/* + number_of_conflicts*/) * D[x - 1][y]);
         }
         //mitte:
@@ -820,9 +820,9 @@ int quantity_persons;
 // ##### desired coordinates; are used, when update rule is parallel
     int desired_x;
     int desired_y;
-    bool already_moved;
-    vector<int> conflict_partner;
+    char desired_direction;
     int number_of_conflicts;
+    bool wins_conflict;
 
 // ###### time measurement for the analysis of movement of the person
     double time_start;
@@ -845,6 +845,122 @@ private:
 };
 
 
+class conflict{
+public:
+    conflict(){
+
+    }
+    conflict(int nx, int ny, vector<int> &cp, vector<person> &persvec){
+        x = nx;
+        y = ny;
+        conflict_partner = cp;
+        rise_number_of_conflicts_of_persons(persvec);
+        set_C(persvec);
+        number_of_winner = who_winns_conflict();
+    }
+
+    //Ort des Konfliktes:
+    int x;
+    int y;
+
+    //Nummern der Personen im Konflikt:
+    vector<int> conflict_partner;
+
+    //Gewinner des Konfliktes:
+    int number_of_winner;
+
+    //Konfliktmatrix
+    double C[3][3];
+
+    //Hilfsmatrix, in der die Nummern der Personen stehen, die am Konflikt teilnehmen (mit relativer Position zum Ort des Konflikts
+    double C_pers_numb[3][3];
+
+
+
+    void print_C(){
+        cout << "----------------C---------------" << endl;
+        cout << "An der Stelle: " << x << ";" << y << endl;
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                cout << C[j][i] << " , ";
+            }
+            cout << endl;
+        }
+        cout << "----------------C---------------" << endl;
+    }
+    void print_C_pers_numb(){
+        cout << "----------------Cpers---------------" << endl;
+        cout << "An der Stelle: " << x << ";" << y << endl;
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                cout << C_pers_numb[j][i] << " , ";
+            }
+            cout << endl;
+        }
+        cout << "----------------Cpers---------------" << endl;
+    }
+    double get_C(int x, int y){
+        return C[x][y];
+    }
+    double get_C_pers_numb(int x, int y){
+        return C_pers_numb[x][y];
+    }
+
+private:
+    void set_C(vector<person> &persvec){
+
+        //Setzt Einträge der Matrizen auf 0
+        for(int k = 0; k < 3; k++){
+            for(int l = 0; l < 3; l++){
+                C[k][l] = 0;
+                C_pers_numb[k][l] = 0;
+            }
+        }
+
+        //Füllt Einträge von C, die Werte von der Transitionmatrix, die dazu geführt haben, dass sich die Person auf das Feld Conflict.x,Conflict.y bewegen will wird in die Konfliktmatrix C eingetragen
+        for(int i = 0; i < conflict_partner.size(); i++){
+            C[persvec[conflict_partner[i]].x - x + 1][persvec[conflict_partner[i]].y - y + 1] = persvec[conflict_partner[i]].get_T(x - persvec[conflict_partner[i]].x + 1, y - persvec[conflict_partner[i]].y + 1);
+            C_pers_numb[persvec[conflict_partner[i]].x - x + 1][persvec[conflict_partner[i]].y - y + 1] =  conflict_partner[i];
+        }
+        //Normalisierung der C-Matrix:
+         //Finden der Summe der Einträge von C:
+        double sum_C_entries = 0;
+        for (int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                sum_C_entries = sum_C_entries + C[i][j];
+            }
+        }
+         //Normalisierung durchführen:
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                C[i][j] = C[i][j] / sum_C_entries;
+            }
+        }
+    }
+    int who_winns_conflict(){
+        double r = rand() % 1000 / 1000.;
+        if(r < get_C(1,0)){
+            return get_C_pers_numb(1,0);
+        }
+        else if(r < (get_C(1,0) + get_C(2,1))){
+            return get_C_pers_numb(2,1);
+        }
+        else if(r < (get_C(1,0) + get_C(2,1) + get_C(1,2))){
+            return get_C_pers_numb(1,2);
+        }
+        else if(r < (get_C(1,0) + get_C(2,1) + get_C(1,2) + get_C(0,1))){
+            return get_C_pers_numb(0,1);
+        }
+        else{
+            return get_C_pers_numb(1,1);
+        }
+    }
+    void rise_number_of_conflicts_of_persons(vector<person> &persvec){
+        for(int i = 0; i < conflict_partner.size(); i++){
+            persvec[conflict_partner[i]].number_of_conflicts ++;
+        }
+    }
+};
 
 //person::person(){}
 //hindernis::hindernis(){}

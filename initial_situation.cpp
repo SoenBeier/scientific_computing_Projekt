@@ -17,6 +17,8 @@ plant_layout: Gibt den Namen des Bildes an, welches den Anfangssituation der Hin
 movement_update: Gibt an ob sich die Personen parallel oder hintereinander Bewegen sollen. Verschiedene Effekte sind nur mit der parallelen Methode möglich (z.B. das Ausbrechen von Panik)
 grafic_delay: Gibt an wie schnell die Iterationsschritte abgearbeitet werden [in ms]
 
+
+
 Wie setze ich die Variablen richtig?
 Schritt:
 1 - plant_layout wählen; Ist die Datei nicht vorhanden, so wird eine Fehlermeldung beim Ausführen angezeigt.
@@ -26,19 +28,21 @@ Die restlichen Optionen können nach Belieben eingestellt werden und werden zu k
 */
 
 
-const static int grid_height = 33;
-const static int grid_width = 33;
+const static int grid_height = 70;
+const static int grid_width = 70;
 
-static int max_number_of_iterations = 6000;
+static int max_number_of_iterations = 300;
 static bool iteration_break_condition = true; //kann das Program auch vorher schon abbrechen(wenn alle Personen im Ziel sind)?
 
 static const char plant_layout[] = "25x25_Haus.bmp";//Name des Gebäudeplans
-static const char movement_update = 's'; //'s' - sequential, 'p' - parallel
+static const char movement_update = 'p'; //'s' - sequential, 'p' - parallel
+//BEIM PARALLELEN NOCHMAL NACHSCHAUEN: C[][] WIRD WIRKLICH RICHTIG GEWÄHLT ?? was hat es mit den einsen in der Matrix zu tun?
 
-static int grafic_delay = 10;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
+static int grafic_delay = 200;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
 
-static int decay_param = 5; //Zerfallsparameter fürs dynamische Feld [0,100]
-static int diffusion_param = 5; //Verteilungsparameter fürs dynamische Feld [0,100]
+//zum D-Feld:
+static int decay_param = 0; //Zerfallsparameter fürs dynamische Feld [0,100]
+static int diffusion_param = 0; //Verteilungsparameter fürs dynamische Feld [0,100]
 
 
 /*
@@ -46,8 +50,8 @@ Erklärung zur Benutzung des Analysedurchlaufs:
 Wenn die Daten des Simulationslaufs gespeichert werden sollen, so muss "execute" aktiviert sein.
 
 Wenn die Parameter der Simulation so verändert werden sollen, dass die unten aufgeführten Werte von jedem Objekt angenommen werden,
-so muss "execute" aktiviert sein und der jeweilige Parameter muss positiv sein. Alle so gewählten Parameter werden immer in allen Objekten verändert.
-Einzelne Zuweisungen sind also nicht möglich.
+so muss "execute" aktiviert sein und der jeweilige Parameter muss positiv gewählt sein. Alle so gewählten Parameter werden immer in allen Objekten verändert.
+Zuweisungen für einzelne Objekte sind also nicht möglich.
 
 Wenn das Programm über die Shell aufgerufen werden soll, bzw. der Aufruf durch die vorher programmierte batch Datei(auf einem Windows Rechner)
 stammt, so muss der Parameter foreign_call aktiviert sein. Die angegebenen Parameter werden dann ignoriert und die Eingabe der Parameter erfolgt über
@@ -76,8 +80,6 @@ delta:
     double k_D = -1; //Einfluss von D auf die Bewegung der Personen
     double w_S = 1; //Wissen der Personen über die Ausgänge
     double friction = 0;
-    double alpha = -1; // Ausbreiten von D
-    double delta = -1; // Verschwinden von D
 };
 
 #endif
