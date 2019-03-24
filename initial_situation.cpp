@@ -28,21 +28,20 @@ Die restlichen Optionen können nach Belieben eingestellt werden und werden zu k
 */
 
 
-const static int grid_height = 70;
-const static int grid_width = 70;
+const static int grid_height = 80;
+const static int grid_width = 80;
 
-static int max_number_of_iterations = 300;
+static int max_number_of_iterations = 80;
 static bool iteration_break_condition = true; //kann das Program auch vorher schon abbrechen(wenn alle Personen im Ziel sind)?
 
-static const char plant_layout[] = "25x25_Haus.bmp";//Name des Gebäudeplans
-static const char movement_update = 'p'; //'s' - sequential, 'p' - parallel
-//BEIM PARALLELEN NOCHMAL NACHSCHAUEN: C[][] WIRD WIRKLICH RICHTIG GEWÄHLT ?? was hat es mit den einsen in der Matrix zu tun?
+static const char plant_layout[] = "einzel_Haus.bmp";//Name des Gebäudeplans
+static const char movement_update = 's'; //'s' - sequential, 'p' - parallel
 
-static int grafic_delay = 200;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
+static int grafic_delay = 10;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
 
 //zum D-Feld:
 static int decay_param = 0; //Zerfallsparameter fürs dynamische Feld [0,100]
-static int diffusion_param = 0; //Verteilungsparameter fürs dynamische Feld [0,100]
+static int diffusion_param = 90; //Verteilungsparameter fürs dynamische Feld [0,100]
 
 
 /*
