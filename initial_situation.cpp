@@ -39,7 +39,7 @@ static const char plant_layout[] = "25x25_Haus.bmp";//Name des Gebäudeplans
 static const char movement_update = 'p'; //'s' - sequential, 'p' - parallel
 //BEIM PARALLELEN NOCHMAL NACHSCHAUEN: C[][] WIRD WIRKLICH RICHTIG GEWÄHLT ?? was hat es mit den einsen in der Matrix zu tun?
 
-static int grafic_delay = 5;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
+static int grafic_delay = 0;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
 
 //zum D-Feld:
 static int decay_param = 0; //Zerfallsparameter fürs dynamische Feld [0,100]
