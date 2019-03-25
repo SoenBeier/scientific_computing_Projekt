@@ -31,19 +31,21 @@ Die restlichen Optionen können nach Belieben eingestellt werden und werden zu k
 const static int grid_height = 80;
 const static int grid_width = 80;
 
-static int max_number_of_iterations = 80;
+
+static int max_number_of_iterations = 100000;
 static bool iteration_break_condition = true; //kann das Program auch vorher schon abbrechen(wenn alle Personen im Ziel sind)?
 
-static const char plant_layout[] = "einzel_Haus.bmp";//Name des Gebäudeplans
-static const char movement_update = 's'; //'s' - sequential, 'p' - parallel
+static const char plant_layout[] = "25x25_Haus_weniger_pers.bmp";//Name des Gebäudeplans
+static const char movement_update = 'p'; //'s' - sequential, 'p' - parallel
+//BEIM PARALLELEN NOCHMAL NACHSCHAUEN: C[][] WIRD WIRKLICH RICHTIG GEWÄHLT ?? was hat es mit den einsen in der Matrix zu tun?
 
-static int grafic_delay = 10;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
+static int grafic_delay = 5;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
 
 //zum D-Feld:
 static int decay_param = 0; //Zerfallsparameter fürs dynamische Feld [0,100]
-static int diffusion_param = 90; //Verteilungsparameter fürs dynamische Feld [0,100]
+static int diffusion_param = 0; //Verteilungsparameter fürs dynamische Feld [0,100] ERZEUGT FEHLER BEIM AUSFÜHREN!
 
-
+static bool reject_other_D_fields = false; //(noch nicht eingebaut) Ist für die Simulation für den Korridor nötig, bei dem die Menschen mit unterschiedlichen Zielen das D Feld der Menschen mit einem anderen Ziel abstoßend finden
 /*
 Erklärung zur Benutzung des Analysedurchlaufs:
 Wenn die Daten des Simulationslaufs gespeichert werden sollen, so muss "execute" aktiviert sein.
@@ -72,13 +74,13 @@ delta:
 
 
  struct analysis_run{
-    bool execute = false; //wenn true: Werte in dieser Strukturen werden dann an die Objekte übergeben und die Abfrage an den Benutzer entfallen
+    bool execute = true; //wenn true: Werte in dieser Strukturen werden dann an die Objekte übergeben und die Abfrage an den Benutzer entfallen
     bool foreign_call = false; //experimentell; Werte werden mit der Konsole hinzugefügt, dies kann für die Analyse benutzt werden
     // wird hier ein negativer eintrag gewählt, so wird dieser Parameter nicht gesetzt
     double k_S = 1; //Einfluss von s auf die Bewegung der Personen
-    double k_D = -1; //Einfluss von D auf die Bewegung der Personen
+    double k_D = 0; //Einfluss von D auf die Bewegung der Personen
     double w_S = 1; //Wissen der Personen über die Ausgänge
-    double friction = 0;
+    double friction = 0.9;
 };
 
 #endif

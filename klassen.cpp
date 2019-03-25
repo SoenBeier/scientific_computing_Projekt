@@ -343,11 +343,11 @@ public:
     };
 
     double friction = 0.0; // Wahrscheinlichkeit, dass sich die Person nicht bewegt, obwohl sie sich bewegen sollte
-    void moveto(int xn, int yn, vector<person> &persvec, vector <int > &propability_arr_diff, vector<int> &propability_arr_dec, vector<obstacle> &obstvec){
+
+    void moveto(int xn, int yn, vector<person> &persvec, vector <int > &propability_arr_diff, vector<int> &propability_arr_dec, vector<obstacle> &obstvec, bool after_conflict=false){
         double r = (rand() % 1000) / 1000.0; // Zufallszahl
-        if(evacuated == false && r >= friction){
-            set_D(persvec, xn, yn, propability_arr_diff, propability_arr_dec, obstvec);
-            ax = x;
+        if((evacuated == false && r >= friction) || (evacuated == false && after_conflict == false)){//Wenn die vor der Bewegung kein Konflikt stattgefunden hat wird die Bewegung auf jeden Fall ausgeführt; mit Konflikt nur zu einer bestimmten Wahrscheinlichkeit, die von der "friction" abhängt
+            set_D(persvec, xn, yn, propability_arr_diff, propability_arr_dec, obstvec);            ax = x;
             ay = y;
             x = xn;
             y = yn;
@@ -747,7 +747,7 @@ int quantity_persons;
             w_S[i] = w;
         }
     }
-    void set_w_S(int quantity_known_dest, bool previously_set = false){//legt den anfänglicher Wissensstand der Person über die Ausgänge fest
+    void set_w_S(int quantity_known_dest, bool previously_set = false){//legt den anfänglicher Wissensstand der Person über die Ausgänge fest, Parameter w_S wird für eine eine Anzahl(quantity_known_dest) von Zielen zufällg gewählt, wenn previously set == false ist; previously set = true wird nur intern benutzt
         w_S.resize(quantity_destinations);
         for(int i = 0; i < quantity_destinations; i++){
             if(previously_set == false)
@@ -787,7 +787,7 @@ int quantity_persons;
             cout <<"w_S ist:" <<w_S[i] << endl;
         }*/
     }
-    void set_w_S(bool prefer_a_dest, int quantity_preferred_dest, int *preferred_dest, int quantity_known_dest){//legt den anfänglichen Wissensstand der Person über die Ausgänge fest; preferierte Ziele werden bevorzugt nach der Festlegungangesteuert, qpd ist die Anzahl der übergebenen Ziele
+    void set_w_S(bool prefer_a_dest, int quantity_preferred_dest, int *preferred_dest, int quantity_known_dest){//legt den anfänglichen Wissensstand der Person über die Ausgänge fest; preferierte Ziele werden bevorzugt nach der Festlegung angesteuert, qpd ist die Anzahl der übergebenen Ziele
         w_S.resize(quantity_destinations);
         // set all values of w_S = 0:
         for(int i = 0; i < quantity_destinations; i++){
@@ -976,9 +976,10 @@ int quantity_persons;
 // ##### desired coordinates; are used, when update rule is parallel
     int desired_x;
     int desired_y;
-    bool already_moved;
-    vector<int> conflict_partner;
+    char desired_direction;
     int number_of_conflicts;
+    bool wins_conflict;
+    bool had_a_conflict; //wird benutzt um herauszufinden ob bei einer Bewegung der "friction" Parameter angewendet werden muss
 
 // ###### time measurement for the analysis of movement of the person
     double time_start;
@@ -1001,6 +1002,123 @@ private:
 };
 
 
+class conflict{
+public:
+    conflict(){
+
+    }
+    conflict(int nx, int ny, vector<int> &cp, vector<person> &persvec){
+        x = nx;
+        y = ny;
+        conflict_partner = cp;
+        rise_number_of_conflicts_of_persons(persvec);
+        set_C(persvec);
+        number_of_winner = who_winns_conflict();
+    }
+
+    //Ort des Konfliktes:
+    int x;
+    int y;
+
+    //Nummern der Personen im Konflikt:
+    vector<int> conflict_partner;
+
+    //Gewinner des Konfliktes:
+    int number_of_winner;
+
+    //Konfliktmatrix
+    double C[3][3];
+
+    //Hilfsmatrix, in der die Nummern der Personen stehen, die am Konflikt teilnehmen (mit relativer Position zum Ort des Konflikts
+    double C_pers_numb[3][3];
+
+
+
+    void print_C(){
+        cout << "----------------C---------------" << endl;
+        cout << "An der Stelle: " << x << ";" << y << endl;
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                cout << C[j][i] << " , ";
+            }
+            cout << endl;
+        }
+        cout << "----------------C---------------" << endl;
+    }
+    void print_C_pers_numb(){
+        cout << "----------------Cpers---------------" << endl;
+        cout << "An der Stelle: " << x << ";" << y << endl;
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                cout << C_pers_numb[j][i] << " , ";
+            }
+            cout << endl;
+        }
+        cout << "----------------Cpers---------------" << endl;
+    }
+    double get_C(int x, int y){
+        return C[x][y];
+    }
+    double get_C_pers_numb(int x, int y){
+        return C_pers_numb[x][y];
+    }
+
+private:
+    void set_C(vector<person> &persvec){
+
+        //Setzt Einträge der Matrizen auf 0
+        for(int k = 0; k < 3; k++){
+            for(int l = 0; l < 3; l++){
+                C[k][l] = 0;
+                C_pers_numb[k][l] = 0;
+            }
+        }
+
+        //Füllt Einträge von C, die Werte von der Transitionmatrix, die dazu geführt haben, dass sich die Person auf das Feld Conflict.x,Conflict.y bewegen will wird in die Konfliktmatrix C eingetragen
+        for(int i = 0; i < conflict_partner.size(); i++){
+            C[persvec[conflict_partner[i]].x - x + 1][persvec[conflict_partner[i]].y - y + 1] = persvec[conflict_partner[i]].get_T(x - persvec[conflict_partner[i]].x + 1, y - persvec[conflict_partner[i]].y + 1);
+            C_pers_numb[persvec[conflict_partner[i]].x - x + 1][persvec[conflict_partner[i]].y - y + 1] =  conflict_partner[i];
+        }
+        //Normalisierung der C-Matrix:
+         //Finden der Summe der Einträge von C:
+        double sum_C_entries = 0;
+        for (int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                sum_C_entries = sum_C_entries + C[i][j];
+            }
+        }
+         //Normalisierung durchführen:
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                C[i][j] = C[i][j] / sum_C_entries;
+            }
+        }
+    }
+    int who_winns_conflict(){
+        double r = rand() % 1000 / 1000.;
+        if(r < get_C(1,0)){
+            return get_C_pers_numb(1,0);
+        }
+        else if(r < (get_C(1,0) + get_C(2,1))){
+            return get_C_pers_numb(2,1);
+        }
+        else if(r < (get_C(1,0) + get_C(2,1) + get_C(1,2))){
+            return get_C_pers_numb(1,2);
+        }
+        else if(r < (get_C(1,0) + get_C(2,1) + get_C(1,2) + get_C(0,1))){
+            return get_C_pers_numb(0,1);
+        }
+        else{
+            return get_C_pers_numb(1,1);
+        }
+    }
+    void rise_number_of_conflicts_of_persons(vector<person> &persvec){
+        for(int i = 0; i < conflict_partner.size(); i++){
+            persvec[conflict_partner[i]].number_of_conflicts ++;
+            persvec[conflict_partner[i]].had_a_conflict = true; // für die richtige Anwendung des friction Parameters
+        }
+    }
+};
 
 //person::person(){}
 //hindernis::hindernis(){}

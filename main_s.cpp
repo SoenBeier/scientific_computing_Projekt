@@ -101,7 +101,7 @@ void print_init_vector(vector <vector<int>> &initcoord_vec){
 //#### Grafikausgabe
 void clear_drawing(SDL_Renderer *renderer){// clears the whole screen/pigment the whole screen white //NOCHMAL DURCH RICHTIGEN BEFEHL ERSETZEN
     SDL_SetRenderDrawColor(renderer,250,250,250,0);
-    const SDL_Rect scrrect = {0,0,grid_width*10,grid_height*10}; //declarate rectangle, which contains the whole screen -> NOCHMAL NACHBESSERN : NUR BENÖTIGTER PLATZ
+    const SDL_Rect scrrect = {0,0,grid_width*10,grid_height*10}; //declarate rectangle, which contains the whole screen -> NOCHMAL NACHBESSERN : NUR BENÃTIGTER PLATZ
     SDL_RenderFillRect(renderer, &scrrect);
 }
 void draw_grid(vector <person> &pa, vector <destination> &da, vector<obstacle> &oa, SDL_Renderer *renderer){ //draw all objects on screen
@@ -121,7 +121,7 @@ void draw_grid(vector <person> &pa, vector <destination> &da, vector<obstacle> &
     }
     SDL_RenderPresent(renderer);
 }
-void draw_grid(vector <person> &pa, vector <destination> &da, vector<obstacle> &oa, SDL_Renderer *renderer, int magnification_factor){//draw all objects on screen with a magnication ; möglicherweise eine größere Vergrößerung ermöglichen ?
+void draw_grid(vector <person> &pa, vector <destination> &da, vector<obstacle> &oa, SDL_Renderer *renderer, int magnification_factor){//draw all objects on screen with a magnication ; mÃ¶glicherweise eine grÃ¶Ãere VergrÃ¶Ãerung ermÃ¶glichen ?
 
     clear_drawing(renderer); // pigment the screen white
     if (magnification_factor == 1){
@@ -170,10 +170,10 @@ void draw_grid(vector <person> &pa, vector <destination> &da, vector<obstacle> &
 //#### Grafikausgabe
 
 
-//#### Vorgehen während Iteration
+//#### Vorgehen wÃ¤hrend Iteration
 void move_people_sequential(vector<person> &persvec, vector<obstacle> &obstvec, vector<destination> &destvec, vector <int > &propability_arr_diff, vector<int> &propability_arr_dec){
     //cout << "SIND GERADE HIER AM ARBEITEN" << endl;
-    //Vector wird mit allen Nummern gefüllt; jede Nummer kann genau einer Person zugeordnet werden kann
+    //Vector wird mit allen Nummern gefÃ¼llt; jede Nummer kann genau einer Person zugeordnet werden kann
     vector<int> serial_number_pers;
     for(int i = 0; i < persvec.size(); i++){
         serial_number_pers.push_back(i);
@@ -215,22 +215,23 @@ void move_people_sequential(vector<person> &persvec, vector<obstacle> &obstvec, 
 
 }
 void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, vector<destination> &destvec, vector <int > &propability_arr_diff, vector<int> &propability_arr_dec){
-    double r;
-    vector<char> direction;
-    // Für Jede Person:
+//Jede Person entescheidet nun auf welche Koordinaten (desired_x,desired_y) sie gehen möchte
     for(int i = 0; i < persvec.size(); i++){
-        persvec[i].already_moved = false;
-        //Erstellt die transmission Matrix:
-        persvec[i].set_T(obstvec,persvec,'p');
+        //Voreinstellung der variable "wins_conflict", die für die nächste Schleife benötigt wird:
+        persvec[i].wins_conflict = false;
+        persvec[i].had_a_conflict = false;
 
-        //Erstellt random Zahl r zwischen 0 und 1:
-        r = (rand() % 10000) /10000.0;
+        //jede Person setzt ihre Transition Matrix:
+        persvec[i].set_T(obstvec,persvec);
 
-        //Findet nun heraus, welche Koordinaten unter (desired x, desired y) gespeichert werden sollen:
+        //für jede Person wird eine random Zahl zwischen 0 und 1 erstellt:
+        double r = (rand() % 100) / 100. ;
+
+        //Ermittelt nun stochastisch in welche Richtung sich die Person bewegen möchte:
         if(r < persvec[i].get_T(1,0)){ //nach oben?
             persvec[i].desired_x = persvec[i].x;
             persvec[i].desired_y = persvec[i].y - 1;
-            direction.push_back('o');
+            persvec[i].desired_direction = 'o';
         }
         else if(r < (persvec[i].get_T(1,0) + persvec[i].get_T(2,1))){//nach rechts?
             persvec[i].desired_x = persvec[i].x + 1;
@@ -250,89 +251,64 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
         else{// stehen bleiben?
             persvec[i].desired_x = persvec[i].x;
             persvec[i].desired_y = persvec[i].y;
-            direction.push_back('m');
-            }
+            persvec[i].wins_conflict = true; //Möchte die Person stehen bleiben, so gewinnt diese Person immer den Konflikt
+            persvec[i].desired_direction = 's';
+        }
     }
 
-    //geht alle Personen durch:
-    for(int i = 0; i < persvec.size(); i++){
-        //Sind die gewünschten Koordinaten der iten Person (desired x, desired y) auch gewünschte Koordinaten einer anderen Person?:
-        bool only_one_desired = true;
-        persvec[i].conflict_partner.push_back(i);
+//Entscheidung welche Person sich bewegen darf und welche beispielsweise bei einem Konflikt stehen bleiben muss:
+    for(int i = 0; i <persvec.size(); i++){
+        vector<int> conflict_partner;//Enthält Nummer der Konfliktpartner
+
+        //Fügt sich selbst zu den Konfliktpartnern hinzu:
+        conflict_partner.push_back(i);
+
+        //Fügt die anderen Konfliktpartner hinzu:
         for(int j = 0; j < persvec.size(); j++){
-            if(persvec[i].desired_x == persvec[j].desired_x && persvec[i].desired_y == persvec[j].desired_y && j != i){
-                only_one_desired = false;
-                persvec[i].conflict_partner.push_back(j);
+            //die Personen, die das selbe Ziel haben, werden zum Vektor conflict_partner hinzugefügt:
+            if(persvec[j].desired_x == persvec[i].desired_x && persvec[j].desired_y == persvec[i].desired_y && i != j){
+                conflict_partner.push_back(j);
+            }
+        }
+        //Überprüft ob der Konflikt ausgetragen werden muss:
+        bool conflict_done = false;
+            //Überprüft ob nur eine Person im vector ist
+        if(conflict_partner.size() == 1){
+            persvec[conflict_partner[0]].wins_conflict = true;
+            conflict_done = true;
+        }
+        else{//Überprüft, ob dieser Konflikt schon ausgetragen wurde, also ob eine Person, des conflict partner vectors, schon unter wins_conflict ein "true" zu stehen hat:
+            for(int j = 0; j < conflict_partner.size(); j++){
+                if(persvec[conflict_partner[j]].wins_conflict == true){
+                    conflict_done = true;
+                }
+
             }
         }
 
-        //Hat die ite Person als einzige einen Anspruch auf (desired_x,desired_y)?, dann:
-        if(only_one_desired == true){
-            if(persvec[i].already_moved == false){
-                persvec[i].moveto(persvec[i].desired_x,persvec[i].desired_y, persvec,propability_arr_diff, propability_arr_dec, obstvec);
-                persvec[i].already_moved = true;
-                persvec[i].conflict_partner.clear();
-            }
+        //Wenn der Konflikt noch nicht ausgetragen wurde, also conflict_done == false ist, so wird dieser ausgeführt:
+        if(conflict_done == false){
+            conflict con = conflict(persvec[conflict_partner[0]].desired_x,persvec[conflict_partner[0]].desired_y, conflict_partner, persvec);
+            persvec[con.number_of_winner].wins_conflict = true;
         }
-        else{//Es gibt Konflikte
-            if(persvec[i].already_moved == false){
-                int x = persvec[i].desired_x;
-                int y = persvec[i].desired_y;
-                cout << x << ";" << y << endl;
-                //initialisiere Konfliktvektor C
-                vector<double> C;
-                // Fülle Konfliktvektor C; T-Matrix-Wert wird hierfür verwendet
-                for(int t = 0; t < persvec[i].conflict_partner.size(); t++){
-                    if(direction[persvec[i].conflict_partner[t]] == 'o'){
-                        C.push_back(persvec[persvec[i].conflict_partner[t]].get_T(1,0));
-                    }
-                    if(direction[persvec[i].conflict_partner[t]] == 'r'){
-                        C.push_back(persvec[persvec[i].conflict_partner[t]].get_T(2,1));
-                    }
-                    if(direction[persvec[i].conflict_partner[t]] == 'u'){
-                        C.push_back(persvec[persvec[i].conflict_partner[t]].get_T(1,2));
-                    }
-                    if(direction[persvec[i].conflict_partner[t]] == 'l'){
-                        C.push_back(persvec[persvec[i].conflict_partner[t]].get_T(0,1));
-                    }
-                    if(direction[persvec[i].conflict_partner[t]] == 'm'){
-                        C.push_back(persvec[persvec[i].conflict_partner[t]].get_T(1,1));
-                    }
-                    persvec[persvec[i].conflict_partner[t]].already_moved = true;
-                }
-
-                C.push_back(0);
-                C.push_back(0);
-                C.push_back(0);
-                C.push_back(0);
-                C.push_back(0);
-
-                int index_max_C = 0;
-                int value_max_C = 0;
-                for(int c = 0; c < C.size();c++){
-                    if (C[c] > value_max_C){
-                        value_max_C = C[c];
-                        index_max_C = c;
-                    }
-                    if (C[c] > 0 && persvec[persvec[i].conflict_partner[c]].evacuated == false){
-                        persvec[persvec[i].conflict_partner[c]].number_of_conflicts++;
-                    }
-                }
-
-                persvec[persvec[i].conflict_partner[index_max_C]].moveto(x,y, persvec, propability_arr_diff, propability_arr_dec, obstvec);
-                persvec[i].conflict_partner.clear();
-            }
-            //Erstelle eine Konfliktmatrix:
+        //Reset des Vektors:
+        conflict_partner.clear();
+    }
 
 
-
-
-
+//Bewegt die Personen, die die Konflikte gewonnen haben
+    for(int i = 0; i < persvec.size(); i++){
+        if(persvec[i].wins_conflict == true){
+            persvec[i].moveto(persvec[i].desired_x, persvec[i].desired_y, persvec, propability_arr_diff, propability_arr_dec, obstvec,persvec[i].had_a_conflict);
+            //Nach konflikt muss hier noch true übergeben werden
         }
     }
 
 }
-bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &persvec){//Überprüft ob die Person das Ziel erreicht hat
+
+
+}
+bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &persvec){//ÃberprÃ¼ft ob die Person das Ziel erreicht hat
         bool return_value = false;
 
         for(int i = 0; i < persvec.size(); i++){
@@ -369,7 +345,7 @@ void update_object_parameters(int iteration, vector<person> &persvec, vector<des
         persvec[j].decay_dyn_f(propability_arr_dec, persvec, j, obstvec);
     }
 }
-//#### Vorgehen während Iteration
+//#### Vorgehen wÃ¤hrend Iteration
 
 
 //#### Analyse
@@ -384,7 +360,7 @@ void set_analyse_parameters(analysis_run &ana_run, char *k_S, char *k_D, char *w
 
     cout << ana_run.k_S << ";" << ana_run.k_D << ";" << ana_run.w_S<< ";" << ana_run.friction << ";" << decay_param << ";" << diffusion_param << endl;
 }
-void set_model_parameters(vector<person> &persvec, double k_S, double k_D, double w_S, double friction){//setzt Parameter aller Personen; dies ist für die Analyse der Evakuierungszeit unabdingbar
+void set_model_parameters(vector<person> &persvec, double k_S, double k_D, double w_S, double friction){//setzt Parameter aller Personen; dies ist fÃ¼r die Analyse der Evakuierungszeit unabdingbar
     cout << "BIS HIER! " << k_D << endl;
 
     for(int i = 0; i < persvec.size(); i++){
@@ -396,21 +372,26 @@ void set_model_parameters(vector<person> &persvec, double k_S, double k_D, doubl
             cout << "HIER !!!:" << k_D << endl;
         }
         if(w_S >= 0){
-            persvec[i].set_w_S(w_S);
+            persvec[i].set_w_S(w_S);//Setzt w_S aller Ziela auf 1
         }
         if(friction >= 0){
             if(friction <= 1){
                 persvec[i].friction = friction;
             }
             else{
-                cout << "Fehler - der Friction Parameter kann nicht größer als 1 sein!" << endl;
+                cout << "Fehler - der Friction Parameter kann nicht grÃ¶Ãer als 1 sein!" << endl;
                 break;
             }
         }
+        if(reject_other_D_fields == true){
+            //Setzt alle w_S Parameter einer Person auf 0 außer die von einem einzigen zufällig ausgewähltem Ziel:
+            persvec[i].set_w_S(0.0);
+            persvec[i].set_w_S(1,false);
+        }
     }
 }
-void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungszeit der Personen, sollte nur ausgefürt werden, wenn vorher "set_model_parameters" angewendet wurde, also analysis_run.execute aktiviert ist
-    //Öffnet ein Dokument, in dem alle Daten gespeichert werden:
+void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungszeit der Personen, sollte nur ausgefÃ¼rt werden, wenn vorher "set_model_parameters" angewendet wurde, also analysis_run.execute aktiviert ist
+    //Ãffnet ein Dokument, in dem alle Daten gespeichert werden:
     fstream f;
     f.open("daten.dat", ios::app);
 
@@ -419,33 +400,41 @@ void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungs
     int  number_evac_pers = 0;
     for(int i = 0; i < persvec.size(); i++){
         if(persvec[i].evacuated == true){
-            cout << i << " endtime: " << persvec[i].time_end << endl;
+            //cout << i << " endtime: " << persvec[i].time_end << endl;
             average_evac_time = average_evac_time + persvec[i].evacuation_time;
             number_evac_pers++;
         }
     }
     average_evac_time = average_evac_time / number_evac_pers;
-    // Berechnet die durchschnittlich benötigte Iterationsanzahl, damit die Personen ans Ziel kommen:
+    // Berechnet die durchschnittlich benÃ¶tigte Iterationsanzahl, damit die Personen ans Ziel kommen:
     double average_evac_iteration = 0;
     for(int i = 0; i < persvec.size(); i++){
         if(persvec[i].evacuated == true){
-            cout << i << "enditeration: " << persvec[i].iteration_when_evacuated << endl;
+            //cout << i << "enditeration: " << persvec[i].iteration_when_evacuated << endl;
             average_evac_iteration = average_evac_iteration + persvec[i].iteration_when_evacuated;
         }
     }
     average_evac_iteration = average_evac_iteration / number_evac_pers;
 
+    //Berechnet die durschnittliche Anzahl an Kollisionen der einzelnen Personen:
+    double average_number_conflicts = 0;
+    for(int i = 0; i < persvec.size(); i++){
+        //cout << i << "Anzahl Konflikte: " << persvec[i].number_of_conflicts << endl;
+        average_number_conflicts = average_number_conflicts + persvec[i].number_of_conflicts;
+    }
+    average_number_conflicts = average_number_conflicts / number_evac_pers;
+
     //Schreibt berechnete Daten in das geöffnete Dokument
-    //Reihenfolge der Daten ist: Name Grundris, Durchschnittliche Evakuierungszeit, Durchschnittliche Iteration bei Evakuierung, Anzahl der Personen, die das Ziel nicht erreichen, k_S, k_D, w_S, friction, decay, diffusion Update Regel, Grafik_Delay
-    f << (string) plant_layout << " " << average_evac_time << " " << average_evac_iteration << " " << persvec.size() - number_evac_pers << " " << persvec[0].k_S << " " << persvec[0].k_D << " " << persvec[0].w_S[0] << " " << persvec[0].friction <<" " <<decay_param << " " <<diffusion_param << " " << movement_update << " " << grafic_delay << endl;
+    //Reihenfolge der Daten ist: Name Grundris, Durchschnittliche Evakuierungszeit, Durchschnittliche Iteration bei Evakuierung, Anzahl der Personen, die das Ziel nicht erreichen, Anzahl der Personen, k_S, k_D, w_S, friction, decay, diffusion Update Regel, Grafik_Delay, Durschnittliche Anzahl der Kollisionen
+    f << (string) plant_layout << " " << average_evac_time << " " << average_evac_iteration << " " << persvec.size() - number_evac_pers << " " << persvec.size() << " " << persvec[0].k_S << " " << persvec[0].k_D << " " << persvec[0].w_S[0] << " " << persvec[0].friction <<" " <<decay_param << " " <<diffusion_param << " " << movement_update << " " << grafic_delay << " " << average_number_conflicts << endl;
     f.close();
 /*
 Density
 panic
 k_D
 k_S
-w_S - Wissen über das Ziel
-omega - steht für w_S
+w_S - Wissen Ã¼ber das Ziel
+omega - steht fÃ¼r w_S
 */
 }
 //#### Analyse
@@ -509,7 +498,7 @@ void lege_und_printe_grunriss_auf_dfeld (vector <person> &persvec, vector <obsta
 
 
 int main(int argc, char* args[]){
-    //Überprüfung der angegebenen Parameter:
+    //ÃberprÃ¼fung der angegebenen Parameter:
     ifstream file_test(plant_layout);
     if(!file_test){
         std::cout << "Der Name des Gebaeudeplans wurde falsch eingegeben oder diese Datei existiert nicht. Korrigieren Sie die Eingabe der Variable plant_layout! " << endl;
@@ -521,7 +510,7 @@ int main(int argc, char* args[]){
 
 
     analysis_run ana_run;
-    //Für den Aufruf über die Shell, bzw für den Aufruf über die Batch Datei:
+    //FÃ¼r den Aufruf Ã¼ber die Shell, bzw fÃ¼r den Aufruf Ã¼ber die Batch Datei:
     if(ana_run.foreign_call == true){
         set_analyse_parameters(ana_run, args[1], args[2], args[3], args[4], args[5], args[6]);
     }
@@ -546,21 +535,21 @@ int main(int argc, char* args[]){
     vector <vector <int >> initcoord_dest_vec;
     vector <vector <int >> initcoord_pers_vec;
     vector <vector <int >> initcoord_obst_vec;
-    set_init_vectors(bmp_surf,initcoord_pers_vec,initcoord_dest_vec,initcoord_obst_vec,2,0,1,0,0,0); //befüllt die initcoord Vektoren
+    set_init_vectors(bmp_surf,initcoord_pers_vec,initcoord_dest_vec,initcoord_obst_vec,2,0,1,0,0,0); //befÃ¼llt die initcoord Vektoren
     int quantity_persons = initcoord_pers_vec.size();
     int quantity_destinations = initcoord_dest_vec.size();
     int quantity_obstacles = initcoord_obst_vec.size();
 
     //Ausgabe der Koordinaten der noch zu erstellenden Personen, Hindernissen, Zielen
-    cout << "person " ;
-    print_init_vector(initcoord_dest_vec);
     cout << "dest " ;
+    print_init_vector(initcoord_dest_vec);
+    cout << "obst " ;
     print_init_vector(initcoord_obst_vec);
-    cout << "obstacle " ;
+    cout << "pers " ;
     print_init_vector(initcoord_pers_vec);
 
-    //Schließen des SDL_Fensters
-    while (ana_run.execute == false) {if (SDL_PollEvent(&Event) && Event.type == SDL_QUIT){break;}} //Hält Fenster so lange offen bis es per Hand geschlossen wird
+    //SchlieÃen des SDL_Fensters
+    while (ana_run.execute == false) {if (SDL_PollEvent(&Event) && Event.type == SDL_QUIT){break;}} //HÃ¤lt Fenster so lange offen bis es per Hand geschlossen wird
     SDL_FreeSurface( bmp_surf );
 	bmp_surf = NULL;
 	SDL_DestroyWindow( Window );
@@ -600,8 +589,8 @@ vector <int> propability_arr_dec(100);
         persvec[p] = person(initcoord_pers_vec[p][0],initcoord_pers_vec[p][1],destvec,quantity_obstacles,quantity_destinations,quantity_persons);
     }
 
-//Bei einem Durchlauf des Programms, bei dem Daten entnommen und Analysiert werden müssen, müssen gleichwertige Bedingungen hergestellt werden
-//Deshalb werden dabei einige Parameter nochmals umgeändert:
+//Bei einem Durchlauf des Programms, bei dem Daten entnommen und Analysiert werden mÃ¼ssen, mÃ¼ssen gleichwertige Bedingungen hergestellt werden
+//Deshalb werden dabei einige Parameter nochmals umgeÃ¤ndert:
     if(ana_run.execute == true){
         set_model_parameters(persvec,ana_run.k_S,ana_run.k_D,ana_run.w_S,ana_run.friction);
     }
@@ -637,7 +626,7 @@ for(int i = 0; i < max_number_of_iterations; i++){
         cout << "Fehler in der Eingabe: movement_update kann nur 'p' oder 's' sein"  << endl;
     }
 
-    //Abbruchbedingung, wenn die max_number_of_iterations zu hoch gewählt wurde
+    //Abbruchbedingung, wenn die max_number_of_iterations zu hoch gewÃ¤hlt wurde
     bool b_c = true;
     for (int j = 0; j < persvec.size(); j++){
         if(persvec[j].evacuated == false){
@@ -662,13 +651,17 @@ for(int i = 0; i < max_number_of_iterations; i++){
     cout << "Durchlauf abgeschlossen" << endl;
     SDL_Delay(500);
 
-    while (ana_run.execute == false) {if (SDL_PollEvent(&event) && event.type == SDL_QUIT){break;}} //Hält Fenster so lange offen bis es per Hand geschlossen wird
+    while (ana_run.execute == false) {if (SDL_PollEvent(&event) && event.type == SDL_QUIT){break;}} //HÃ¤lt Fenster so lange offen bis es per Hand geschlossen wird
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 
 
+/*
 //test
+for (int i = 0; i < persvec.size(); i++){
+    cout << "Anzahl Konflikte von: " << i << " ist:" << persvec[i].number_of_conflicts << endl;
+}
 cout << "anzahl personen:" << quantity_persons<< endl;
 int i;
     for (i=0; i< 1  ; i++)
@@ -703,7 +696,7 @@ int i;
 
 
 //test
-
+*/
 
 //################## visual output 2
 
