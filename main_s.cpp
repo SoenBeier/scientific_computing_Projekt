@@ -236,17 +236,17 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
         else if(r < (persvec[i].get_T(1,0) + persvec[i].get_T(2,1))){//nach rechts?
             persvec[i].desired_x = persvec[i].x + 1;
             persvec[i].desired_y = persvec[i].y;
-            direction.push_back('r');
+            persvec[i].desired_direction = 'r';
         }
         else if(r < (persvec[i].get_T(1,0) + persvec[i].get_T(2,1) + persvec[i].get_T(1,2))){//nach unten?
             persvec[i].desired_x = persvec[i].x;
             persvec[i].desired_y = persvec[i].y + 1;
-            direction.push_back('u');
+            persvec[i].desired_direction = 'u';
         }
         else if(r < (persvec[i].get_T(1,0) + persvec[i].get_T(2,1) + persvec[i].get_T(1,2) + persvec[i].get_T(0,1))){//nach links?
             persvec[i].desired_x = persvec[i].x - 1;
             persvec[i].desired_y = persvec[i].y;
-            direction.push_back('l');
+            persvec[i].desired_direction = 'l';
         }
         else{// stehen bleiben?
             persvec[i].desired_x = persvec[i].x;
@@ -307,7 +307,7 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
 }
 
 
-}
+
 bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &persvec){//ÃberprÃ¼ft ob die Person das Ziel erreicht hat
         bool return_value = false;
 
@@ -361,7 +361,6 @@ void set_analyse_parameters(analysis_run &ana_run, char *k_S, char *k_D, char *w
     cout << ana_run.k_S << ";" << ana_run.k_D << ";" << ana_run.w_S<< ";" << ana_run.friction << ";" << decay_param << ";" << diffusion_param << endl;
 }
 void set_model_parameters(vector<person> &persvec, double k_S, double k_D, double w_S, double friction){//setzt Parameter aller Personen; dies ist fÃ¼r die Analyse der Evakuierungszeit unabdingbar
-    cout << "BIS HIER! " << k_D << endl;
 
     for(int i = 0; i < persvec.size(); i++){
         if(k_S >= 0){
@@ -369,7 +368,6 @@ void set_model_parameters(vector<person> &persvec, double k_S, double k_D, doubl
         }
         if(k_D >= 0){
             persvec[i].k_D = k_D;
-            cout << "HIER !!!:" << k_D << endl;
         }
         if(w_S >= 0){
             persvec[i].set_w_S(w_S);//Setzt w_S aller Ziela auf 1
@@ -379,7 +377,7 @@ void set_model_parameters(vector<person> &persvec, double k_S, double k_D, doubl
                 persvec[i].friction = friction;
             }
             else{
-                cout << "Fehler - der Friction Parameter kann nicht grÃ¶Ãer als 1 sein!" << endl;
+                cout << "Fehler - der Friction Parameter kann nicht groesser als 1 sein!" << endl;
                 break;
             }
         }
@@ -549,7 +547,7 @@ int main(int argc, char* args[]){
     print_init_vector(initcoord_pers_vec);
 
     //SchlieÃen des SDL_Fensters
-    while (ana_run.execute == false) {if (SDL_PollEvent(&Event) && Event.type == SDL_QUIT){break;}} //HÃ¤lt Fenster so lange offen bis es per Hand geschlossen wird
+    while (ana_run.foreign_call == false) {if (SDL_PollEvent(&Event) && Event.type == SDL_QUIT){break;}} //HÃ¤lt Fenster so lange offen bis es per Hand geschlossen wird
     SDL_FreeSurface( bmp_surf );
 	bmp_surf = NULL;
 	SDL_DestroyWindow( Window );
@@ -651,7 +649,7 @@ for(int i = 0; i < max_number_of_iterations; i++){
     cout << "Durchlauf abgeschlossen" << endl;
     SDL_Delay(500);
 
-    while (ana_run.execute == false) {if (SDL_PollEvent(&event) && event.type == SDL_QUIT){break;}} //HÃ¤lt Fenster so lange offen bis es per Hand geschlossen wird
+    while (ana_run.foreign_call == false) {if (SDL_PollEvent(&event) && event.type == SDL_QUIT){break;}} //HÃ¤lt Fenster so lange offen bis es per Hand geschlossen wird
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
