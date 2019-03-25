@@ -31,6 +31,7 @@ Die restlichen Optionen können nach Belieben eingestellt werden und werden zu k
 const static int grid_height = 80;
 const static int grid_width = 80;
 
+
 static int max_number_of_iterations = 100000;
 static bool iteration_break_condition = true; //kann das Program auch vorher schon abbrechen(wenn alle Personen im Ziel sind)?
 
@@ -45,8 +46,6 @@ static int decay_param = 0; //Zerfallsparameter fürs dynamische Feld [0,100]
 static int diffusion_param = 0; //Verteilungsparameter fürs dynamische Feld [0,100] ERZEUGT FEHLER BEIM AUSFÜHREN!
 
 static bool reject_other_D_fields = false; //(noch nicht eingebaut) Ist für die Simulation für den Korridor nötig, bei dem die Menschen mit unterschiedlichen Zielen das D Feld der Menschen mit einem anderen Ziel abstoßend finden
-
-
 /*
 Erklärung zur Benutzung des Analysedurchlaufs:
 Wenn die Daten des Simulationslaufs gespeichert werden sollen, so muss "execute" aktiviert sein.
