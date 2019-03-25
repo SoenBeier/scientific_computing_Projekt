@@ -737,7 +737,7 @@ int quantity_persons;
 
 
 // ####### Static field S
-    double k_S = 100;
+    double k_S = 1;
     vector <double> w_S;// wie sehr kennt die Person die verschiedenen Eingänge; Eintrag ist zwischen 0,1
     double S[grid_width][grid_height];
 
@@ -852,25 +852,6 @@ int quantity_persons;
                 }
             }
         }
-        /*
-        //cout <<"max_S : " <<max_S << endl;
-        // Beschränkt die Größe der Einträge, damit die größe der Zahlen nicht die Speichergrenze beim exponentieren überschreiten
-        while (max_S > 200){
-            for(int l = 0; l < quantity_destinations; l++){
-                for(int xi = 0; xi < grid_width; xi++){
-                    for(int yi = 0; yi < grid_height; yi++){
-                        S[xi][yi] = S[xi][yi]/2;
-
-
-                    }
-                }
-
-            }
-            max_S = max_S/2;
-            //cout <<"max_S2 : " <<max_S << endl;
-        }*/
-
-
     }
     void print_S(int width = grid_width, int height = grid_height){
         cout << "----------------------------------------------------------------" << endl;

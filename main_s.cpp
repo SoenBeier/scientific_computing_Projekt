@@ -654,7 +654,9 @@ for(int i = 0; i < max_number_of_iterations; i++){
     SDL_DestroyWindow(window);
     SDL_Quit();
 
-
+cout << "HIER!" << persvec[0].w_S[0] << endl;
+persvec[0].print_S();
+destvec[0].print_S_k();
 /*
 //test
 for (int i = 0; i < persvec.size(); i++){
