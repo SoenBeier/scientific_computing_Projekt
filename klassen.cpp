@@ -343,9 +343,9 @@ public:
     };
 
     double friction = 0.0; // Wahrscheinlichkeit, dass sich die Person nicht bewegt, obwohl sie sich bewegen sollte
-    void moveto(int xn, int yn, vector<person> &persvec, vector <int > &propability_arr_diff, vector<int> &propability_arr_dec){
+    void moveto(int xn, int yn, vector<person> &persvec, vector <int > &propability_arr_diff, vector<int> &propability_arr_dec, bool after_conflict = false){//after_conflict wird benötigt um den Effekt des friction Parametrs ordnungsgemäß auszuführen. Friction = Reibung tritt nur auf, wenn die Bewegung nach einem Konflikt ausgeführt wird
         double r = (rand() % 1000) / 1000.0; // Zufallszahl
-        if(evacuated == false && r >= friction){
+        if((evacuated == false && r >= friction) || (evacuated == false && after_conflict == false)){//Wenn die vor der Bewegung kein Konflikt stattgefunden hat wird die Bewegung auf jeden Fall ausgeführt; mit Konflikt nur zu einer bestimmten Wahrscheinlichkeit, die von der "friction" abhängt
             set_D(persvec, xn, yn, propability_arr_diff, propability_arr_dec);
             ax = x;
             ay = y;
@@ -417,7 +417,7 @@ int quantity_persons;
 
 
 // ###### Dynamic floor field DZur Uni Potsdam(Brandenburg):
-    double k_D = 0;
+    double k_D = 1;
     int D[grid_width][grid_height];
 
     void set_D_on_zero()
@@ -591,7 +591,7 @@ int quantity_persons;
             w_S[i] = w;
         }
     }
-    void set_w_S(int quantity_known_dest, bool previously_set = false){//legt den anfänglicher Wissensstand der Person über die Ausgänge fest
+    void set_w_S(int quantity_known_dest, bool previously_set = false){//legt den anfänglicher Wissensstand der Person über die Ausgänge fest, Parameter w_S wird für eine eine Anzahl(quantity_known_dest) von Zielen zufällg gewählt, wenn previously set == false ist; previously set = true wird nur intern benutzt
         w_S.resize(quantity_destinations);
         for(int i = 0; i < quantity_destinations; i++){
             if(previously_set == false)
@@ -631,7 +631,7 @@ int quantity_persons;
             cout <<"w_S ist:" <<w_S[i] << endl;
         }*/
     }
-    void set_w_S(bool prefer_a_dest, int quantity_preferred_dest, int *preferred_dest, int quantity_known_dest){//legt den anfänglichen Wissensstand der Person über die Ausgänge fest; preferierte Ziele werden bevorzugt nach der Festlegungangesteuert, qpd ist die Anzahl der übergebenen Ziele
+    void set_w_S(bool prefer_a_dest, int quantity_preferred_dest, int *preferred_dest, int quantity_known_dest){//legt den anfänglichen Wissensstand der Person über die Ausgänge fest; preferierte Ziele werden bevorzugt nach der Festlegung angesteuert, qpd ist die Anzahl der übergebenen Ziele
         w_S.resize(quantity_destinations);
         // set all values of w_S = 0:
         for(int i = 0; i < quantity_destinations; i++){
@@ -823,6 +823,7 @@ int quantity_persons;
     char desired_direction;
     int number_of_conflicts;
     bool wins_conflict;
+    bool had_a_conflict; //wird benutzt um herauszufinden ob bei einer Bewegung der "friction" Parameter angewendet werden muss
 
 // ###### time measurement for the analysis of movement of the person
     double time_start;
@@ -958,6 +959,7 @@ private:
     void rise_number_of_conflicts_of_persons(vector<person> &persvec){
         for(int i = 0; i < conflict_partner.size(); i++){
             persvec[conflict_partner[i]].number_of_conflicts ++;
+            persvec[conflict_partner[i]].had_a_conflict = true; // für die richtige Anwendung des friction Parameters
         }
     }
 };

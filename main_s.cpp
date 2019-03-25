@@ -219,12 +219,13 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
     for(int i = 0; i < persvec.size(); i++){
         //Voreinstellung der variable "wins_conflict", die für die nächste Schleife benötigt wird:
         persvec[i].wins_conflict = false;
+        persvec[i].had_a_conflict = false;
 
         //jede Person setzt ihre Transition Matrix:
         persvec[i].set_T(obstvec,persvec);
 
         //für jede Person wird eine random Zahl zwischen 0 und 1 erstellt:
-        double r = (rand() % 10000) / 10000. ;
+        double r = (rand() % 100) / 100. ;
 
         //Ermittelt nun stochastisch in welche Richtung sich die Person bewegen möchte:
         if(r < persvec[i].get_T(1,0)){ //nach oben?
@@ -299,7 +300,8 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
 //Bewegt die Personen, die die Konflikte gewonnen haben
     for(int i = 0; i < persvec.size(); i++){
         if(persvec[i].wins_conflict == true){
-            persvec[i].moveto(persvec[i].desired_x, persvec[i].desired_y, persvec, propability_arr_diff, propability_arr_dec);
+            persvec[i].moveto(persvec[i].desired_x, persvec[i].desired_y, persvec, propability_arr_diff, propability_arr_dec,persvec[i].had_a_conflict);
+            //Nach konflikt muss hier noch true übergeben werden
         }
     }
 
@@ -376,7 +378,7 @@ void set_model_parameters(vector<person> &persvec, double k_S, double k_D, doubl
             persvec[i].k_D = k_D;
         }
         if(w_S >= 0){
-            persvec[i].set_w_S(w_S);
+            persvec[i].set_w_S(w_S);//Setzt w_S aller Ziela auf 1
         }
         if(friction >= 0){
             if(friction <= 1){
@@ -386,6 +388,11 @@ void set_model_parameters(vector<person> &persvec, double k_S, double k_D, doubl
                 cout << "Fehler - der Friction Parameter kann nicht größer als 1 sein!" << endl;
                 break;
             }
+        }
+        if(reject_other_D_fields == true){
+            //Setzt alle w_S Parameter einer Person auf 0 außer die von einem einzigen zufällig ausgewähltem Ziel:
+            persvec[i].set_w_S(0.0);
+            persvec[i].set_w_S(1,false);
         }
     }
 }
@@ -399,7 +406,7 @@ void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungs
     int  number_evac_pers = 0;
     for(int i = 0; i < persvec.size(); i++){
         if(persvec[i].evacuated == true){
-            cout << i << " endtime: " << persvec[i].time_end << endl;
+            //cout << i << " endtime: " << persvec[i].time_end << endl;
             average_evac_time = average_evac_time + persvec[i].evacuation_time;
             number_evac_pers++;
         }
@@ -409,15 +416,23 @@ void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungs
     double average_evac_iteration = 0;
     for(int i = 0; i < persvec.size(); i++){
         if(persvec[i].evacuated == true){
-            cout << i << "enditeration: " << persvec[i].iteration_when_evacuated << endl;
+            //cout << i << "enditeration: " << persvec[i].iteration_when_evacuated << endl;
             average_evac_iteration = average_evac_iteration + persvec[i].iteration_when_evacuated;
         }
     }
     average_evac_iteration = average_evac_iteration / number_evac_pers;
 
+    //Berechnet die durschnittliche Anzahl an Kollisionen der einzelnen Personen:
+    double average_number_conflicts = 0;
+    for(int i = 0; i < persvec.size(); i++){
+        //cout << i << "Anzahl Konflikte: " << persvec[i].number_of_conflicts << endl;
+        average_number_conflicts = average_number_conflicts + persvec[i].number_of_conflicts;
+    }
+    average_number_conflicts = average_number_conflicts / number_evac_pers;
+
     //Schreibt berechnete Daten in das geöffnete Dokument
-    //Reihenfolge der Daten ist: Name Grundris, Durchschnittliche Evakuierungszeit, Durchschnittliche Iteration bei Evakuierung, Anzahl der Personen, die das Ziel nicht erreichen, k_S, k_D, w_S, friction, decay, diffusion Update Regel, Grafik_Delay
-    f << (string) plant_layout << " " << average_evac_time << " " << average_evac_iteration << " " << persvec.size() - number_evac_pers << " " << persvec[0].k_S << " " << persvec[0].k_D << " " << persvec[0].w_S[0] << " " << persvec[0].friction <<" " <<decay_param << " " <<diffusion_param << " " << movement_update << " " << grafic_delay << endl;
+    //Reihenfolge der Daten ist: Name Grundris, Durchschnittliche Evakuierungszeit, Durchschnittliche Iteration bei Evakuierung, Anzahl der Personen, die das Ziel nicht erreichen, Anzahl der Personen, k_S, k_D, w_S, friction, decay, diffusion Update Regel, Grafik_Delay, Durschnittliche Anzahl der Kollisionen
+    f << (string) plant_layout << " " << average_evac_time << " " << average_evac_iteration << " " << persvec.size() - number_evac_pers << " " << persvec.size() << " " << persvec[0].k_S << " " << persvec[0].k_D << " " << persvec[0].w_S[0] << " " << persvec[0].friction <<" " <<decay_param << " " <<diffusion_param << " " << movement_update << " " << grafic_delay << " " << average_number_conflicts << endl;
     f.close();
 /*
 Density
@@ -532,11 +547,11 @@ int main(int argc, char* args[]){
     int quantity_obstacles = initcoord_obst_vec.size();
 
     //Ausgabe der Koordinaten der noch zu erstellenden Personen, Hindernissen, Zielen
-    cout << "person " ;
-    print_init_vector(initcoord_dest_vec);
     cout << "dest " ;
+    print_init_vector(initcoord_dest_vec);
+    cout << "obst " ;
     print_init_vector(initcoord_obst_vec);
-    cout << "obstacle " ;
+    cout << "pers " ;
     print_init_vector(initcoord_pers_vec);
 
     //Schließen des SDL_Fensters
@@ -651,7 +666,7 @@ for(int i = 0; i < max_number_of_iterations; i++){
     SDL_DestroyWindow(window);
     SDL_Quit();
 
-
+/*
 //test
 for (int i = 0; i < persvec.size(); i++){
     cout << "Anzahl Konflikte von: " << i << " ist:" << persvec[i].number_of_conflicts << endl;
@@ -684,7 +699,7 @@ int i;
         cout << propability_arr_dec[i] << "; ";
     }
 //test
-
+*/
 
 //################## visual output 2
 
