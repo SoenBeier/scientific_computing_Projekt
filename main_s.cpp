@@ -170,7 +170,7 @@ void draw_grid(vector <person> &pa, vector <destination> &da, vector<obstacle> &
 //#### Grafikausgabe
 
 
-//#### Vorgehen wÃ¤hrend Iteration
+//#### Vorgehen waehrend Iteration
 void move_people_sequential(vector<person> &persvec, vector<obstacle> &obstvec, vector<destination> &destvec, vector <int > &propability_arr_diff, vector<int> &propability_arr_dec){
     //cout << "SIND GERADE HIER AM ARBEITEN" << endl;
     //Vector wird mit allen Nummern gefÃ¼llt; jede Nummer kann genau einer Person zugeordnet werden kann
@@ -306,9 +306,7 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
 
 }
 
-
-
-bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &persvec){//ÃberprÃ¼ft ob die Person das Ziel erreicht hat
+bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &persvec){//Ueberprueft ob die Person das Ziel erreicht hat
         bool return_value = false;
 
         for(int i = 0; i < persvec.size(); i++){
@@ -334,15 +332,40 @@ bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &
         }
         return return_value;
 }
-void update_object_parameters(int iteration, vector<person> &persvec, vector<destination> &destvec, vector<int> &propability_arr_diff, vector<int> &propability_arr_dec, vector <obstacle> &obstvec){
+void update_object_parameters(int iteration, vector<person> &persvec, vector<destination> &destvec, vector<int> &propability_arr_diff, vector<int> &propability_arr_dec, vector <obstacle> &obstvec){//Erneuert Parameter, wird nach jedem Iterationsschritt aufgerufen
 
     for(int j = 0; j < persvec.size(); j++)
     {
         persvec[j].iteration = iteration;
         persvec[j].renew_w_S_and_S(destvec);
-
+        persvec[j].last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].ax, persvec[j].ay, persvec[j].x, persvec[j].y);
+        persvec[j].a_last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].aax, persvec[j].aay, persvec[j].ax, persvec[j].ay);
+        persvec[j].set_D(persvec, persvec[j].x, persvec[j].y , propability_arr_diff, propability_arr_dec, obstvec);
         persvec[j].diffusion_dyn_f(propability_arr_diff, persvec, persvec[j].x, persvec[j].y,j, obstvec, propability_arr_dec);
         persvec[j].decay_dyn_f(propability_arr_dec, persvec, j, obstvec);
+    }
+}
+//Wenn Ziele nebeneinanderliegen, kann folgende Funktion ausgeführt werden, damit die Personen beide Ziele "als ein Ziel" sehen (w_S wird bei beiden gleich gesetzt)
+void unite_destinations(vector <person> &persvec, vector <destination> &destvec){
+    for(int l = 0; l < destvec.size(); l++){//Damit auch Nachbarn von Nachbarn angepasst werden (destvec.size() ist die maximal nötige Anzahl an Iterationen)
+        for(int i = 0; i < destvec.size(); i++){
+            for(int j = 0; j < destvec.size(); j++){
+                if((destvec[i].x == destvec[j].x + 1 && destvec[i].y == destvec[j].y) || (destvec[i].x == destvec[j].x - 1 && destvec[i].y == destvec[j].y) || (destvec[i].x == destvec[j].x && destvec[i].y == destvec[j].y + 1)  || (destvec[i].x == destvec[j].x && destvec[i].y == destvec[j].y - 1)){//wenn ja dann sind beides Nachbarn
+                    if(l == destvec.size()){
+                        destvec[i].dest_neighbours.push_back(j);
+                    }
+                    for(int k = 0; k < persvec.size(); k++){
+                        if(persvec[k].w_S[i] > persvec[k].w_S[j]){
+                            persvec[k].w_S[j] = persvec[k].w_S[i];
+                        }
+                        else{
+                            persvec[k].w_S[i] = persvec[k].w_S[j];
+                        }
+                    }
+                }
+                //AUSSNAHME SICH SELBST
+            }
+        }
     }
 }
 //#### Vorgehen wÃ¤hrend Iteration
@@ -360,36 +383,60 @@ void set_analyse_parameters(analysis_run &ana_run, char *k_S, char *k_D, char *w
 
     cout << ana_run.k_S << ";" << ana_run.k_D << ";" << ana_run.w_S<< ";" << ana_run.friction << ";" << decay_param << ";" << diffusion_param << endl;
 }
-void set_model_parameters(vector<person> &persvec, double k_S, double k_D, double w_S, double friction){//setzt Parameter aller Personen; dies ist fÃ¼r die Analyse der Evakuierungszeit unabdingbar
+void set_model_parameters(analysis_run ana_run, vector<person> &persvec, vector<destination> &destvec){//setzt Parameter aller Personen; dies ist fÃ¼r die Analyse der Evakuierungszeit unabdingbar
+    if(ana_run.execute == true){
+        for(int i = 0; i < persvec.size(); i++){
+            if(ana_run.k_S >= 0){
+                persvec[i].k_S = ana_run.k_S;
+            }
+            if(ana_run.k_D >= 0){
+                persvec[i].k_D = ana_run.k_D;
+            }
+            if(ana_run.w_S >= 0){
+                persvec[i].set_w_S(ana_run.w_S);//Setzt w_S aller Ziela auf 1
+            }
+            if(ana_run.friction >= 0){
+                if(ana_run.friction <= 1){
+                    persvec[i].friction = ana_run.friction;
+                }
+                else{
+                    cout << "Fehler - der Friction Parameter kann nicht groesser als 1 sein!" << endl;
+                    break;
+                }
+            }
+        }
+    }
+    if(reject_other_D_fields == true){
+        for(int i = 0; i < persvec.size(); i++){
+        //Setzt alle w_S Parameter einer Person auf 0 außer die von einem einzigen zufällig ausgewähltem Ziel:
+            bool w_S_modified = false; //zur Ueberpruefung der korrekten Ausführung der Änderung von w_S
 
-    for(int i = 0; i < persvec.size(); i++){
-        if(k_S >= 0){
-            persvec[i].k_S = k_S;
-        }
-        if(k_D >= 0){
-            persvec[i].k_D = k_D;
-        }
-        if(w_S >= 0){
-            persvec[i].set_w_S(w_S);//Setzt w_S aller Ziela auf 1
-        }
-        if(friction >= 0){
-            if(friction <= 1){
-                persvec[i].friction = friction;
-            }
-            else{
-                cout << "Fehler - der Friction Parameter kann nicht groesser als 1 sein!" << endl;
-                break;
-            }
-        }
-        if(reject_other_D_fields == true){
-            //Setzt alle w_S Parameter einer Person auf 0 außer die von einem einzigen zufällig ausgewähltem Ziel:
+            //Ueberschreibung des vectors w_S, damit nur noch ein Eintrag von w_S die Zahl 1 enthält (alle anderen werden mit 0 gefüllt)
             persvec[i].set_w_S(0.0);
             persvec[i].set_w_S(1,false);
+
+            for(int j = 0; j < persvec[i].w_S.size(); j++){
+                if(persvec[i].w_S[j] == 1){
+                    persvec[i].numb_selected_dest = j;
+                    w_S_modified = true;
+                }
+            }
+            //Fehlerueberpuefung:
+            if(w_S_modified == false){
+                cout << "Fehler: w_S wurde nicht dem Betriebsmodus 'reject_other_D_fields' angepasst" << endl;
+            }
+
         }
+    }
+    if(unite_destinations_if_possible == true){
+        if(reject_other_D_fields == false){
+            cout << "Die Simulation könnte fehlerhaft sein, da reject_other_D_fields deaktiviert ist." << endl;
+        }
+        unite_destinations(persvec,destvec);
     }
 }
 void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungszeit der Personen, sollte nur ausgefÃ¼rt werden, wenn vorher "set_model_parameters" angewendet wurde, also analysis_run.execute aktiviert ist
-    //Ãffnet ein Dokument, in dem alle Daten gespeichert werden:
+    //oeffnet ein Dokument, in dem alle Daten gespeichert werden:
     fstream f;
     f.open("daten.dat", ios::app);
 
@@ -496,7 +543,7 @@ void lege_und_printe_grunriss_auf_dfeld (vector <person> &persvec, vector <obsta
 
 
 int main(int argc, char* args[]){
-    //ÃberprÃ¼fung der angegebenen Parameter:
+    //Ueberpruefung der angegebenen Parameter:
     ifstream file_test(plant_layout);
     if(!file_test){
         std::cout << "Der Name des Gebaeudeplans wurde falsch eingegeben oder diese Datei existiert nicht. Korrigieren Sie die Eingabe der Variable plant_layout! " << endl;
@@ -508,7 +555,7 @@ int main(int argc, char* args[]){
 
 
     analysis_run ana_run;
-    //FÃ¼r den Aufruf Ã¼ber die Shell, bzw fÃ¼r den Aufruf Ã¼ber die Batch Datei:
+    //Fuer den Aufruf ueber die Shell, bzw fuer den Aufruf ueber die Batch Datei:
     if(ana_run.foreign_call == true){
         set_analyse_parameters(ana_run, args[1], args[2], args[3], args[4], args[5], args[6]);
     }
@@ -546,7 +593,7 @@ int main(int argc, char* args[]){
     cout << "pers " ;
     print_init_vector(initcoord_pers_vec);
 
-    //SchlieÃen des SDL_Fensters
+    //Schliessen des SDL_Fensters
     while (ana_run.foreign_call == false) {if (SDL_PollEvent(&Event) && Event.type == SDL_QUIT){break;}} //HÃ¤lt Fenster so lange offen bis es per Hand geschlossen wird
     SDL_FreeSurface( bmp_surf );
 	bmp_surf = NULL;
@@ -587,11 +634,9 @@ vector <int> propability_arr_dec(100);
         persvec[p] = person(initcoord_pers_vec[p][0],initcoord_pers_vec[p][1],destvec,quantity_obstacles,quantity_destinations,quantity_persons);
     }
 
-//Bei einem Durchlauf des Programms, bei dem Daten entnommen und Analysiert werden mÃ¼ssen, mÃ¼ssen gleichwertige Bedingungen hergestellt werden
-//Deshalb werden dabei einige Parameter nochmals umgeÃ¤ndert:
-    if(ana_run.execute == true){
-        set_model_parameters(persvec,ana_run.k_S,ana_run.k_D,ana_run.w_S,ana_run.friction);
-    }
+//Bei einem Durchlauf des Programms, bei dem Daten entnommen und Analysiert werden muessen, muessen gleichwertige Bedingungen hergestellt werden
+//Deshalb werden dabei einige Parameter nochmals umgeaendert:
+    set_model_parameters(ana_run, persvec, destvec);
 
 //################## object declaration
 
@@ -607,6 +652,16 @@ vector <int> propability_arr_dec(100);
 
 
 //test
+
+/*
+for(int i = 0; i < persvec.size();i++){
+    cout << "Hier w_S:" << endl;
+    for(int j = 0; j < persvec[i].w_S.size(); j++){
+        cout << persvec[i].w_S[j] << ";";
+    }
+    cout << endl << "ausgewaehltes dest: " << persvec[i].numb_selected_dest << endl;
+}
+*/
 //test
 
 
