@@ -197,16 +197,16 @@ void move_people_sequential(vector<person> &persvec, vector<obstacle> &obstvec, 
     //cout << "Zufallszahl r: " << r << endl;
 
     if(r < persvec[j].get_T(1,0)){// Bewegung nach oben?
-        persvec[j].moveto(persvec[j].x, persvec[j].y - 1, persvec, propability_arr_diff, propability_arr_dec, obstvec);
+        persvec[j].moveto(persvec[j].x, persvec[j].y - 1);
     }
     else if(r < (persvec[j].get_T(1,0) + persvec[j].get_T(2,1))){//nach rechts?
-        persvec[j].moveto(persvec[j].x + 1, persvec[j].y, persvec, propability_arr_diff, propability_arr_dec, obstvec);
+        persvec[j].moveto(persvec[j].x + 1, persvec[j].y);
     }
     else if(r < (persvec[j].get_T(1,0) + persvec[j].get_T(2,1) + persvec[j].get_T(1,2))){//nach unten?
-        persvec[j].moveto(persvec[j].x, persvec[j].y + 1, persvec, propability_arr_diff, propability_arr_dec, obstvec);
+        persvec[j].moveto(persvec[j].x, persvec[j].y + 1);
     }
     else if(r < (persvec[j].get_T(1,0) + persvec[j].get_T(2,1) + persvec[j].get_T(1,2) + persvec[j].get_T(0,1))){//nach links?
-        persvec[j].moveto(persvec[j].x - 1, persvec[j].y, persvec, propability_arr_diff, propability_arr_dec, obstvec);
+        persvec[j].moveto(persvec[j].x - 1, persvec[j].y);
     }
     else{//stehen bleiben
     }
@@ -256,7 +256,7 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
         }
     }
 
-//Entscheidung welche Person sich bewegen darf und welche beispielsweise bei einem Konflikt stehen bleiben muss:
+///Entscheidung welche Person sich bewegen darf und welche beispielsweise bei einem Konflikt stehen bleiben muss:
     for(int i = 0; i <persvec.size(); i++){
         vector<int> conflict_partner;//Enthält Nummer der Konfliktpartner
 
@@ -299,7 +299,7 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
 //Bewegt die Personen, die die Konflikte gewonnen haben
     for(int i = 0; i < persvec.size(); i++){
         if(persvec[i].wins_conflict == true){
-            persvec[i].moveto(persvec[i].desired_x, persvec[i].desired_y, persvec, propability_arr_diff, propability_arr_dec, obstvec,persvec[i].had_a_conflict);
+            persvec[i].moveto(persvec[i].desired_x, persvec[i].desired_y, persvec[i].had_a_conflict);
             //Nach konflikt muss hier noch true übergeben werden
         }
     }
@@ -320,13 +320,18 @@ bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &
                     };
                 for(int k = 0; k < 5; k++){
                     if(persvec[i].x == nh[2*k] && persvec[i].y == nh[2*k + 1] && persvec[i].evacuated == false){//Ist die Person ein Nachbar des Ziels?
-                        persvec[i].x = destvec[j].x;//setzt Person in das Feld mit den Koordinaten des Ziels
-                        persvec[i].y = destvec[j].y;
+                        persvec[i].moveto(destvec[j].x,destvec[j].y);
                         persvec[i].evacuated = true; //damit sich die Person nicht mehr aus dem Ziel hinausbewegt
                         persvec[i].iteration_when_evacuated = persvec[i].iteration; // Stoppt "Iterationsmessung"
                         persvec[i].end_time_measurement();// Stoppt Zeitmessung
                         return_value = true;
                     }
+                }
+                if(persvec[i].x == nh[2*4] && persvec[i].y == nh[2*4 + 1] && persvec[i].evacuated == true && return_value == false){
+                    persvec[i].aax = persvec[i].ax;
+                    persvec[i].aay = persvec[i].ay;
+                    persvec[i].ax = persvec[i].x;
+                    persvec[i].ay = persvec[i].y;
                 }
             }
         }
@@ -340,9 +345,9 @@ void update_object_parameters(int iteration, vector<person> &persvec, vector<des
         persvec[j].renew_w_S_and_S(destvec);
         persvec[j].last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].ax, persvec[j].ay, persvec[j].x, persvec[j].y);
         persvec[j].a_last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].aax, persvec[j].aay, persvec[j].ax, persvec[j].ay);
-        persvec[j].set_D(persvec, persvec[j].x, persvec[j].y , propability_arr_diff, propability_arr_dec, obstvec);
+        persvec[j].set_D_3(persvec, j);
         persvec[j].diffusion_dyn_f(propability_arr_diff, persvec, persvec[j].x, persvec[j].y,j, obstvec, propability_arr_dec);
-        persvec[j].decay_dyn_f(propability_arr_dec, persvec, j, obstvec);
+        persvec[j].decay_dyn_f(propability_arr_dec, persvec, j);
     }
 }
 //Wenn Ziele nebeneinanderliegen, kann folgende Funktion ausgeführt werden, damit die Personen beide Ziele "als ein Ziel" sehen (w_S wird bei beiden gleich gesetzt)
@@ -518,19 +523,58 @@ void lege_und_printe_grunriss_auf_dfeld (vector <person> &persvec, vector <obsta
 
     // addiert grundriss mit d feld
     int static Grundriss_D_Feld[grid_width][grid_height];
-    for (int x=0; x<grid_width; x++)
+    for (int y=0; y<grid_height; y++)
     {
-        for (int y=0; y<grid_height; y++)
+        for (int x=0; x<grid_width; x++)
         {
             Grundriss_D_Feld[x][y]=persvec[ith_person].D[x][y]+Grundriss[x][y];
         }
     }
     //print
-    for (int x=0; x<grid_width; x++)
+    for (int y=-1; y<grid_width; y++)
     {
-        for (int y=0; y<grid_height; y++)
+        if (y==-1)
         {
-            cout << Grundriss_D_Feld[x][y] << ";" ;
+            cout << "  ";
+        }
+        if (0<=y && y <=9)
+        {
+            cout << " " << y ;
+        }
+        if (10<=y && y <=99)
+        {
+            cout << y ;
+        }
+        for (int x=0; x<grid_height; x++)
+        {
+
+            if (y==-1)
+            {
+                if (0<=x && x <=9)
+                {
+                    cout << "  " << x << ";";
+                }
+                if (10<=x && x <=99)
+                {
+                    cout << " " << x << ";";
+                }
+            }
+            //cout << Grundriss_D_Feld[x][y] << ";" ;
+            if (y>=0)
+            {
+                if (0<= Grundriss_D_Feld[x][y] && Grundriss_D_Feld[x][y]<=9)
+                {
+                    cout << "  " << Grundriss_D_Feld[x][y] << ";" ;
+                }
+                else if (10<=Grundriss_D_Feld[x][y] && Grundriss_D_Feld[x][y] <= 99)
+                {
+                    cout << " " << Grundriss_D_Feld[x][y] << ";";
+                }
+                else
+                {
+                    cout << Grundriss_D_Feld[x][y] << ";";
+                }
+            }
         }
         cout << endl;
     }
@@ -588,10 +632,18 @@ int main(int argc, char* args[]){
     //Ausgabe der Koordinaten der noch zu erstellenden Personen, Hindernissen, Zielen
     cout << "dest " ;
     print_init_vector(initcoord_dest_vec);
+    cout << "Anzahl Ziele: " << initcoord_dest_vec.size()<< endl;
+    cout << "------------------------------" << endl;
+
     cout << "obst " ;
     print_init_vector(initcoord_obst_vec);
+    cout << "Anzahl Gegenstaende: " << initcoord_obst_vec.size()<< endl;
+    cout << "------------------------------" << endl;
+
     cout << "pers " ;
     print_init_vector(initcoord_pers_vec);
+    cout << "Anzahl Personen: " << initcoord_pers_vec.size()<< endl;
+    cout << "------------------------------" << endl;
 
     //Schliessen des SDL_Fensters
     while (ana_run.foreign_call == false) {if (SDL_PollEvent(&Event) && Event.type == SDL_QUIT){break;}} //HÃ¤lt Fenster so lange offen bis es per Hand geschlossen wird
@@ -610,6 +662,7 @@ int main(int argc, char* args[]){
 vector <int > propability_arr_diff(100);
 vector <int> propability_arr_dec(100);
 
+
 //test
 
 //################## object declaration
@@ -622,7 +675,6 @@ vector <int> propability_arr_dec(100);
 
     vector<obstacle> obstvec;
     obstvec.resize(quantity_obstacles);
-
 //construction of used objects
     for(int o = 0; o < quantity_obstacles; o++){
         obstvec[o] = obstacle(initcoord_obst_vec[o][0],initcoord_obst_vec[o][1],quantity_obstacles,quantity_destinations,quantity_persons);
@@ -634,12 +686,12 @@ vector <int> propability_arr_dec(100);
         persvec[p] = person(initcoord_pers_vec[p][0],initcoord_pers_vec[p][1],destvec,quantity_obstacles,quantity_destinations,quantity_persons);
     }
 
+
 //Bei einem Durchlauf des Programms, bei dem Daten entnommen und Analysiert werden muessen, muessen gleichwertige Bedingungen hergestellt werden
 //Deshalb werden dabei einige Parameter nochmals umgeaendert:
     set_model_parameters(ana_run, persvec, destvec);
 
 //################## object declaration
-
 
 //################## visual output 1
     SDL_Event event;
@@ -693,8 +745,23 @@ for(int i = 0; i < max_number_of_iterations; i++){
         break;
     }
 
-
     update_object_parameters(i,persvec,destvec,propability_arr_diff,propability_arr_dec, obstvec);
+
+    ///test
+    if (i%25==0)
+    {
+    /*cout << "                                                                " << endl;
+    cout << "================================================================" << endl;
+    cout << "Personen haben sich zum " << i<< "ten mal bewegt!" << endl;
+    cout << "================================================================" << endl;*/
+
+    cout << "                                                                " << endl;
+    cout << "Grundriss + dfeld von Person:" << "1" << endl;
+    cout << i << ". Iteration" << endl;
+    lege_und_printe_grunriss_auf_dfeld(persvec, obstvec, destvec, 1, initcoord_pers_vec);
+    }
+
+    ///test
 //################## iteration method
 
 
@@ -703,7 +770,7 @@ for(int i = 0; i < max_number_of_iterations; i++){
         draw_grid(persvec,destvec,obstvec,renderer,2);
         SDL_Delay(grafic_delay);
 }
-    cout << "k_D: " << persvec[0].k_D;
+    cout << "k_D: " << persvec[0].k_D << endl;
     cout << "Durchlauf abgeschlossen" << endl;
     SDL_Delay(500);
 
@@ -713,20 +780,19 @@ for(int i = 0; i < max_number_of_iterations; i++){
     SDL_Quit();
 
 
-/*
 //test
 for (int i = 0; i < persvec.size(); i++){
-    cout << "Anzahl Konflikte von: " << i << " ist:" << persvec[i].number_of_conflicts << endl;
+    cout << "Anzahl Konflikte von: " << i << " ist: " << persvec[i].number_of_conflicts << endl;
 }
 cout << "anzahl personen:" << quantity_persons<< endl;
 int i;
-    for (i=0; i< 1  ; i++)
+    for (i=1; i< 2  ; i++)
     {
         cout << i<<". " << "Person D Feld:"  << endl;
         persvec[i].print_D();
 
-        cout << i<<". " << "Person S Feld:"  << endl;
-        persvec[i].print_S();
+        /*cout << i<<". " << "Person S Feld:"  << endl;
+        persvec[i].print_S();*/
     }
 
     cout << " " << endl;
@@ -752,7 +818,7 @@ int i;
 
 
 //test
-*/
+
 
 //################## visual output 2
 
