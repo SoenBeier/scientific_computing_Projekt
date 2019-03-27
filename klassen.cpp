@@ -875,7 +875,7 @@ int quantity_persons;
                 return;
             }
             for(int i = 0; i < quantity_preferred_dest; i++){
-                w_S[preferred_dest[i]] = 1;
+                w_S[preferred_dest[i]] = 2;
             }
             set_w_S(quantity_known_dest-quantity_preferred_dest, true);
 
@@ -933,9 +933,11 @@ int quantity_persons;
         cout << "----------------------------------------------------------------" << endl;
         for(int j = 0; j < height; j++){
             for(int i = 0; i < width; i++){
-                if (S[i][j] > 9 && S[i][j] <= 99){cout << " " << S[i][j] << ";" ;}
-                else if (S[i][j] > 99){cout << S[i][j] << ";" ;}
-                else {cout << "  " << S[i][j] << ";" ;}
+                if (S[i][j] > 9999){cout << "" << (int)S[i][j] << ";" ;}
+                else if (S[i][j] > 999){cout << " " << (int)S[i][j] << ";" ;}
+                else if (S[i][j] > 99){cout << "  " << (int)S[i][j] << ";" ;}
+                else if (S[i][j] > 9){cout << "   " << (int)S[i][j] << ";" ;}
+                else {cout << "    " << S[i][j] << ";" ;}
 
             }
         cout << endl;

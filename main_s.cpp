@@ -653,20 +653,23 @@ vector <int> propability_arr_dec(100);
 
 //test
 
-/*
-for(int i = 0; i < persvec.size();i++){
+
+for(int i = 0; i < 4;i++){
     cout << "Hier w_S:" << endl;
     for(int j = 0; j < persvec[i].w_S.size(); j++){
         cout << persvec[i].w_S[j] << ";";
     }
     cout << endl << "ausgewaehltes dest: " << persvec[i].numb_selected_dest << endl;
 }
-*/
+
 //test
 
 
 for(int i = 0; i < max_number_of_iterations; i++){
 //################## iteration method
+    //persvec[20].print_coords();
+    //persvec[20].print_T();
+    //persvec[20].print_S();
     has_pers_reached_destination(destvec,persvec);
 
     if(movement_update == 's'){
