@@ -6,6 +6,7 @@
 #include <vector>
 #include <math.h>
 #include <time.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -286,24 +287,19 @@ public:
         y = ny;
         int colour_variation = (rand() % 150) - 75; //leichte Farbvariation, damit die einzelnen Personen voneinander unterschieden werden können
         setrgb(0,0,150 + colour_variation);
-
         quantity_obstacles = q_obst;
         quantity_destinations = q_dest;
         quantity_persons = q_pers;
-
         //###Zu set_w_S
         int p_d[1]; //bevorzugtes Ziel
+
         p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zufällig ausgewählt
         set_w_S(true,1,p_d, rand() % (quantity_destinations) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
         renew_w_S_and_S(destvec);
-
         set_S(destvec);
-
         set_D_on_zero();
-
         //Zufälliges setzen des "Friction" Parameters:
         friction = (rand() % 300) / 1000;
-
         evacuated = false;
         number_of_conflicts = 0;
 
@@ -344,10 +340,10 @@ public:
 
     double friction = 0.0; // Wahrscheinlichkeit, dass sich die Person nicht bewegt, obwohl sie sich bewegen sollte
 
-    void moveto(int xn, int yn, vector<person> &persvec, vector <int > &propability_arr_diff, vector<int> &propability_arr_dec, vector<obstacle> &obstvec, bool after_conflict=false){
+    void moveto(int xn, int yn, bool after_conflict=false){
         double r = (rand() % 1000) / 1000.0; // Zufallszahl
         if((evacuated == false && r >= friction) || (evacuated == false && after_conflict == false)){//Wenn die vor der Bewegung kein Konflikt stattgefunden hat wird die Bewegung auf jeden Fall ausgeführt; mit Konflikt nur zu einer bestimmten Wahrscheinlichkeit, die von der "friction" abhängt
-            set_D(persvec, xn, yn, propability_arr_diff, propability_arr_dec, obstvec);            ax = x;
+            ax = x;
             ay = y;
             x = xn;
             y = yn;
@@ -431,7 +427,7 @@ int quantity_persons;
         }
     }
 
-    void set_D(vector<person> &persvec, int xn, int yn, vector<int> &propability_arr_diff, vector<int> &propability_arr_dec, vector <obstacle> &obstvec)
+    void set_D(vector<person> &persvec, int xn, int yn, vector <obstacle> &obstvec)
     {
         for (int k=0; k< quantity_persons; k++)
         {
@@ -445,7 +441,43 @@ int quantity_persons;
         }
     }
 
-    void decay_dyn_f(vector <int> &propability_arr_dec, vector <person> &persvec, int i, vector<obstacle> &obstvec)
+    void set_D_2(vector <person> &persvec, vector <obstacle> &obstvec, int ith_pers_d_feld)
+    {
+        for (int x=0; x<grid_width; x++)
+        {
+            for (int y=0; y<grid_height; y++)
+            {
+                if (can_d_field_be_here(x,y,obstvec)==true)
+                {
+                    for (int j=0; j<persvec.size(); j++)
+                    {
+                        if(persvec[j].x==x && persvec[j].y==y && persvec[ith_pers_d_feld].x!=x && persvec[ith_pers_d_feld].y!=y)
+                        {
+                            persvec[ith_pers_d_feld].D[x][y]++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    void set_D_3 (vector <person> &persvec, int j)
+    {
+        for (int i=0; i< persvec.size(); i++) //gehe alle personen durch
+        {
+            if (i!=j) ///nicht von der eigenen spur beeinflussen
+            {
+                if ((persvec[i].ax!=persvec[i].x || persvec[i].ay!=persvec[i].y) /*&& persvec[i].evacuated == false*/) /// überprüfe ob sich die person bewegt hat
+                ///person hat sich bewegt
+                {
+                    persvec[j].D[persvec[i].ax][persvec[i].ay]++;
+                }
+            }
+        }
+    }
+
+
+    void decay_dyn_f(vector <int> &propability_arr_dec, vector <person> &persvec, int i)
     {
         bool grid_full=true;
         //geht die gesamte fläche durch
@@ -453,12 +485,20 @@ int quantity_persons;
         {
             for (int y=0; y<grid_height; y++)
             {
-                if (persvec[i].D[x][y]!=0) //falls das d feld an dieser stelle existiert
+                if (persvec[i].D[x][y]>0) //falls das d feld an dieser stelle existiert
                 {
-                    //zerfall des d Feldes:
-                    //-----------------------------
-                    //schreibe wahrscheinlichkeitsarray
-                    for (int k=0; k < propability_arr_dec.size(); k++)
+                    int d_max = persvec[i].D[x][y];
+                    int reduc=1;
+                    if (persvec[i].D[x][y]<=15)
+                    {
+                        reduc=persvec[i].D[x][y];
+                    }
+                    for (int j=0; j<reduc; j++) ///je staerker das d feld am puntk x y ost, desto stärker kann es zerfallen
+                    {
+                        //zerfall des d Feldes:
+                        //-----------------------------
+                        //schreibe wahrscheinlichkeitsarray
+                        for (int k=0; k < propability_arr_dec.size(); k++)
                     {
                         propability_arr_dec[k]=0;
                     }
@@ -469,17 +509,31 @@ int quantity_persons;
                             propability_arr_dec[k]=1;
                         }
                     }
+                    /*if (i==1)
+                    {
+                        cout << "Person " << i << " hat die Koordinaten: (x;y) = " << "(" << persvec[i].x << ";" << persvec[i].y << ")" << endl;
+                        cout << "D-Feld von Person "<< i << " ungleich null am Punkt: (x;y) = " <<"("<<x<<";"<<y<<")" << endl;
+                        cout << "############################" << endl;
+                    }*/
+
+
 
                     //generiere zufällige zahl und überprüfe ob d feld zerfallen soll
                     int r_2=rand()%100;
                     if (propability_arr_dec[r_2]==1) //verifikation: D feld soll sich auflösen
                     {
-                        if (/*falls 1 Nachbar frei ist*/ persvec[i].D[x][y+1]==0 || persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==0 || persvec[i].D[x-1][y]==0 || /*falls 2 Nachbarn frei sind*/ persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==persvec[i].D[x][y-1]==0 || /*falls 3 Nachbarn frei sind*/ persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0)
-                        {
-                            persvec[i].D[x][y]=0;
+                        //if (/*falls 1 Nachbar frei ist*/ persvec[i].D[x][y+1]==0 || persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==0 || persvec[i].D[x-1][y]==0 || /*falls 2 Nachbarn frei sind*/ persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==persvec[i].D[x][y-1]==0 || /*falls 3 Nachbarn frei sind*/ persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0)
+                        //{
+                            /*if (i==1)
+                            {
+                                cout << "-------------------------------------------" << endl;
+                                cout << "Zerfall findet bei Person "<< i<< " am Punkt: (x;y) = " <<"("<<x<<";"<<y<<")  statt."<< endl;
+                                cout << "--------------------------------------------" << endl;
+                            }*/
+                            persvec[i].D[x][y]--;
                             grid_full=false;
-                        }
-                        //falls das d feld komplett voll ist und trz zerfällt
+                        //}
+                        //falls das d feld komplett voll ist, zerfällt es trz iwo am rand
                         if (grid_full==true)
                         {
                             int x_rand = rand () %grid_width;
@@ -490,28 +544,16 @@ int quantity_persons;
                             switch (which_side)
                             {
                                 case 0:
-                                    if (can_d_field_be_here(0,y_rand, obstvec)==true)
-                                    {
-                                        persvec[i].D[0][y_rand]=0;
-                                    }
+                                    persvec[i].D[0][y_rand]=0;
                                 case 1:
-                                    if (can_d_field_be_here(x_rand,0, obstvec)==true)
-                                    {
-                                        persvec[i].D[x_rand][0]=0;
-                                    }
                                     persvec[i].D[x_rand][0]=0;
                                 case 2:
-                                    if (can_d_field_be_here(grid_width-1,y_rand, obstvec)==true)
-                                    {
-                                        persvec[i].D[grid_width-1][y_rand]=0;
-                                    }
+                                    persvec[i].D[grid_width-1][y_rand]=0;
                                 case 3:
-                                    if (can_d_field_be_here(x_rand,grid_height-1, obstvec)==true)
-                                    {
-                                        persvec[i].D[x_rand][grid_height-1]=0;
-                                    }
+                                    persvec[i].D[x_rand][grid_height-1]=0;
                             }
                         }
+                    }
                     }
                 }
             }
@@ -520,6 +562,7 @@ int quantity_persons;
 
     void diffusion_dyn_f(vector <int > &propability_arr_diff, vector <person> &persvec, int xn, int yn, int i, vector<obstacle> &obstvec, vector <int> &propability_arr_dec)
     {
+
         bool grid_full=true;
         //gehe ganzen grundriss durch und überprüfe ob sich das d feld verteilen soll
         for (int x=0; x< grid_width; x++)
@@ -527,9 +570,11 @@ int quantity_persons;
             for (int y=0; y<grid_height; y++)
             {
                 //falls das d feld an diesem pkt existiert
-                if (persvec[i].D[x][y]!=0)
+                if (persvec[i].D[x][y]>0)
                 {
-                    //Verteilung des D-Felds
+                    for (int k=0; k<persvec[i].D[x][y]; k++) ///je stärker das d feld desto schneller kann es sich verteilen
+                    {
+                                            //Verteilung des D-Felds
                     //------------
                     //schreibe wahrscheinlichkeitsarray
                     for (int k=0; k <propability_arr_diff.size(); k++)
@@ -557,6 +602,10 @@ int quantity_persons;
                                 if (can_d_field_be_here(x-1, y, obstvec)==true)
                                 {
                                     persvec[i].D[x-1][y]++;
+                                    if (persvec[i].D[x][y]>=2)
+                                    {
+                                        persvec[i].D[x][y]--;
+                                    }
                                 }
                                 grid_full=false;
                             }
@@ -565,7 +614,10 @@ int quantity_persons;
                                 if (can_d_field_be_here(x+1, y, obstvec)==true)
                                 {
                                     persvec[i].D[x+1][y]++;
-                                }
+                                    if (persvec[i].D[x][y]>=2)
+                                    {
+                                        persvec[i].D[x][y]--;
+                                    }                                }
                                 grid_full=false;
                             }
                             else if (x!=xn && y-1!=yn)
@@ -573,7 +625,10 @@ int quantity_persons;
                                 if (can_d_field_be_here(x, y-1, obstvec)==true)
                                 {
                                     persvec[i].D[x][y-1]++;
-                                }
+                                    if (persvec[i].D[x][y]>=2)
+                                    {
+                                        persvec[i].D[x][y]--;
+                                    }                                }
                                 grid_full=false;
                             }
                             else if (x!=xn && y+1!=yn)
@@ -581,7 +636,10 @@ int quantity_persons;
                                 if (can_d_field_be_here(x, y+1, obstvec)==true)
                                 {
                                     persvec[i].D[x][y+1]++;
-                                }
+                                    if (persvec[i].D[x][y]>=2)
+                                    {
+                                        persvec[i].D[x][y]--;
+                                    }                                }
                                 grid_full=false;
                             }
                         }
@@ -592,7 +650,10 @@ int quantity_persons;
                                 if (can_d_field_be_here(x+1, y, obstvec)==true)
                                 {
                                     persvec[i].D[x+1][y]++;
-                                }
+                                    if (persvec[i].D[x][y]>=2)
+                                    {
+                                        persvec[i].D[x][y]--;
+                                    }                                }
                                 grid_full=false;
                             }
                             else if (x!=xn && y-1!=yn)
@@ -600,7 +661,10 @@ int quantity_persons;
                                 if (can_d_field_be_here(x, y-1, obstvec)==true)
                                 {
                                     persvec[i].D[x][y-1]++;
-                                }
+                                    if (persvec[i].D[x][y]>=2)
+                                    {
+                                        persvec[i].D[x][y]--;
+                                    }                                }
                                 grid_full=false;
                             }
                             else if (x!=xn && y+1!=yn)
@@ -608,6 +672,7 @@ int quantity_persons;
                                if (can_d_field_be_here(x, y+1, obstvec)==true)
                                 {
                                     persvec[i].D[x][y+1]++;
+                                    persvec[i].D[x][y]--;
                                 }
                                 grid_full=false;
                             }
@@ -616,7 +681,10 @@ int quantity_persons;
                                 if (can_d_field_be_here(x-1, y, obstvec)==true)
                                 {
                                     persvec[i].D[x-1][y]++;
-                                }
+                                    if (persvec[i].D[x][y]>=2)
+                                    {
+                                        persvec[i].D[x][y]--;
+                                    }                                }
                                 grid_full=false;
                             }
                         }
@@ -627,7 +695,10 @@ int quantity_persons;
                                 if (can_d_field_be_here(x, y-1, obstvec)==true)
                                 {
                                     persvec[i].D[x][y-1]++;
-                                }
+                                    if (persvec[i].D[x][y]>=2)
+                                    {
+                                        persvec[i].D[x][y]--;
+                                    }                                }
                                 grid_full=false;
                             }
                             else if (x!=xn && y+1!=yn)
@@ -635,7 +706,10 @@ int quantity_persons;
                                if (can_d_field_be_here(x, y+1, obstvec)==true)
                                 {
                                     persvec[i].D[x][y+1]++;
-                                }
+                                    if (persvec[i].D[x][y]>=2)
+                                    {
+                                        persvec[i].D[x][y]--;
+                                    }                                }
                                 grid_full=false;
                             }
                             else if (x-1!=xn && y!=yn)
@@ -643,7 +717,10 @@ int quantity_persons;
                                 if (can_d_field_be_here(x-1, y, obstvec)==true)
                                 {
                                     persvec[i].D[x-1][y]++;
-                                }
+                                    if (persvec[i].D[x][y]>=2)
+                                    {
+                                        persvec[i].D[x][y]--;
+                                    }                                }
                                 grid_full=false;
                             }
                             else if (x+1!=xn && y!=yn)
@@ -651,7 +728,10 @@ int quantity_persons;
                                 if (can_d_field_be_here(x+1, y, obstvec)==true)
                                 {
                                     persvec[i].D[x+1][y]++;
-                                }
+                                    if (persvec[i].D[x][y]>=2)
+                                    {
+                                        persvec[i].D[x][y]--;
+                                    }                                }
                                 grid_full=false;
                             }
                         }
@@ -662,7 +742,10 @@ int quantity_persons;
                                if (can_d_field_be_here(x, y+1, obstvec)==true)
                                 {
                                     persvec[i].D[x][y+1]++;
-                                }
+                                    if (persvec[i].D[x][y]>=2)
+                                    {
+                                        persvec[i].D[x][y]--;
+                                    }                                }
                                 grid_full=false;
                             }
                             else if (x-1!=xn && y!=yn)
@@ -670,7 +753,10 @@ int quantity_persons;
                                 if (can_d_field_be_here(x-1, y, obstvec)==true)
                                 {
                                     persvec[i].D[x-1][y]++;
-                                }
+                                    if (persvec[i].D[x][y]>=2)
+                                    {
+                                        persvec[i].D[x][y]--;
+                                    }                                }
                                 grid_full=false;
                             }
                             else if (x+1!=xn && y!=yn)
@@ -678,7 +764,10 @@ int quantity_persons;
                                 if (can_d_field_be_here(x+1, y, obstvec)==true)
                                 {
                                     persvec[i].D[x+1][y]++;
-                                }
+                                    if (persvec[i].D[x][y]>=2)
+                                    {
+                                        persvec[i].D[x][y]--;
+                                    }                                }
                                 grid_full=false;
                             }
                             else if (x!=xn && y-1!=yn)
@@ -686,17 +775,22 @@ int quantity_persons;
                                 if (can_d_field_be_here(x, y-1, obstvec)==true)
                                 {
                                     persvec[i].D[x][y-1]++;
-                                }
+                                    if (persvec[i].D[x][y]>=2)
+                                    {
+                                        persvec[i].D[x][y]--;
+                                    }                                }
                                 grid_full=false;
                             }
                         }
                     }
+                    }
                 }
             }
         }
-        if (grid_full==true)
+
+        if (grid_full==true && diffusion_param !=0) //sollte nicht passieren, vermeidet fehler
         {
-            decay_dyn_f(propability_arr_dec, persvec, i, obstvec);
+            decay_dyn_f(propability_arr_dec, persvec, i);
         }
     }
 
@@ -727,8 +821,8 @@ int quantity_persons;
 
     void print_D()
     {
-        for (int i = 0; i < grid_width; i++){
-            for(int j = 0; j < grid_height; j++){
+        for (int i = 0; i < grid_height; i++){
+            for(int j = 0; j < grid_width; j++){
                 cout << D[i][j] << ":";
             }
             cout << endl;
