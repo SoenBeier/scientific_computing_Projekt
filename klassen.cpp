@@ -267,7 +267,8 @@ int quantity_persons;
         }
     }
 
-
+//fuer das vereinigen der Ziele:
+    vector <int> dest_neighbours;
 
 private:
 
@@ -284,6 +285,10 @@ public:
     person(int nx, int ny,vector<destination> &destvec, int q_obst, int q_dest, int q_pers){
         x = nx;
         y = ny;
+        ax = x;
+        ay = y;
+        aax = ax;
+        aay = ay;
         int colour_variation = (rand() % 150) - 75; //leichte Farbvariation, damit die einzelnen Personen voneinander unterschieden werden können
         setrgb(0,0,150 + colour_variation);
 
@@ -311,6 +316,11 @@ public:
     person(int nx, int ny, int f1, int f2, int f3,vector<destination> &destvec, int q_obst, int q_dest, int q_pers){
         x = nx;
         y = ny;
+        ax = x;
+        ay = y;
+        aax = ax;
+        aay = ay;
+
         setrgb(f1,f2,f3);
 
         quantity_obstacles = q_obst;
@@ -347,7 +357,10 @@ public:
     void moveto(int xn, int yn, vector<person> &persvec, vector <int > &propability_arr_diff, vector<int> &propability_arr_dec, vector<obstacle> &obstvec, bool after_conflict=false){
         double r = (rand() % 1000) / 1000.0; // Zufallszahl
         if((evacuated == false && r >= friction) || (evacuated == false && after_conflict == false)){//Wenn die vor der Bewegung kein Konflikt stattgefunden hat wird die Bewegung auf jeden Fall ausgeführt; mit Konflikt nur zu einer bestimmten Wahrscheinlichkeit, die von der "friction" abhängt
-            set_D(persvec, xn, yn, propability_arr_diff, propability_arr_dec, obstvec);            ax = x;
+            //set_D(persvec, xn, yn, propability_arr_diff, propability_arr_dec, obstvec);   -> jetzt in update_objekt_parameter
+            aax = ax;
+            aay = ay;
+            ax = x;
             ay = y;
             x = xn;
             y = yn;
@@ -409,6 +422,64 @@ int quantity_persons;
 //alte Koordinaten
     int ax;
     int ay;
+//alte Koordinate der alten Koordinaten
+    int aax;
+    int aay;
+//letzte Bewegungsrichtung
+    char last_movement_direction;
+//vorletzte Bewegungsrichtung
+    char a_last_movement_direction;
+
+    char set_last_movement_direction(int ax, int ay, int jx, int jy){ //ax steht für "altes x", jx fuer "jetziges x", setzt die Variable last_movement_direction
+        if(jx > ax){
+            //Fehlerueberpruefung: ist die Bewegung genau 1 lang?:
+            if (jx != ax + 1 && evacuated == false){
+                cout << "Fehler: Die Person hat sich nicht exakt um 1 bewegt,1" << endl;
+            }
+            if(jy != jy && evacuated == false){
+                cout << "Fehler: Bewegung der Person wurde falsch ausgeführt; x und y Koordinaten wurden gleichzeitig verändert" << endl;
+            }
+
+            return 'r';
+        }
+        else if(jx < ax){
+            //Fehlerueberpruefung: ist die Bewegung genau 1 lang?:
+            if (jx != ax - 1 && evacuated == false){
+                cout << "Fehler: Die Person hat sich nicht exakt um 1 bewegt,2" << endl;
+            }
+            if(jy != jy && evacuated == false){
+                cout << "Fehler: Bewegung der Person wurde falsch ausgeführt; x und y Koordinaten wurden gleichzeitig verändert" << endl;
+            }
+
+            return 'l';
+        }
+        else if(jy > ay){
+            //Fehlerueberpruefung: ist die Bewegung genau 1 lang?:
+            if (jy != ay + 1 && evacuated == false){
+                cout << "Fehler: Die Person hat sich nicht exakt um 1 bewegt,3" << endl;
+            }
+            if(jx != jx && evacuated == false){
+                cout << "Fehler: Bewegung der Person wurde falsch ausgeführt; x und y Koordinaten wurden gleichzeitig verändert" << endl;
+            }
+
+            return 'u';
+        }
+        else if(jy < ay){
+            //Fehlerueberpruefung: ist die Bewegung genau 1 lang?:
+            if (jy != ay - 1 && evacuated == false){
+                cout << "Fehler: Die Person hat sich nicht exakt um 1 bewegt,4" << endl;
+            }
+            if(jx != jx && evacuated == false){
+                cout << "Fehler: Bewegung der Person wurde falsch ausgeführt; x und y Koordinaten wurden gleichzeitig verändert" << endl;
+            }
+
+            return 'o';
+        }
+        else{//Person ist stehen geblieben
+            return 's';
+        }
+    }
+
 //colour
     int r;
     int g;
@@ -747,7 +818,7 @@ int quantity_persons;
             w_S[i] = w;
         }
     }
-    void set_w_S(int quantity_known_dest, bool previously_set = false){//legt den anfänglicher Wissensstand der Person über die Ausgänge fest, Parameter w_S wird für eine eine Anzahl(quantity_known_dest) von Zielen zufällg gewählt, wenn previously set == false ist; previously set = true wird nur intern benutzt
+    void set_w_S(int quantity_known_dest, bool previously_set = false){//legt den anfänglicher Wissensstand der Person über die Ausgänge fest, Parameter w_S wird für eine Anzahl(quantity_known_dest) von Zielen zufällg gewählt, wenn previously set == false ist (Ausnahmefall ist, wenn quantity_known_dest == 1 ist, dann ist w_S = 1; previously set = true wird nur intern benutzt
         w_S.resize(quantity_destinations);
         for(int i = 0; i < quantity_destinations; i++){
             if(previously_set == false)
@@ -770,9 +841,14 @@ int quantity_persons;
                 }
             }
             if(used == false && (previously_set == false || (previously_set == true && w_S[r] == 0))){
-                //Füllen von w_S zum ausgewählen Ziel mit einer Zufälligen Zahl von (0 bis 1]
+                //Füllen von w_S zum ausgewählen Ziel mit einer Zufälligen Zahl von (0 bis 1], außer, wenn nur ein Ausgang bekannt ist (in diesem Fall ist w_S immer 1)
+                if(quantity_known_dest == 1){
+                    w_S[r] = 1.;
+                }
+                else{
                 w_S[r] = (double) (rand() % 10) / 10 + 0.1;
-                cout <<"w_S[r] ist:" << w_S[r] <<" mit r =" << r << endl;
+                }
+                //cout <<"w_S[r] ist:" << w_S[r] <<" mit r =" << r << endl;
                 selected_dest.push_back(r);
             }
             else{
@@ -799,7 +875,7 @@ int quantity_persons;
                 return;
             }
             for(int i = 0; i < quantity_preferred_dest; i++){
-                w_S[preferred_dest[i]] = 1;
+                w_S[preferred_dest[i]] = 2;
             }
             set_w_S(quantity_known_dest-quantity_preferred_dest, true);
 
@@ -857,9 +933,11 @@ int quantity_persons;
         cout << "----------------------------------------------------------------" << endl;
         for(int j = 0; j < height; j++){
             for(int i = 0; i < width; i++){
-                if (S[i][j] > 9 && S[i][j] <= 99){cout << " " << S[i][j] << ";" ;}
-                else if (S[i][j] > 99){cout << S[i][j] << ";" ;}
-                else {cout << "  " << S[i][j] << ";" ;}
+                if (S[i][j] > 9999){cout << "" << (int)S[i][j] << ";" ;}
+                else if (S[i][j] > 999){cout << " " << (int)S[i][j] << ";" ;}
+                else if (S[i][j] > 99){cout << "  " << (int)S[i][j] << ";" ;}
+                else if (S[i][j] > 9){cout << "   " << (int)S[i][j] << ";" ;}
+                else {cout << "    " << S[i][j] << ";" ;}
 
             }
         cout << endl;
@@ -978,8 +1056,39 @@ int quantity_persons;
         evacuation_time = time_end - time_start;
     }
 
-private:
+// ###### wenn "reject_other_D_fields" aktiviert ist, werden folgende Variablen benutzt:
+    int numb_selected_dest; // gibt das Ziel an welches die Person kennt und ansteuern wird
+    //last_movement_direction wird benutzt und steht bei den Koordinaten
 
+
+
+
+
+private:
+    bool followed_the_pers_my_S(person qpers, int iterations_done){//ist wahr, wenn die gefragte Person mit ihrem letzten(iterations_done == 1) bzw. vorletzten(iterations_done == 2) Schritt dem eigenen Potentialfeld gefolgt ist und in die Richtung des eigenen Ziels geht.
+        int nx, ny, ax, ay;
+        if(iterations_done == 1){
+            nx = qpers.x;
+            ny = qpers.y;
+            ax = qpers.ax;
+            ay = qpers.ay;
+        }
+        else if(iterations_done == 2){
+            nx = qpers.ax;
+            ny = qpers.ay;
+            ax = qpers.aax;
+            ay = qpers.aay;
+        }
+        else{
+            cout << "Fehler in followed_the_pers_my_S()" << endl;
+        }
+        if((k_S * S[nx][ny]) > (k_S * S[ax][ay]) && qpers.evacuated == false && iteration > 1){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
 };
 
 
