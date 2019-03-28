@@ -345,7 +345,7 @@ void update_object_parameters(int iteration, vector<person> &persvec, vector<des
         if(corridor_conditions == false){ persvec[j].renew_w_S_and_S(destvec); }
         persvec[j].last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].ax, persvec[j].ay, persvec[j].x, persvec[j].y);
         persvec[j].a_last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].aax, persvec[j].aay, persvec[j].ax, persvec[j].ay);
-        persvec[j].set_D_3(persvec, j);
+        persvec[j].set_D_3(persvec, j, iteration);
         persvec[j].diffusion_dyn_f(propability_arr_diff, persvec, persvec[j].x, persvec[j].y,j, obstvec, propability_arr_dec);
         persvec[j].decay_dyn_f(propability_arr_dec, persvec, j);
     }
@@ -379,7 +379,7 @@ void unite_destinations(vector <person> &persvec, vector <destination> &destvec)
 //#### Analyse
 
 void adapt_w_S_has_only_one_destination(vector<person> &persvec, vector<destination> &destvec){// Sorgt dafür, dass alle Personen nur ein Ziel kennen, dies wird für die Simulation des Korridors benötigt
-    cout << "HIER !" << endl;
+    //cout << "HIER !" << endl;
     for(int i = 0; i < persvec.size(); i++){
     //Setzt alle w_S Parameter einer Person auf 0 außer die von einem einzigen zufällig ausgewähltem Ziel:
         bool w_S_modified = false; //zur Ueberpruefung der korrekten Ausführung der Änderung von w_S
@@ -668,12 +668,12 @@ int main(int argc, char* args[]){
 
 
 
-
 //test
 
 vector <int > propability_arr_diff(100);
 vector <int> propability_arr_dec(100);
 
+cout << "Wahrscheinlichkeitsarrays wurden erstellt;" << endl;
 
 //test
 
@@ -698,6 +698,28 @@ vector <int> propability_arr_dec(100);
         persvec[p] = person(initcoord_pers_vec[p][0],initcoord_pers_vec[p][1],destvec,quantity_obstacles,quantity_destinations,quantity_persons);
     }
 
+    cout << "Objekte wurden erstellt;" << endl;
+    cout << " " << endl;
+
+	cout << "k_D: " << persvec[0].k_D << endl;
+	cout << "k_S: " << persvec[0].k_S << endl;
+
+    cout << " " <<endl;
+    cout << "Diff. Parameter: " << diffusion_param << endl;
+    cout << " " <<endl;
+    cout << "Dec. Parameter: " << decay_param << endl;
+
+    cout << " " <<endl;
+    cout << "corridorconditions: " << corridor_conditions << endl;
+
+    cout << " " <<endl;
+    cout << "reject_other_d_fields: " << reject_other_D_fields << endl;
+
+    cout << " " <<endl;
+    cout << "graphic delay: " << grafic_delay << endl;
+
+    cout << " " <<endl;
+    cout << "Bewegungsupdate: " << movement_update << endl;
 
 //Bei einem Durchlauf des Programms, bei dem Daten entnommen und Analysiert werden muessen, muessen gleichwertige Bedingungen hergestellt werden
 //Deshalb werden dabei einige Parameter nochmals umgeaendert:
@@ -763,21 +785,20 @@ for(int i = 0; i < max_number_of_iterations; i++){
 
     ///test
 
-    /*if (i%25==0)
+    if (i%25==0)
     {
-    /*cout << "                                                                " << endl;
+    cout << "                                                                " << endl;
     cout << "================================================================" << endl;
     cout << "Personen haben sich zum " << i<< "ten mal bewegt!" << endl;
     cout << "================================================================" << endl;
 
     cout << "                                                                " << endl;
     cout << "Grundriss + dfeld von Person:" << "1" << endl;
-    cout << i << ". Iteration" << endl;
     lege_und_printe_grunriss_auf_dfeld(persvec, obstvec, destvec, 1, initcoord_pers_vec);
-    }*/
+    }
 
     ///test
-  
+
 //################## iteration method
 
 
@@ -786,7 +807,7 @@ for(int i = 0; i < max_number_of_iterations; i++){
         draw_grid(persvec,destvec,obstvec,renderer,2);
         SDL_Delay(grafic_delay);
 }
-    cout << "k_D: " << persvec[0].k_D << endl;
+    cout << " " << endl;
     cout << "Durchlauf abgeschlossen" << endl;
     SDL_Delay(500);
 
@@ -813,8 +834,8 @@ int i;
     }
 
     cout << " " << endl;
-    cout << "Grundriss + dfeld von Person:" << i << endl;
-    lege_und_printe_grunriss_auf_dfeld(persvec, obstvec, destvec, 0, initcoord_pers_vec);
+    cout << "Grundriss + D-Feld von Person:" << "1" << endl;
+    lege_und_printe_grunriss_auf_dfeld(persvec, obstvec, destvec, 1, initcoord_pers_vec);
 
     cout << " " <<endl;
     cout << "diff parameter: " << diffusion_param << endl;

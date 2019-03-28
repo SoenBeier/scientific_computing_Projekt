@@ -28,14 +28,14 @@ Die restlichen Optionen können nach Belieben eingestellt werden und werden zu k
 */
 
 
-const static int grid_height = 35;
-const static int grid_width = 260;
+const static int grid_height = 80;
+const static int grid_width = 70;
 
 
 static int max_number_of_iterations = 1000;
 static bool iteration_break_condition = true; //kann das Program auch vorher schon abbrechen(wenn alle Personen im Ziel sind)?
 
-static const char plant_layout[] = "Korridor_ohne_Hin.bmp";//Name des Gebäudeplans
+static const char plant_layout[] = "einzel_Haus.bmp";//Name des Gebäudeplans
 
 static const char movement_update = 'p'; //'s' - sequential, 'p' - parallel
 //BEIM PARALLELEN NOCHMAL NACHSCHAUEN: C[][] WIRD WIRKLICH RICHTIG GEWÄHLT ?? was hat es mit den einsen in der Matrix zu tun?
@@ -51,8 +51,8 @@ Veränderungen am Ablauf des Programms, wenn "reject_other_D_fields" aktiviert i
     -> jede Person kennt also nur ein Ziel. Die Nummer dieses Ziels wird in der Variable "numb_selected_dest" in der Personenklasse gespeichert
 - Das D Feld von einer Person wird von anderen Personen nur erhöht, wenn sich diese in die Richtung bewegen, in die das statische Feld der Person zeigt
 */
-static bool corridor_conditions = true; //Korridor muss waagerecht liegen; aktiviert automatisch unite_destinations_if_possible
-static bool reject_other_D_fields = true; //(noch nicht eingebaut) Ist für die Simulation für den Korridor nötig, bei dem die Menschen mit unterschiedlichen Zielen das D Feld der Menschen mit einem anderen Ziel abstoßend finden
+static bool corridor_conditions = false; //Korridor muss waagerecht liegen; aktiviert automatisch unite_destinations_if_possible
+static bool reject_other_D_fields = false; //(noch nicht eingebaut) Ist für die Simulation für den Korridor nötig, bei dem die Menschen mit unterschiedlichen Zielen das D Feld der Menschen mit einem anderen Ziel abstoßend finden
 static bool unite_destinations_if_possible = false; //(nur möglich wenn reject_other_D_fields aktiv ist) Vereinigt Ziele die genau nebeneinanderliegen zu einem Ziel (w_S wird kopiert)
 /*
 Erklärung zur Benutzung des Analysedurchlaufs:
@@ -87,9 +87,9 @@ delta:
     // wird hier ein negativer eintrag gewählt, so wird dieser Parameter nicht gesetzt
 
     double k_S = 1; //Einfluss von s auf die Bewegung der Personen
-    double k_D = 4; //Einfluss von D auf die Bewegung der Personen
-    double w_S = -1; //Wissen der Personen über die Ausgänge
-    double friction = -1;
+    double k_D = 2; //Einfluss von D auf die Bewegung der Personen
+    double w_S = -1; ///Wissen der Personen über die Ausgänge (zufaellig im default)
+    double friction = -1; ///zufaellig im default
 
 };
 

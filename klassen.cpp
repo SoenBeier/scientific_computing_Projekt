@@ -510,19 +510,35 @@ int quantity_persons;
             }
         }
     }
-
-    void set_D_3 (vector <person> &persvec, int j)
+    int iterat_val;
+    void set_D_3 (vector <person> &persvec, int j, int iteration)
     {
+        if (iteration==0)
+        {
+            for (int i=0; i<persvec.size(); i++)
+            {
+                persvec[i].iteration=0;
+            }
+        }
         for (int i=0; i< persvec.size(); i++) //gehe alle personen durch
         {
             if (i!=j) ///nicht von der eigenen spur beeinflussen
             {
-                if((reject_other_D_fields == true && followed_the_pers_my_S(persvec[i],2) == true) || reject_other_D_fields == false){
-                    if ((persvec[i].ax!=persvec[i].x || persvec[i].ay!=persvec[i].y) /*&& persvec[i].evacuated == false*/) /// überprüfe ob sich die person bewegt hat
-                    ///person hat sich bewegt
+                if((reject_other_D_fields == true && followed_the_pers_my_S(persvec[i],2) == true) || reject_other_D_fields == false)
+                {
+                    int old_d_val;
+                    if ((persvec[i].ax!=persvec[i].x || persvec[i].ay!=persvec[i].y) && persvec[i].evacuated == false) /// überprüfe ob sich die person i bewegt hat
                     {
                         persvec[j].D[persvec[i].ax][persvec[i].ay]++;
+
+                        old_d_val=persvec[j].D[persvec[i].ax][persvec[i].ay];
+                        persvec[j].D[persvec[i].ax][persvec[i].ay]=0; ///das d feld von jeder person j!=i hat direkt hinter person i keinen wert mehr -> abstandshalter
                     }
+                    if (persvec[i].iterat_val+1==persvec[i].iteration && (persvec[i].aax!=persvec[i].x || persvec[i].aay!=persvec[i].y) && persvec[i].evacuated == false) /// überprüfe ob sich die person i zum zweiten mal bewegt hat
+                    {
+                        persvec[j].D[persvec[i].aax][persvec[i].aax]=old_d_val; ///setze den wert in der abstandshalter d feld zelle (war vorher auf null) wieder auf den alten wert
+                    }
+                    persvec[i].iterat_val=persvec[i].iteration;
                 }
             }
         }
@@ -540,7 +556,7 @@ int quantity_persons;
                 {
                     int d_max = persvec[i].D[x][y];
                     int reduc=1;
-                    if (persvec[i].D[x][y]<=15)
+                    if (persvec[i].D[x][y]>=25)
                     {
                         reduc=persvec[i].D[x][y];
                     }
