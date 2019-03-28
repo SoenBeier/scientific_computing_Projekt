@@ -28,8 +28,8 @@ Die restlichen Optionen können nach Belieben eingestellt werden und werden zu k
 */
 
 
-const static int grid_height = 40;
-const static int grid_width = 200;
+const static int grid_height = 100;
+const static int grid_width = 100;
 
 
 
@@ -41,11 +41,11 @@ static const char plant_layout[] = "gross_haus.bmp";//Name des Gebäudeplans
 static const char movement_update = 'p'; //'s' - sequential, 'p' - parallel
 //BEIM PARALLELEN NOCHMAL NACHSCHAUEN: C[][] WIRD WIRKLICH RICHTIG GEWÄHLT ?? was hat es mit den einsen in der Matrix zu tun?
 
-static int grafic_delay = 10;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
+static int grafic_delay = 0;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
 
 //zum D-Feld:
 static int decay_param = 25; //Zerfallsparameter fürs dynamische Feld [0,100]
-static int diffusion_param = 25; //Verteilungsparameter fürs dynamische Feld [0,100] ERZEUGT FEHLER BEIM AUSFÜHREN!
+static int diffusion_param = 30; //Verteilungsparameter fürs dynamische Feld [0,100] ERZEUGT FEHLER BEIM AUSFÜHREN!
 
 /*
 Veränderungen am Ablauf des Programms, wenn "reject_other_D_fields" aktiviert ist:

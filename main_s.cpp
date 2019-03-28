@@ -705,15 +705,6 @@ vector <int> propability_arr_dec(100);
 
 //test
 
-
-for(int i = 0; i < 4;i++){
-    cout << "Hier w_S:" << endl;
-    for(int j = 0; j < persvec[i].w_S.size(); j++){
-        cout << persvec[i].w_S[j] << ";";
-    }
-    cout << endl << "ausgewaehltes dest: " << persvec[i].numb_selected_dest << endl;
-}
-
 //test
 
 
@@ -748,18 +739,18 @@ for(int i = 0; i < max_number_of_iterations; i++){
     update_object_parameters(i,persvec,destvec,propability_arr_diff,propability_arr_dec, obstvec);
 
     ///test
-    if (i%25==0)
+    /*if (i%25==0)
     {
     /*cout << "                                                                " << endl;
     cout << "================================================================" << endl;
     cout << "Personen haben sich zum " << i<< "ten mal bewegt!" << endl;
-    cout << "================================================================" << endl;*/
+    cout << "================================================================" << endl;
 
     cout << "                                                                " << endl;
     cout << "Grundriss + dfeld von Person:" << "1" << endl;
     cout << i << ". Iteration" << endl;
     lege_und_printe_grunriss_auf_dfeld(persvec, obstvec, destvec, 1, initcoord_pers_vec);
-    }
+    }*/
 
     ///test
 //################## iteration method
