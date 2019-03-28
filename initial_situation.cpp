@@ -28,15 +28,15 @@ Die restlichen Optionen können nach Belieben eingestellt werden und werden zu k
 */
 
 
-const static int grid_height = 40;
-const static int grid_width = 200;
+const static int grid_height = 35;
+const static int grid_width = 260;
 
 
 
-static int max_number_of_iterations = 10000;
+static int max_number_of_iterations = 1000;
 static bool iteration_break_condition = true; //kann das Program auch vorher schon abbrechen(wenn alle Personen im Ziel sind)?
 
-static const char plant_layout[] = "gross_haus.bmp";//Name des Gebäudeplans
+static const char plant_layout[] = "Korridor_ohne_Hin.bmp";//Name des Gebäudeplans
 
 static const char movement_update = 'p'; //'s' - sequential, 'p' - parallel
 //BEIM PARALLELEN NOCHMAL NACHSCHAUEN: C[][] WIRD WIRKLICH RICHTIG GEWÄHLT ?? was hat es mit den einsen in der Matrix zu tun?
@@ -44,8 +44,8 @@ static const char movement_update = 'p'; //'s' - sequential, 'p' - parallel
 static int grafic_delay = 10;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
 
 //zum D-Feld:
-static int decay_param = 25; //Zerfallsparameter fürs dynamische Feld [0,100]
-static int diffusion_param = 25; //Verteilungsparameter fürs dynamische Feld [0,100] ERZEUGT FEHLER BEIM AUSFÜHREN!
+static int decay_param = 35; //Zerfallsparameter fürs dynamische Feld [0,100]
+static int diffusion_param = 35; //Verteilungsparameter fürs dynamische Feld [0,100] ERZEUGT FEHLER BEIM AUSFÜHREN!
 
 /*
 Veränderungen am Ablauf des Programms, wenn "reject_other_D_fields" aktiviert ist:
@@ -53,7 +53,8 @@ Veränderungen am Ablauf des Programms, wenn "reject_other_D_fields" aktiviert i
     -> jede Person kennt also nur ein Ziel. Die Nummer dieses Ziels wird in der Variable "numb_selected_dest" in der Personenklasse gespeichert
 - Das D Feld von einer Person wird von anderen Personen nur erhöht, wenn sich diese in die Richtung bewegen, in die das statische Feld der Person zeigt
 */
-static bool reject_other_D_fields = false; //(noch nicht eingebaut) Ist für die Simulation für den Korridor nötig, bei dem die Menschen mit unterschiedlichen Zielen das D Feld der Menschen mit einem anderen Ziel abstoßend finden
+static bool corridor_conditions = true; //Korridor muss waagerecht liegen; aktiviert automatisch unite_destinations_if_possible
+static bool reject_other_D_fields = true; //(noch nicht eingebaut) Ist für die Simulation für den Korridor nötig, bei dem die Menschen mit unterschiedlichen Zielen das D Feld der Menschen mit einem anderen Ziel abstoßend finden
 static bool unite_destinations_if_possible = false; //(nur möglich wenn reject_other_D_fields aktiv ist) Vereinigt Ziele die genau nebeneinanderliegen zu einem Ziel (w_S wird kopiert)
 /*
 Erklärung zur Benutzung des Analysedurchlaufs:
@@ -73,7 +74,7 @@ Ist fälschlicherweise der Paramter "foreign_call" aktiviert wird das Programm a
 
 
 Erklärung der Effekte der einzelnen Paramter auf die Bewegung einer Person:
-k_S: Einfluss des statischen Feldes auf die Bewegungen der Personen
+k_S: Einfluss des statischen Feldes auf die Bewegungen der Personenu
 k_D: Einfluss des dynamischen Feldes auf die Bewegungen der Personen
 w_S: Wissensstand der Personen über die einzelnen Ausgänge (wenn der Einfluss vom statischen Feld nicht beeinflusst werden soll, sollte w_S = 1 gewählt sein !!!
 friction: Gibt die Wahrscheinlichkeit an, dass sich eine Person in einem Iterationsschritt nicht bewegt, obwohl sie es dürfte
@@ -87,10 +88,10 @@ delta:
     bool foreign_call = false; //experimentell; Werte werden mit der Konsole hinzugefügt, dies kann für die Analyse benutzt werden
     // wird hier ein negativer eintrag gewählt, so wird dieser Parameter nicht gesetzt
 
-    double k_S = 5; //Einfluss von s auf die Bewegung der Personen
-    double k_D = 2; //Einfluss von D auf die Bewegung der Personen
-    double w_S = 1; //Wissen der Personen über die Ausgänge
-    double friction = 0;
+    double k_S = 1; //Einfluss von s auf die Bewegung der Personen
+    double k_D = 4; //Einfluss von D auf die Bewegung der Personen
+    double w_S = -1; //Wissen der Personen über die Ausgänge
+    double friction = -1;
 
 };
 

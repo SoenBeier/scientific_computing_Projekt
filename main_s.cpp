@@ -342,7 +342,7 @@ void update_object_parameters(int iteration, vector<person> &persvec, vector<des
     for(int j = 0; j < persvec.size(); j++)
     {
         persvec[j].iteration = iteration;
-        persvec[j].renew_w_S_and_S(destvec);
+        if(corridor_conditions == false){ persvec[j].renew_w_S_and_S(destvec); }
         persvec[j].last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].ax, persvec[j].ay, persvec[j].x, persvec[j].y);
         persvec[j].a_last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].aax, persvec[j].aay, persvec[j].ax, persvec[j].ay);
         persvec[j].set_D_3(persvec, j);
@@ -377,6 +377,32 @@ void unite_destinations(vector <person> &persvec, vector <destination> &destvec)
 
 
 //#### Analyse
+
+void adapt_w_S_has_only_one_destination(vector<person> &persvec, vector<destination> &destvec){// Sorgt dafür, dass alle Personen nur ein Ziel kennen, dies wird für die Simulation des Korridors benötigt
+    cout << "HIER !" << endl;
+    for(int i = 0; i < persvec.size(); i++){
+    //Setzt alle w_S Parameter einer Person auf 0 außer die von einem einzigen zufällig ausgewähltem Ziel:
+        bool w_S_modified = false; //zur Ueberpruefung der korrekten Ausführung der Änderung von w_S
+
+        //Ueberschreibung des vectors w_S, damit nur noch ein Eintrag von w_S die Zahl 1 enthält (alle anderen werden mit 0 gefüllt)
+        persvec[i].set_w_S(0.0);
+        persvec[i].set_w_S(1,false);
+        for(int j = 0; j < destvec.size(); j++){
+            if(persvec[i].w_S[j] == 1){
+                persvec[i].numb_selected_dest = j;
+                //Änderung der Farbe der Personen
+                persvec[i].g = (int)(j * 250 / destvec.size());
+
+                w_S_modified = true;
+            }
+        }
+            //Fehlerueberpuefung:
+        if(w_S_modified == false){
+            cout << "Fehler: w_S wurde nicht dem Betriebsmodus angepasst" << endl;
+        }
+
+    }
+}
 void set_analyse_parameters(analysis_run &ana_run, char *k_S, char *k_D, char *w_S, char *friction, char *w_decay, char *w_diffusion){//setzt Parameter aus einem Ausruf aus der Shell
     ana_run.k_S = atoi(k_S) / 1000.;
     ana_run.k_D = atoi(k_D) / 1000.;
@@ -388,7 +414,7 @@ void set_analyse_parameters(analysis_run &ana_run, char *k_S, char *k_D, char *w
 
     cout << ana_run.k_S << ";" << ana_run.k_D << ";" << ana_run.w_S<< ";" << ana_run.friction << ";" << decay_param << ";" << diffusion_param << endl;
 }
-void set_model_parameters(analysis_run ana_run, vector<person> &persvec, vector<destination> &destvec){//setzt Parameter aller Personen; dies ist fÃ¼r die Analyse der Evakuierungszeit unabdingbar
+void set_model_parameters(analysis_run ana_run, vector<person> &persvec, vector<destination> &destvec, vector<obstacle> &obstvec){//setzt Parameter aller Personen; dies ist fÃ¼r die Analyse der Evakuierungszeit unabdingbar
     if(ana_run.execute == true){
         for(int i = 0; i < persvec.size(); i++){
             if(ana_run.k_S >= 0){
@@ -411,35 +437,21 @@ void set_model_parameters(analysis_run ana_run, vector<person> &persvec, vector<
             }
         }
     }
-    if(reject_other_D_fields == true){
+    if(corridor_conditions == true){//Handelt es sich bei der geforderten Situation um einen Korridor, so ist reject_other_D_fields automatisch aktiviert
+        adapt_w_S_has_only_one_destination(persvec,destvec);
+        unite_destinations_if_possible = true;
         for(int i = 0; i < persvec.size(); i++){
-        //Setzt alle w_S Parameter einer Person auf 0 außer die von einem einzigen zufällig ausgewähltem Ziel:
-            bool w_S_modified = false; //zur Ueberpruefung der korrekten Ausführung der Änderung von w_S
-
-            //Ueberschreibung des vectors w_S, damit nur noch ein Eintrag von w_S die Zahl 1 enthält (alle anderen werden mit 0 gefüllt)
-            persvec[i].set_w_S(0.0);
-            persvec[i].set_w_S(1,false);
-
-            for(int j = 0; j < persvec[i].w_S.size(); j++){
-                if(persvec[i].w_S[j] == 1){
-                    persvec[i].numb_selected_dest = j;
-                    w_S_modified = true;
-                }
-            }
-            //Fehlerueberpuefung:
-            if(w_S_modified == false){
-                cout << "Fehler: w_S wurde nicht dem Betriebsmodus 'reject_other_D_fields' angepasst" << endl;
-            }
-
+            persvec[i].set_S_corridor(persvec,destvec,obstvec);
         }
     }
+    if(reject_other_D_fields == true && corridor_conditions == false){
+        adapt_w_S_has_only_one_destination(persvec,destvec);
+    }
     if(unite_destinations_if_possible == true){
-        if(reject_other_D_fields == false){
-            cout << "Die Simulation könnte fehlerhaft sein, da reject_other_D_fields deaktiviert ist." << endl;
-        }
         unite_destinations(persvec,destvec);
     }
 }
+
 void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungszeit der Personen, sollte nur ausgefÃ¼rt werden, wenn vorher "set_model_parameters" angewendet wurde, also analysis_run.execute aktiviert ist
     //oeffnet ein Dokument, in dem alle Daten gespeichert werden:
     fstream f;
@@ -689,7 +701,7 @@ vector <int> propability_arr_dec(100);
 
 //Bei einem Durchlauf des Programms, bei dem Daten entnommen und Analysiert werden muessen, muessen gleichwertige Bedingungen hergestellt werden
 //Deshalb werden dabei einige Parameter nochmals umgeaendert:
-    set_model_parameters(ana_run, persvec, destvec);
+    set_model_parameters(ana_run, persvec, destvec, obstvec);
 
 //################## object declaration
 
@@ -704,8 +716,9 @@ vector <int> propability_arr_dec(100);
 
 
 //test
-
-
+//persvec[0].print_S();
+//persvec[1].print_S();
+/*
 for(int i = 0; i < 4;i++){
     cout << "Hier w_S:" << endl;
     for(int j = 0; j < persvec[i].w_S.size(); j++){
@@ -713,7 +726,7 @@ for(int i = 0; i < 4;i++){
     }
     cout << endl << "ausgewaehltes dest: " << persvec[i].numb_selected_dest << endl;
 }
-
+*/
 //test
 
 
@@ -748,18 +761,7 @@ for(int i = 0; i < max_number_of_iterations; i++){
     update_object_parameters(i,persvec,destvec,propability_arr_diff,propability_arr_dec, obstvec);
 
     ///test
-    if (i%25==0)
-    {
-    /*cout << "                                                                " << endl;
-    cout << "================================================================" << endl;
-    cout << "Personen haben sich zum " << i<< "ten mal bewegt!" << endl;
-    cout << "================================================================" << endl;*/
 
-    cout << "                                                                " << endl;
-    cout << "Grundriss + dfeld von Person:" << "1" << endl;
-    cout << i << ". Iteration" << endl;
-    lege_und_printe_grunriss_auf_dfeld(persvec, obstvec, destvec, 1, initcoord_pers_vec);
-    }
 
     ///test
 //################## iteration method
@@ -781,6 +783,7 @@ for(int i = 0; i < max_number_of_iterations; i++){
 
 
 //test
+/*
 for (int i = 0; i < persvec.size(); i++){
     cout << "Anzahl Konflikte von: " << i << " ist: " << persvec[i].number_of_conflicts << endl;
 }
@@ -792,7 +795,7 @@ int i;
         persvec[i].print_D();
 
         /*cout << i<<". " << "Person S Feld:"  << endl;
-        persvec[i].print_S();*/
+        persvec[i].print_S();
     }
 
     cout << " " << endl;
@@ -815,8 +818,7 @@ int i;
         cout << propability_arr_dec[i] << "; ";
     }
 
-
-
+*/
 //test
 
 
