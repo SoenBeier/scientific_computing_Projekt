@@ -92,7 +92,9 @@ public:
         quantity_destinations = q_dest;
         quantity_persons = q_pers;
 
-        set_static_field_k(obstvec);
+        if(corridor_conditions == false){
+            set_static_field_k(obstvec); //wird für den Fall des Korridors nicht benötigt
+        }
     };
     destination(int a, int b, int f1, int f2, int f3,vector<obstacle> &obstvec, int q_obst, int q_dest, int q_pers){
         x = a;
@@ -102,7 +104,9 @@ public:
         quantity_destinations = q_dest;
         quantity_persons = q_pers;
 
-        set_static_field_k(obstvec);
+        if(corridor_conditions == false){
+            set_static_field_k(obstvec); //wird für den Fall des Korridors nicht benötigt
+        }
     };
 // constructors
 
@@ -301,7 +305,12 @@ public:
         p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zufällig ausgewählt
         set_w_S(true,1,p_d, rand() % (quantity_destinations) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
         renew_w_S_and_S(destvec);
-        set_S(destvec);
+
+
+        if(corridor_conditions == false){
+            set_S_normal(destvec);
+        }
+
         set_D_on_zero();
         //Zufälliges setzen des "Friction" Parameters:
         friction = (rand() % 300) / 1000;
@@ -329,7 +338,10 @@ public:
         set_w_S(true,1,p_d, rand() % (quantity_destinations) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
         renew_w_S_and_S(destvec);
 
-        set_S(destvec);
+        if(corridor_conditions == false){
+            set_S_normal(destvec);
+        }
+
 
         set_D_on_zero();
 
@@ -499,39 +511,6 @@ int quantity_persons;
         }
     }
 
-    void set_D(vector<person> &persvec, int xn, int yn, vector <obstacle> &obstvec)
-    {
-        for (int k=0; k< quantity_persons; k++)
-        {
-            if (can_d_field_be_here(persvec[k].x,persvec[k].y, obstvec)==true)
-            {
-                if (persvec[k].x != x && persvec[k].y != y)
-                {
-                    persvec[k].D[x][y]++;
-                }
-            }
-        }
-    }
-
-    void set_D_2(vector <person> &persvec, vector <obstacle> &obstvec, int ith_pers_d_feld)
-    {
-        for (int x=0; x<grid_width; x++)
-        {
-            for (int y=0; y<grid_height; y++)
-            {
-                if (can_d_field_be_here(x,y,obstvec)==true)
-                {
-                    for (int j=0; j<persvec.size(); j++)
-                    {
-                        if(persvec[j].x==x && persvec[j].y==y && persvec[ith_pers_d_feld].x!=x && persvec[ith_pers_d_feld].y!=y)
-                        {
-                            persvec[ith_pers_d_feld].D[x][y]++;
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     void set_D_3 (vector <person> &persvec, int j)
     {
@@ -990,11 +969,11 @@ int quantity_persons;
         for(int i = 0; i < quantity_destinations; i++){
             if(destvec[i].x > x - r_influence_sphere && destvec[i].x < x + r_influence_sphere){
                 if(destvec[i].y > y - r_influence_sphere && destvec[i].y < y + r_influence_sphere){
-                    w_S[i] = 5;
+                    w_S[i] = 2;
                 }
             }
         }
-        set_S(destvec);
+        set_S_normal(destvec);
     }
     void print_w_S(){
         cout << endl << "print_w_S:" << endl;
@@ -1003,7 +982,7 @@ int quantity_persons;
         }
         cout << endl;
     }
-    void set_S(vector<destination> &destvec){//Addiere alle S_k Arrays der einzelnen destinations zum S Array hinzu; dies verläuft nach Gewichtung
+    void set_S_normal(vector<destination> &destvec){//Addiere alle S_k Arrays der einzelnen destinations zum S Array hinzu; dies verläuft nach Gewichtung
         double max_S = 0;
         //setze alle Einträge von S auf 0:
         for(int xi = 0; xi < grid_width; xi++){
@@ -1023,6 +1002,42 @@ int quantity_persons;
                 }
             }
         }
+    }
+    void set_S_corridor( vector<person> &persvec, vector<destination> &destvec, vector<obstacle> &obstvec){
+        //setze alle Einträge von S auf 0:
+        for(int xi = 0; xi < grid_width; xi++){
+            for(int yi = 0; yi < grid_height; yi++){
+                S[xi][yi] = 0;
+            }
+        }
+        //Wenn diese Funktion ausgeführt wird ein waagerechter Korridor simuliert, der mehrere Ziele am Anfang und am Ende des Korridors besitzt
+        //Geht die Ziele durch und merkt sich die größte x Koordinate
+        int max_x = 0;
+        for(int i = 0; i < destvec.size(); i++){
+            if(destvec[i].x > max_x){
+                max_x = destvec[i].x;
+            }
+        }
+
+        if(destvec[numb_selected_dest].x == max_x){//Dies ist das rechte Ziel, also ist die Formel S[x][y] = x
+            for(int i = 0; i < max_x; i++){
+                for(int j = 0; j < grid_height; j++){
+                    if(could_I_go_to(i,j,obstvec,persvec) || is_there_a_person_on(i,j,persvec)){//Abfrage ob eine Person auf das Feld gehen könnte
+                        S[i][j] = i;
+                    }
+                }
+            }
+        }
+        else{//Es bleibt nur das linke Ziel übrig, also ist die Formel S[x][y] = x_max - x
+            for(int i = 0; i < max_x; i++){
+                for(int j = 0; j < grid_height; j++){
+                    if(could_I_go_to(i,j,obstvec,persvec) || is_there_a_person_on(i,j,persvec)){//Abfrage ob eine Person auf das Feld gehen könnte
+                        S[i][j] = max_x - i;
+                    }
+                }
+            }
+        }
+
     }
     void print_S(int width = grid_width, int height = grid_height){
         cout << "----------------------------------------------------------------" << endl;
