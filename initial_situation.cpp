@@ -32,7 +32,6 @@ const static int grid_height = 35;
 const static int grid_width = 260;
 
 
-
 static int max_number_of_iterations = 1000;
 static bool iteration_break_condition = true; //kann das Program auch vorher schon abbrechen(wenn alle Personen im Ziel sind)?
 
@@ -41,9 +40,8 @@ static const char plant_layout[] = "Korridor_ohne_Hin.bmp";//Name des Gebäudepl
 static const char movement_update = 'p'; //'s' - sequential, 'p' - parallel
 //BEIM PARALLELEN NOCHMAL NACHSCHAUEN: C[][] WIRD WIRKLICH RICHTIG GEWÄHLT ?? was hat es mit den einsen in der Matrix zu tun?
 
-static int grafic_delay = 10;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
+static int grafic_delay = 0;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
 
-//zum D-Feld:
 static int decay_param = 35; //Zerfallsparameter fürs dynamische Feld [0,100]
 static int diffusion_param = 35; //Verteilungsparameter fürs dynamische Feld [0,100] ERZEUGT FEHLER BEIM AUSFÜHREN!
 

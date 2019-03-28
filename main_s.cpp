@@ -716,6 +716,7 @@ vector <int> propability_arr_dec(100);
 
 
 //test
+
 //persvec[0].print_S();
 //persvec[1].print_S();
 /*
@@ -762,8 +763,21 @@ for(int i = 0; i < max_number_of_iterations; i++){
 
     ///test
 
+    /*if (i%25==0)
+    {
+    /*cout << "                                                                " << endl;
+    cout << "================================================================" << endl;
+    cout << "Personen haben sich zum " << i<< "ten mal bewegt!" << endl;
+    cout << "================================================================" << endl;
+
+    cout << "                                                                " << endl;
+    cout << "Grundriss + dfeld von Person:" << "1" << endl;
+    cout << i << ". Iteration" << endl;
+    lege_und_printe_grunriss_auf_dfeld(persvec, obstvec, destvec, 1, initcoord_pers_vec);
+    }*/
 
     ///test
+  
 //################## iteration method
 
 
