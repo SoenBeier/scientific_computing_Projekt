@@ -378,7 +378,7 @@ void unite_destinations(vector <person> &persvec, vector <destination> &destvec)
 
 //#### Analyse
 
-void adapt_w_S_has_only_one_destination(vector<person> &persvec){// Sorgt dafür, dass alle Personen nur ein Ziel kennen, dies wird für die Simulation des Korridors benötigt
+void adapt_w_S_has_only_one_destination(vector<person> &persvec, vector<destination> &destvec){// Sorgt dafür, dass alle Personen nur ein Ziel kennen, dies wird für die Simulation des Korridors benötigt
     cout << "HIER !" << endl;
     for(int i = 0; i < persvec.size(); i++){
     //Setzt alle w_S Parameter einer Person auf 0 außer die von einem einzigen zufällig ausgewähltem Ziel:
@@ -387,9 +387,12 @@ void adapt_w_S_has_only_one_destination(vector<person> &persvec){// Sorgt dafür
         //Ueberschreibung des vectors w_S, damit nur noch ein Eintrag von w_S die Zahl 1 enthält (alle anderen werden mit 0 gefüllt)
         persvec[i].set_w_S(0.0);
         persvec[i].set_w_S(1,false);
-        for(int j = 0; j < persvec[i].w_S.size(); j++){
+        for(int j = 0; j < destvec.size(); j++){
             if(persvec[i].w_S[j] == 1){
                 persvec[i].numb_selected_dest = j;
+                //Änderung der Farbe der Personen
+                persvec[i].g = (int)(j * 250 / destvec.size());
+
                 w_S_modified = true;
             }
         }
@@ -435,14 +438,14 @@ void set_model_parameters(analysis_run ana_run, vector<person> &persvec, vector<
         }
     }
     if(corridor_conditions == true){//Handelt es sich bei der geforderten Situation um einen Korridor, so ist reject_other_D_fields automatisch aktiviert
-        adapt_w_S_has_only_one_destination(persvec);
+        adapt_w_S_has_only_one_destination(persvec,destvec);
         unite_destinations_if_possible = true;
         for(int i = 0; i < persvec.size(); i++){
             persvec[i].set_S_corridor(persvec,destvec,obstvec);
         }
     }
-    if(reject_other_D_fields == true){
-        adapt_w_S_has_only_one_destination(persvec);
+    if(reject_other_D_fields == true && corridor_conditions == false){
+        adapt_w_S_has_only_one_destination(persvec,destvec);
     }
     if(unite_destinations_if_possible == true){
         unite_destinations(persvec,destvec);

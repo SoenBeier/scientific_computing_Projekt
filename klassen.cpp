@@ -511,22 +511,22 @@ int quantity_persons;
         }
     }
 
-
     void set_D_3 (vector <person> &persvec, int j)
     {
         for (int i=0; i< persvec.size(); i++) //gehe alle personen durch
         {
             if (i!=j) ///nicht von der eigenen spur beeinflussen
             {
-                if ((persvec[i].ax!=persvec[i].x || persvec[i].ay!=persvec[i].y) /*&& persvec[i].evacuated == false*/) /// überprüfe ob sich die person bewegt hat
-                ///person hat sich bewegt
-                {
-                    persvec[j].D[persvec[i].ax][persvec[i].ay]++;
+                if((reject_other_D_fields == true && followed_the_pers_my_S(persvec[i],2) == true) || reject_other_D_fields == false){
+                    if ((persvec[i].ax!=persvec[i].x || persvec[i].ay!=persvec[i].y) /*&& persvec[i].evacuated == false*/) /// überprüfe ob sich die person bewegt hat
+                    ///person hat sich bewegt
+                    {
+                        persvec[j].D[persvec[i].ax][persvec[i].ay]++;
+                    }
                 }
             }
         }
     }
-
 
     void decay_dyn_f(vector <int> &propability_arr_dec, vector <person> &persvec, int i)
     {
@@ -1020,6 +1020,10 @@ int quantity_persons;
         }
 
         if(destvec[numb_selected_dest].x == max_x){//Dies ist das rechte Ziel, also ist die Formel S[x][y] = x
+            // Aendert Farbe der Personen für eine bessere Übersicht
+            b = 0;
+            g = 50;
+            r = 255;
             for(int i = 0; i < max_x; i++){
                 for(int j = 0; j < grid_height; j++){
                     if(could_I_go_to(i,j,obstvec,persvec) || is_there_a_person_on(i,j,persvec)){//Abfrage ob eine Person auf das Feld gehen könnte
@@ -1029,6 +1033,8 @@ int quantity_persons;
             }
         }
         else{//Es bleibt nur das linke Ziel übrig, also ist die Formel S[x][y] = x_max - x
+            b = 255;
+            g = 0;
             for(int i = 0; i < max_x; i++){
                 for(int j = 0; j < grid_height; j++){
                     if(could_I_go_to(i,j,obstvec,persvec) || is_there_a_person_on(i,j,persvec)){//Abfrage ob eine Person auf das Feld gehen könnte

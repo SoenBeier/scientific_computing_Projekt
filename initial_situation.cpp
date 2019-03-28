@@ -28,8 +28,8 @@ Die restlichen Optionen können nach Belieben eingestellt werden und werden zu k
 */
 
 
-const static int grid_height = 40;
-const static int grid_width = 200;
+const static int grid_height = 35;
+const static int grid_width = 260;
 
 
 
@@ -45,7 +45,7 @@ static int grafic_delay = 10;// Je höher, desto langsamer aktuallisiert sich di
 
 //zum D-Feld:
 static int decay_param = 35; //Zerfallsparameter fürs dynamische Feld [0,100]
-static int diffusion_param = 25; //Verteilungsparameter fürs dynamische Feld [0,100] ERZEUGT FEHLER BEIM AUSFÜHREN!
+static int diffusion_param = 35; //Verteilungsparameter fürs dynamische Feld [0,100] ERZEUGT FEHLER BEIM AUSFÜHREN!
 
 /*
 Veränderungen am Ablauf des Programms, wenn "reject_other_D_fields" aktiviert ist:
@@ -54,7 +54,7 @@ Veränderungen am Ablauf des Programms, wenn "reject_other_D_fields" aktiviert i
 - Das D Feld von einer Person wird von anderen Personen nur erhöht, wenn sich diese in die Richtung bewegen, in die das statische Feld der Person zeigt
 */
 static bool corridor_conditions = true; //Korridor muss waagerecht liegen; aktiviert automatisch unite_destinations_if_possible
-static bool reject_other_D_fields = false; //(noch nicht eingebaut) Ist für die Simulation für den Korridor nötig, bei dem die Menschen mit unterschiedlichen Zielen das D Feld der Menschen mit einem anderen Ziel abstoßend finden
+static bool reject_other_D_fields = true; //(noch nicht eingebaut) Ist für die Simulation für den Korridor nötig, bei dem die Menschen mit unterschiedlichen Zielen das D Feld der Menschen mit einem anderen Ziel abstoßend finden
 static bool unite_destinations_if_possible = false; //(nur möglich wenn reject_other_D_fields aktiv ist) Vereinigt Ziele die genau nebeneinanderliegen zu einem Ziel (w_S wird kopiert)
 /*
 Erklärung zur Benutzung des Analysedurchlaufs:
@@ -74,7 +74,7 @@ Ist fälschlicherweise der Paramter "foreign_call" aktiviert wird das Programm a
 
 
 Erklärung der Effekte der einzelnen Paramter auf die Bewegung einer Person:
-k_S: Einfluss des statischen Feldes auf die Bewegungen der Personen
+k_S: Einfluss des statischen Feldes auf die Bewegungen der Personenu
 k_D: Einfluss des dynamischen Feldes auf die Bewegungen der Personen
 w_S: Wissensstand der Personen über die einzelnen Ausgänge (wenn der Einfluss vom statischen Feld nicht beeinflusst werden soll, sollte w_S = 1 gewählt sein !!!
 friction: Gibt die Wahrscheinlichkeit an, dass sich eine Person in einem Iterationsschritt nicht bewegt, obwohl sie es dürfte
@@ -89,7 +89,7 @@ delta:
     // wird hier ein negativer eintrag gewählt, so wird dieser Parameter nicht gesetzt
 
     double k_S = 1; //Einfluss von s auf die Bewegung der Personen
-    double k_D = 1; //Einfluss von D auf die Bewegung der Personen
+    double k_D = 4; //Einfluss von D auf die Bewegung der Personen
     double w_S = -1; //Wissen der Personen über die Ausgänge
     double friction = -1;
 
