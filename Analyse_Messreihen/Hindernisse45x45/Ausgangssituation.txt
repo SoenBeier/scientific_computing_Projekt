@@ -1,0 +1,4 @@
+Simuliert wird ein 45x45 Feld(ohne Rand) mit einem eins breiten Ausgang. 
+Vgl. Situation mit Bachelorarbeit von Christian Nitzsche auf Seite 25,26.
+k_S ist 5, k_D ist 0, die Dichte ist Vergleichbar zur Simulation von Nitzsche. 
+Anzahl Personen ist 1000.
