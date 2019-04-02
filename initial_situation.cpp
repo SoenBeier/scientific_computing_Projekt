@@ -45,6 +45,8 @@ static int grafic_delay = 0;// Je höher, desto langsamer aktuallisiert sich die
 static int decay_param = 15; //Zerfallsparameter fürs dynamische Feld [0,100]
 static int diffusion_param = 15; //Verteilungsparameter fürs dynamische Feld [0,100] ERZEUGT FEHLER BEIM AUSFÜHREN!
 
+static int panik_schwelle=5; ///ab welcher anzhal von konflikten geraet jmd in panik
+
 /*
 Veränderungen am Ablauf des Programms, wenn "reject_other_D_fields" aktiviert ist:
 - die Personen erhalten nur für exakt einen Ausgang den Wissensstand 1 (Ueberschreibung der Wissensstände in Funktion set_model_parameter())

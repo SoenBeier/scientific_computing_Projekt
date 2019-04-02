@@ -1008,7 +1008,7 @@ int quantity_persons;
         }
 
         ///panikschwelle -> diffusion
-        if (persvec[i].panic_par>=3)
+        if (persvec[i].panic_par>=panik_schwelle)
         {
             for (int k=0; k<persvec.size(); k++)
             {
