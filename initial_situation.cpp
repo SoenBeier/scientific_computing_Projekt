@@ -35,12 +35,12 @@ const static int grid_width = 120;
 static int max_number_of_iterations = 10000;
 static bool iteration_break_condition = true; ///kann das Program auch vorher schon abbrechen(wenn alle Personen im Ziel sind)?
 
-static const char plant_layout[] = "einzel_haus.bmp";//Name des Gebäudeplans
+static const char plant_layout[] = "test_haus.bmp";//Name des Gebäudeplans
 
 static const char movement_update = 'p'; //'s' - sequential, 'p' - parallel
 //BEIM PARALLELEN NOCHMAL NACHSCHAUEN: C[][] WIRD WIRKLICH RICHTIG GEWÄHLT ?? was hat es mit den einsen in der Matrix zu tun?
 
-static int grafic_delay = 100;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
+static int grafic_delay = 0;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
 
 static int decay_param = 15; //Zerfallsparameter fürs dynamische Feld [0,100]
 static int diffusion_param = 15; //Verteilungsparameter fürs dynamische Feld [0,100] ERZEUGT FEHLER BEIM AUSFÜHREN!
@@ -53,7 +53,7 @@ Veränderungen am Ablauf des Programms, wenn "reject_other_D_fields" aktiviert i
 */
 static bool corridor_conditions = false; //Korridor muss waagerecht liegen; aktiviert automatisch unite_destinations_if_possible
 static bool reject_other_D_fields = false; //(noch nicht eingebaut) Ist für die Simulation für den Korridor nötig, bei dem die Menschen mit unterschiedlichen Zielen das D Feld der Menschen mit einem anderen Ziel abstoßend finden
-static bool unite_destinations_if_possible = false; //(nur möglich wenn reject_other_D_fields aktiv ist) Vereinigt Ziele die genau nebeneinanderliegen zu einem Ziel (w_S wird kopiert)
+static bool unite_destinations_if_possible = true; //(nur möglich wenn reject_other_D_fields aktiv ist) Vereinigt Ziele die genau nebeneinanderliegen zu einem Ziel (w_S wird kopiert)
 /*
 Erklärung zur Benutzung des Analysedurchlaufs:
 Wenn die Daten des Simulationslaufs gespeichert werden sollen, so muss "execute" aktiviert sein.
@@ -87,9 +87,9 @@ delta:
     // wird hier ein negativer eintrag gewählt, so wird dieser Parameter nicht gesetzt
 
     double k_S = 15; //Einfluss von s auf die Bewegung der Personen
-    double k_D = 0; //Einfluss von D auf die Bewegung der Personen
+    double k_D = 5; //Einfluss von D auf die Bewegung der Personen
     double w_S = -1; ///Wissen der Personen über die Ausgänge (zufaellig im default)
-    double friction = -1; ///zufaellig im default
+    double friction = 0; ///zufaellig im default
 
 };
 

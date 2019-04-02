@@ -282,7 +282,7 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
                 if(persvec[conflict_partner[j]].wins_conflict == true){
                     conflict_done = true;
                 }
-
+                persvec[conflict_partner[j]].had_a_conflict=true;
             }
         }
 
@@ -379,6 +379,7 @@ void update_object_parameters(int iteration, vector<person> &persvec, vector<des
         persvec[j].last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].ax, persvec[j].ay, persvec[j].x, persvec[j].y);
         persvec[j].a_last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].aax, persvec[j].aay, persvec[j].ax, persvec[j].ay);
         persvec[j].set_D_3(persvec, j);
+        persvec[j].set_panic_par(persvec, j, iteration);
         persvec[j].diffusion_dyn_f(propability_arr_diff, persvec, persvec[j].x, persvec[j].y,j, obstvec, propability_arr_dec);
         persvec[j].decay_dyn_f(propability_arr_dec, persvec, j);
     }
@@ -679,6 +680,7 @@ int main(int argc, char* args[]){
     int quantity_obstacles = initcoord_obst_vec.size();
 
     //Ausgabe der Koordinaten der noch zu erstellenden Personen, Hindernissen, Zielen
+    cout << "------------------------------" << endl;
     cout << "dest " ;
     print_init_vector(initcoord_dest_vec);
     cout << "Anzahl Ziele: " << initcoord_dest_vec.size()<< endl;
