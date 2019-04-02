@@ -1,11 +1,11 @@
-Die Ordner und Dateinamen enthalten die wichtigen Eigenschaften der Simulationsläufe.
+Die Ordner und Dateinamen enthalten die wichtigen Eigenschaften der SimulationslÃ¤ufe.
 Reihenfolge der Paramter in den Dateien sind:
 
 	1. Name des Grundrisses 
-	2. Durchschnittliche Evakuierungszeit(ist nur bei Datensätzen, die t=korrekt enthalten vergleichbar/korrekt, da zu 	fehleranfällig)
-	3. Durchschnittliche Iteration bei der Evakuierung (ist äquivalent zur Evakuierungszeit, aber immer vergleichbar)
+	2. Durchschnittliche Evakuierungszeit(ist nur bei DatensÃ¤tzen, die t=korrekt enthalten vergleichbar/korrekt, da zu 	fehleranfÃ¤llig)
+	3. Durchschnittliche Iteration bei der Evakuierung (ist Ã¤quivalent zur Evakuierungszeit, aber immer vergleichbar)
 	4. Anzahl der Personen
-	5. Anzahl der Personen, die das Ziel erreicht haben (sollte immer 0 sein, damit die Ergebnisse vergleichbar sind)
+	5. Anzahl der Personen, die das Ziel nicht erreicht haben (sollte immer 0 sein, damit die Ergebnisse vergleichbar sind)
 	6. k_S (der ersten Person) ist der Parameter "analysis_run.execute" aktiviert, so besitzen alle Personen diesen k_S 	Wert 
 	7. k_D -||-
 	8. w_S -||-
@@ -17,4 +17,4 @@ Reihenfolge der Paramter in den Dateien sind:
 	14. Durschnittliche Anzahl der Kollisionen pro Person zum Zeitpunkt der Evakuierung
 
 
-Datensätzen bei denen die Simulation hintereinander (also nicht gleichzeitig) abgelaufen sind und die einen relativ hohen Wert "grafic_delay" besitzen können im Namen mit t=korrekt gekennzeichnet werden, da hier die Fehler die bei der Zeitmessung auftreten minimal sind. Die Höhe des "grafic_delays" sollte hierbei mit angegeben werden und konstant gehalten werden.
+DatensÃ¤tzen bei denen die Simulation hintereinander (also nicht gleichzeitig) abgelaufen sind und die einen relativ hohen Wert "grafic_delay" besitzen kÃ¶nnen im Namen mit t=korrekt gekennzeichnet werden, da hier die Fehler die bei der Zeitmessung auftreten minimal sind. Die HÃ¶he des "grafic_delays" sollte hierbei mit angegeben werden und konstant gehalten werden.
