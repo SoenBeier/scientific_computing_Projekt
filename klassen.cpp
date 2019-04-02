@@ -555,30 +555,23 @@ int quantity_persons;
         {
             for (int y=0; y<grid_height; y++)
             {
-                if (persvec[i].D[x][y]>0) //falls das d feld an dieser stelle existiert
+                int d_abs_beginn = abs(persvec[i].D[x][y]);
+                for (int j=0; j<d_abs_beginn; j++) ///je staerker das d feld am puntk x y ost, desto stärker kann es zerfallen
                 {
-                    int d_max = persvec[i].D[x][y];
-                    int reduc=1;
-                    if (persvec[i].D[x][y]>=25)
+                    //zerfall des d Feldes:
+                    //-----------------------------
+                    //schreibe wahrscheinlichkeitsarray
+                    for (int k=0; k < propability_arr_dec.size(); k++)
+                {
+                    propability_arr_dec[k]=0;
+                }
+                if (decay_param!=0)
+                {
+                    for (int k=0; k<decay_param ; k++)
                     {
-                        reduc=persvec[i].D[x][y];
+                        propability_arr_dec[k]=1;
                     }
-                    for (int j=0; j<reduc; j++) ///je staerker das d feld am puntk x y ost, desto stärker kann es zerfallen
-                    {
-                        //zerfall des d Feldes:
-                        //-----------------------------
-                        //schreibe wahrscheinlichkeitsarray
-                        for (int k=0; k < propability_arr_dec.size(); k++)
-                    {
-                        propability_arr_dec[k]=0;
-                    }
-                    if (decay_param!=0)
-                    {
-                        for (int k=0; k<decay_param ; k++)
-                        {
-                            propability_arr_dec[k]=1;
-                        }
-                    }
+                }
                     /*if (i==1)
                     {
                         cout << "Person " << i << " hat die Koordinaten: (x;y) = " << "(" << persvec[i].x << ";" << persvec[i].y << ")" << endl;
@@ -588,21 +581,27 @@ int quantity_persons;
 
 
 
-                    //generiere zufällige zahl und überprüfe ob d feld zerfallen soll
-                    int r_2=rand()%100;
-                    if (propability_arr_dec[r_2]==1) //verifikation: D feld soll sich auflösen
-                    {
-                        //if (/*falls 1 Nachbar frei ist*/ persvec[i].D[x][y+1]==0 || persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==0 || persvec[i].D[x-1][y]==0 || /*falls 2 Nachbarn frei sind*/ persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==persvec[i].D[x][y-1]==0 || /*falls 3 Nachbarn frei sind*/ persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0)
-                        //{
-                            /*if (i==1)
-                            {
-                                cout << "-------------------------------------------" << endl;
-                                cout << "Zerfall findet bei Person "<< i<< " am Punkt: (x;y) = " <<"("<<x<<";"<<y<<")  statt."<< endl;
-                                cout << "--------------------------------------------" << endl;
-                            }*/
+                //generiere zufällige zahl und überprüfe ob d feld zerfallen soll
+                int r_2=rand()%100;
+                if (propability_arr_dec[r_2]==1) //verifikation: D feld soll sich auflösen
+                {
+                    //if (/*falls 1 Nachbar frei ist*/ persvec[i].D[x][y+1]==0 || persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==0 || persvec[i].D[x-1][y]==0 || /*falls 2 Nachbarn frei sind*/ persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==persvec[i].D[x][y-1]==0 || /*falls 3 Nachbarn frei sind*/ persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0)
+                    //{
+                        /*if (i==1)
+                        {
+                            cout << "-------------------------------------------" << endl;
+                            cout << "Zerfall findet bei Person "<< i<< " am Punkt: (x;y) = " <<"("<<x<<";"<<y<<")  statt."<< endl;
+                            cout << "--------------------------------------------" << endl;
+                        }*/
+                        if(persvec[i].D[x][y] >= 0){
                             persvec[i].D[x][y]--;
-                            grid_full=false;
+                        }
+                        else{
+                            persvec[i].D[x][y]++;
+                        }
+                            //grid_full=false;
                         //}
+                        /*
                         //falls das d feld komplett voll ist, zerfällt es trz iwo am rand
                         if (grid_full==true)
                         {
@@ -623,9 +622,10 @@ int quantity_persons;
                                     persvec[i].D[x_rand][grid_height-1]=0;
                             }
                         }
-                    }
+                        */
                     }
                 }
+
             }
         }
     }
