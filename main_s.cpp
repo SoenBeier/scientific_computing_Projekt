@@ -253,8 +253,13 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
             persvec[i].desired_y = persvec[i].y;
             persvec[i].wins_conflict = true; //Möchte die Person stehen bleiben, so gewinnt diese Person immer den Konflikt
             persvec[i].desired_direction = 's';
+            //Wenn die Person keine Bewegungsmöglichkeit mehr hat wird das als Konflikt gezählt
+            if((persvec[i].get_T(1,0) + persvec[i].get_T(2,1) + persvec[i].get_T(1,2) + persvec[i].get_T(0,1)) == 0){
+                persvec[i].had_a_conflict = true;
+            }
         }
     }
+
 
 ///Entscheidung welche Person sich bewegen darf und welche beispielsweise bei einem Konflikt stehen bleiben muss:
     for(int i = 0; i <persvec.size(); i++){
@@ -797,9 +802,8 @@ for(int i = 0; i < 4;i++){
 
 for(int i = 0; i < max_number_of_iterations; i++){
 //################## iteration method
-    //persvec[20].print_coords();
-    //persvec[20].print_T();
-    //persvec[20].print_S();
+    //persvec[0].print_D();
+
     has_pers_reached_destination(destvec,persvec);
 
     if(movement_update == 's'){

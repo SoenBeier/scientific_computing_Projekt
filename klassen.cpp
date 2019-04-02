@@ -993,18 +993,18 @@ int quantity_persons;
         {
             persvec[i].panic_par++;
             persvec[i].iterat_val=persvec[i].iteration;
-            /*r=0;
+            r=0;
             g=255;
-            b=0;*/
+            b=0;
         }
 
         ///zerfall vom panikparameter
         if (persvec[i].iterat_val+1==persvec[i].iteration && persvec[i].had_a_conflict==false && persvec[i].evacuated==false)
         {
             persvec[i].panic_par--;
-            /*r=0;
+            r=0;
             g=0;
-            b=255;*/
+            b=255;
         }
 
         ///panikschwelle -> diffusion
@@ -1012,7 +1012,7 @@ int quantity_persons;
         {
             for (int k=0; k<persvec.size(); k++)
             {
-                /*if (persvec[k].x==persvec[i].x-1 && persvec[k].y==persvec[i].y)
+                if (persvec[k].x==persvec[i].x-1 && persvec[k].y==persvec[i].y)
                 {
                     persvec[k].panic_par++;
                 }
@@ -1027,21 +1027,27 @@ int quantity_persons;
                 if (persvec[k].x==persvec[i].x-1 && persvec[k].y==persvec[i].y+1)
                 {
                     persvec[k].panic_par++;
-                }*/
-                /*r=255;
+                }
+                r=255;
                 g=0;
-                b=0;*/
+                b=0;
             }
         }
     }
 
     void print_D()
     {
-        for (int i = 0; i < grid_height; i++){
-            for(int j = 0; j < grid_width; j++){
-                cout << D[i][j] << ":";
+        cout << "----------------------------------------------------------------" << endl;
+        for(int j = 0; j < grid_height; j++){
+            for(int i = 0; i < grid_width; i++){
+                if (D[i][j] > 9999){cout << "" << (int)D[i][j] << ";" ;}
+                else if (D[i][j] > 999){cout << " " << (int)D[i][j] << ";" ;}
+                else if (D[i][j] > 99){cout << "  " << (int)D[i][j] << ";" ;}
+                else if (D[i][j] > 9){cout << "   " << (int)D[i][j] << ";" ;}
+                else {cout << "    " << D[i][j] << ";" ;}
+
             }
-            cout << endl;
+        cout << endl;
         }
     }
 
