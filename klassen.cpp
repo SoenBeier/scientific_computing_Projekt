@@ -442,10 +442,10 @@ int quantity_persons;
     char set_last_movement_direction(int ax, int ay, int jx, int jy){ //ax steht für "altes x", jx fuer "jetziges x", setzt die Variable last_movement_direction
         if(jx > ax){
             //Fehlerueberpruefung: ist die Bewegung genau 1 lang?:
-            if (jx != ax + 1 && evacuated == false){
+            if (jx != ax + 1 && evacuated == false && corridor_conditions ==false){
                 cout << "Fehler: Die Person hat sich nicht exakt um 1 bewegt,1" << endl;
             }
-            if(jy != jy && evacuated == false){
+            if(jy != jy && evacuated == false&& corridor_conditions ==false){
                 cout << "Fehler: Bewegung der Person wurde falsch ausgeführt; x und y Koordinaten wurden gleichzeitig verändert" << endl;
             }
 
@@ -453,10 +453,10 @@ int quantity_persons;
         }
         else if(jx < ax){
             //Fehlerueberpruefung: ist die Bewegung genau 1 lang?:
-            if (jx != ax - 1 && evacuated == false){
+            if (jx != ax - 1 && evacuated == false&& corridor_conditions ==false){
                 cout << "Fehler: Die Person hat sich nicht exakt um 1 bewegt,2" << endl;
             }
-            if(jy != jy && evacuated == false){
+            if(jy != jy && evacuated == false&& corridor_conditions ==false){
                 cout << "Fehler: Bewegung der Person wurde falsch ausgeführt; x und y Koordinaten wurden gleichzeitig verändert" << endl;
             }
 
@@ -464,10 +464,10 @@ int quantity_persons;
         }
         else if(jy > ay){
             //Fehlerueberpruefung: ist die Bewegung genau 1 lang?:
-            if (jy != ay + 1 && evacuated == false){
+            if (jy != ay + 1 && evacuated == false&& corridor_conditions ==false){
                 cout << "Fehler: Die Person hat sich nicht exakt um 1 bewegt,3" << endl;
             }
-            if(jx != jx && evacuated == false){
+            if(jx != jx && evacuated == false&& corridor_conditions ==false){
                 cout << "Fehler: Bewegung der Person wurde falsch ausgeführt; x und y Koordinaten wurden gleichzeitig verändert" << endl;
             }
 
@@ -475,10 +475,10 @@ int quantity_persons;
         }
         else if(jy < ay){
             //Fehlerueberpruefung: ist die Bewegung genau 1 lang?:
-            if (jy != ay - 1 && evacuated == false){
+            if (jy != ay - 1 && evacuated == false&& corridor_conditions ==false){
                 cout << "Fehler: Die Person hat sich nicht exakt um 1 bewegt,4" << endl;
             }
-            if(jx != jx && evacuated == false){
+            if(jx != jx && evacuated == false&& corridor_conditions ==false){
                 cout << "Fehler: Bewegung der Person wurde falsch ausgeführt; x und y Koordinaten wurden gleichzeitig verändert" << endl;
             }
 
@@ -510,37 +510,40 @@ int quantity_persons;
             }
         }
     }
-    int iterat_val;
-    void set_D_3 (vector <person> &persvec, int j, int iteration)
+
+    void set_D_3 (vector <person> &persvec, int j)
     {
-        if (iteration==0)
+        if (k_D!=0)
         {
-            for (int i=0; i<persvec.size(); i++)
-            {
-                persvec[i].iteration=0;
-            }
-        }
+
+
         for (int i=0; i< persvec.size(); i++) //gehe alle personen durch
         {
             if (i!=j) ///nicht von der eigenen spur beeinflussen
             {
-                if((reject_other_D_fields == true && followed_the_pers_my_S(persvec[i],2) == true) || reject_other_D_fields == false)
+                if((reject_other_D_fields == true && followed_the_pers_my_S(persvec[i],2) == true) || reject_other_D_fields == false) ///bei mehreren zielen kann eine spur nur entstehen wenn die person in die gleich richtung laeuft
                 {
-                    int old_d_val;
                     if ((persvec[i].ax!=persvec[i].x || persvec[i].ay!=persvec[i].y) && persvec[i].evacuated == false) /// überprüfe ob sich die person i bewegt hat
                     {
                         persvec[j].D[persvec[i].ax][persvec[i].ay]++;
-
-                        old_d_val=persvec[j].D[persvec[i].ax][persvec[i].ay];
-                        persvec[j].D[persvec[i].ax][persvec[i].ay]=0; ///das d feld von jeder person j!=i hat direkt hinter person i keinen wert mehr -> abstandshalter
                     }
-                    if (persvec[i].iterat_val+1==persvec[i].iteration && (persvec[i].aax!=persvec[i].x || persvec[i].aay!=persvec[i].y) && persvec[i].evacuated == false) /// überprüfe ob sich die person i zum zweiten mal bewegt hat
+                }
+                else if (followed_the_pers_my_S(persvec[i], 2)==false && reject_other_D_fields ==true) ///bei mehreren zielen kann, wenn eine pers von mir weg läuft, diese person mein d feld in die richtung der person kauputtmachen (--)
+                {
+                    if ((persvec[i].ax!=persvec[i].x || persvec[i].ay!=persvec[i].y) && persvec[i].evacuated == false)
                     {
-                        persvec[j].D[persvec[i].aax][persvec[i].aax]=old_d_val; ///setze den wert in der abstandshalter d feld zelle (war vorher auf null) wieder auf den alten wert
+                        if (persvec[j].D[persvec[i].ax][persvec[i].ax]>=1)
+                        {
+                            persvec[j].D[persvec[i].ax][persvec[i].ax]--;
+                        }
                     }
-                    persvec[i].iterat_val=persvec[i].iteration;
+                }
+                else
+                {
+                    cout << "Fehler in set_D" << endl;
                 }
             }
+        }
         }
     }
 
@@ -1214,12 +1217,14 @@ private:
         else{
             cout << "Fehler in followed_the_pers_my_S()" << endl;
         }
-        if((k_S * S[nx][ny]) > (k_S * S[ax][ay]) && qpers.evacuated == false && iteration > 1){
-            return true;
+        if((k_S * S[nx][ny]) > (k_S * S[ax][ay]) && qpers.evacuated == false && iteration > 1)
+        {
+            if ((iterations_done==2 && followed_the_pers_my_S(qpers, 1)==true) || iterations_done==1)
+            {
+                return true;
+            }
         }
-        else{
-            return false;
-        }
+        return false;
     }
 };
 

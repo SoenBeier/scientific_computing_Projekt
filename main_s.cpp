@@ -320,14 +320,46 @@ bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &
                     };
                 for(int k = 0; k < 5; k++){
                     if(persvec[i].x == nh[2*k] && persvec[i].y == nh[2*k + 1] && persvec[i].evacuated == false){//Ist die Person ein Nachbar des Ziels?
-                        persvec[i].moveto(destvec[j].x,destvec[j].y);
-                        persvec[i].evacuated = true; //damit sich die Person nicht mehr aus dem Ziel hinausbewegt
-                        persvec[i].iteration_when_evacuated = persvec[i].iteration; // Stoppt "Iterationsmessung"
-                        persvec[i].end_time_measurement();// Stoppt Zeitmessung
-                        return_value = true;
+                        if (corridor_conditions==true)
+                        {
+                            int max_x=0;
+                            int min_x=grid_width;
+                            for (int i=0; i<destvec.size(); i++)
+                            {
+                                if (destvec[i].x > max_x)
+                                {
+                                    max_x=destvec[i].x;
+                                }
+                                if (destvec[i].x < min_x)
+                                {
+                                    min_x=destvec[i].x;
+                                }
+                            }
+                            if (destvec[j].x==max_x)
+                            {
+                                persvec[i].moveto(min_x+2, destvec[j].y);
+                            }
+                            if (destvec[j].x==min_x)
+                            {
+                                /*cout << "max_x= " << max_x << endl;
+                                cout << "persvec[i].x= " << persvec[i].x << endl;*/
+                                persvec[i].x=max_x-2;
+                                //cout << "persvec[i].x= " << persvec[i].x << endl;
+                            }
+                            persvec[i].evacuated = false;
+                            return_value = false;
+                        }
+                        else
+                        {
+                            persvec[i].moveto(destvec[j].x,destvec[j].y);
+                            persvec[i].evacuated = true; //damit sich die Person nicht mehr aus dem Ziel hinausbewegt
+                            persvec[i].iteration_when_evacuated = persvec[i].iteration; // Stoppt "Iterationsmessung"
+                            persvec[i].end_time_measurement();// Stoppt Zeitmessung
+                            return_value = true;
+                        }
                     }
                 }
-                if(persvec[i].x == nh[2*4] && persvec[i].y == nh[2*4 + 1] && persvec[i].evacuated == true && return_value == false){
+                if(persvec[i].x == nh[2*4] && persvec[i].y == nh[2*4 + 1] && persvec[i].evacuated == true && return_value == false && corridor_conditions==false){
                     persvec[i].aax = persvec[i].ax;
                     persvec[i].aay = persvec[i].ay;
                     persvec[i].ax = persvec[i].x;
@@ -341,11 +373,12 @@ void update_object_parameters(int iteration, vector<person> &persvec, vector<des
 
     for(int j = 0; j < persvec.size(); j++)
     {
+        //cout << "persvec[j].x= " << persvec[j].x << endl;
         persvec[j].iteration = iteration;
         if(corridor_conditions == false){ persvec[j].renew_w_S_and_S(destvec); }
         persvec[j].last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].ax, persvec[j].ay, persvec[j].x, persvec[j].y);
         persvec[j].a_last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].aax, persvec[j].aay, persvec[j].ax, persvec[j].ay);
-        persvec[j].set_D_3(persvec, j, iteration);
+        persvec[j].set_D_3(persvec, j);
         persvec[j].diffusion_dyn_f(propability_arr_diff, persvec, persvec[j].x, persvec[j].y,j, obstvec, propability_arr_dec);
         persvec[j].decay_dyn_f(propability_arr_dec, persvec, j);
     }
@@ -606,6 +639,7 @@ int main(int argc, char* args[]){
         return EXIT_SUCCESS;
     }
 
+    cout << "Programm wurde gestartet;" << endl;
 
     srand (time(NULL));
 
@@ -616,6 +650,7 @@ int main(int argc, char* args[]){
         set_analyse_parameters(ana_run, args[1], args[2], args[3], args[4], args[5], args[6]);
     }
 
+    cout << "Grundriss wird geladen..." << endl;
 
     //Initialisation SDL um den gespeicherten Grundriss zu laden
     SDL_Event Event;
@@ -627,6 +662,8 @@ int main(int argc, char* args[]){
     Window = SDL_CreateWindow( "Grundriss", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, grid_width, grid_height, SDL_WINDOW_SHOWN );
     screen_surface = SDL_GetWindowSurface( Window );
     bmp_surf = SDL_LoadBMP(plant_layout);
+
+    cout << "Grundriss geladen;" << endl;
 
     //Zeigt Grundriss, mit dem das Programm arbeiten wird
     SDL_BlitSurface( bmp_surf, NULL, screen_surface, NULL );
@@ -698,6 +735,13 @@ cout << "Wahrscheinlichkeitsarrays wurden erstellt;" << endl;
         persvec[p] = person(initcoord_pers_vec[p][0],initcoord_pers_vec[p][1],destvec,quantity_obstacles,quantity_destinations,quantity_persons);
     }
 
+
+//Bei einem Durchlauf des Programms, bei dem Daten entnommen und Analysiert werden muessen, muessen gleichwertige Bedingungen hergestellt werden
+//Deshalb werden dabei einige Parameter nochmals umgeaendert:
+    set_model_parameters(ana_run, persvec, destvec, obstvec);
+
+//################## object declaration
+
     cout << "Objekte wurden erstellt;" << endl;
     cout << " " << endl;
 
@@ -716,16 +760,12 @@ cout << "Wahrscheinlichkeitsarrays wurden erstellt;" << endl;
     cout << "reject_other_d_fields: " << reject_other_D_fields << endl;
 
     cout << " " <<endl;
-    cout << "graphic delay: " << grafic_delay << endl;
+    cout << "grafic delay: " << grafic_delay << endl;
 
     cout << " " <<endl;
     cout << "Bewegungsupdate: " << movement_update << endl;
 
-//Bei einem Durchlauf des Programms, bei dem Daten entnommen und Analysiert werden muessen, muessen gleichwertige Bedingungen hergestellt werden
-//Deshalb werden dabei einige Parameter nochmals umgeaendert:
-    set_model_parameters(ana_run, persvec, destvec, obstvec);
 
-//################## object declaration
 
 //################## visual output 1
     SDL_Event event;
@@ -785,7 +825,7 @@ for(int i = 0; i < max_number_of_iterations; i++){
 
     ///test
 
-    if (i%25==0)
+    /*if (i%25==0)
     {
     cout << "                                                                " << endl;
     cout << "================================================================" << endl;
@@ -795,7 +835,7 @@ for(int i = 0; i < max_number_of_iterations; i++){
     cout << "                                                                " << endl;
     cout << "Grundriss + dfeld von Person:" << "1" << endl;
     lege_und_printe_grunriss_auf_dfeld(persvec, obstvec, destvec, 1, initcoord_pers_vec);
-    }
+    }*/
 
     ///test
 
@@ -809,6 +849,7 @@ for(int i = 0; i < max_number_of_iterations; i++){
 }
     cout << " " << endl;
     cout << "Durchlauf abgeschlossen" << endl;
+    cout << "Evakuierungszeit: " << persvec[persvec.size()-1].evacuation_time << endl;
     SDL_Delay(500);
 
     while (ana_run.foreign_call == false) {if (SDL_PollEvent(&event) && event.type == SDL_QUIT){break;}} //HÃ¤lt Fenster so lange offen bis es per Hand geschlossen wird
