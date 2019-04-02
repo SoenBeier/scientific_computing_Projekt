@@ -635,7 +635,7 @@ int quantity_persons;
         {
             for (int y=0; y<grid_height; y++)
             {
-                    for (int k=0; k<persvec[i].D[x][y]; k++) ///je stärker das d feld desto schneller kann es sich verteilen
+                    for (int k=0; k<abs(persvec[i].D[x][y]); k++) ///je stärker das d feld desto schneller kann es sich verteilen
                     {
                     //Verteilung des D-Felds
                     //------------
@@ -664,7 +664,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x-1, y, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x-1][y]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -681,7 +681,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x+1, y, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x+1][y]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -698,7 +698,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x, y-1, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y-1]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -715,7 +715,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x, y+1, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y+1]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -735,7 +735,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x+1, y, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x+1][y]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -752,7 +752,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x, y-1, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y-1]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -769,7 +769,7 @@ int quantity_persons;
                             {
                                if (can_d_field_be_here(x, y+1, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y+1]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -786,7 +786,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x-1, y, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x-1][y]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -806,7 +806,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x, y-1, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y-1]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -823,7 +823,7 @@ int quantity_persons;
                             {
                                if (can_d_field_be_here(x, y+1, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y+1]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -840,7 +840,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x-1, y, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x-1][y]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -857,7 +857,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x+1, y, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x+1][y]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -877,7 +877,7 @@ int quantity_persons;
                             {
                                if (can_d_field_be_here(x, y+1, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y+1]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -894,7 +894,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x-1, y, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x-1][y]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -911,7 +911,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x+1, y, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x+1][y]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -928,7 +928,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x, y-1, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y-1]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -993,18 +993,18 @@ int quantity_persons;
         {
             persvec[i].panic_par++;
             persvec[i].iterat_val=persvec[i].iteration;
-            r=0;
+            /*r=0;
             g=255;
-            b=0;
+            b=0;*/
         }
 
         ///zerfall vom panikparameter
         if (persvec[i].iterat_val+1==persvec[i].iteration && persvec[i].had_a_conflict==false && persvec[i].evacuated==false)
         {
             persvec[i].panic_par--;
-            r=0;
+            /*r=0;
             g=0;
-            b=255;
+            b=255;*/
         }
 
         ///panikschwelle -> diffusion
@@ -1028,9 +1028,9 @@ int quantity_persons;
                 {
                     persvec[k].panic_par++;
                 }*/
-                r=255;
+                /*r=255;
                 g=0;
-                b=0;
+                b=0;*/
             }
         }
     }
