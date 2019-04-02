@@ -532,10 +532,7 @@ int quantity_persons;
                 {
                     if ((persvec[i].ax!=persvec[i].x || persvec[i].ay!=persvec[i].y) && persvec[i].evacuated == false)
                     {
-                        if (persvec[j].D[persvec[i].ax][persvec[i].ax]>=1)
-                        {
-                            persvec[j].D[persvec[i].ax][persvec[i].ax]--;
-                        }
+                        persvec[j].D[persvec[i].ax][persvec[i].ax]--;
                     }
                 }
                 else
@@ -607,9 +604,7 @@ int quantity_persons;
                         {
                             int x_rand = rand () %grid_width;
                             int y_rand = rand () %grid_height;
-
                             int which_side = rand() %4;
-
                             switch (which_side)
                             {
                                 case 0:
@@ -628,7 +623,7 @@ int quantity_persons;
 
             }
         }
-    }
+}
 
     void diffusion_dyn_f(vector <int > &propability_arr_diff, vector <person> &persvec, int xn, int yn, int i, vector<obstacle> &obstvec, vector <int> &propability_arr_dec)
     {
@@ -639,12 +634,9 @@ int quantity_persons;
         {
             for (int y=0; y<grid_height; y++)
             {
-                //falls das d feld an diesem pkt existiert
-                if (persvec[i].D[x][y]>0)
-                {
                     for (int k=0; k<persvec[i].D[x][y]; k++) ///je stärker das d feld desto schneller kann es sich verteilen
                     {
-                                            //Verteilung des D-Felds
+                    //Verteilung des D-Felds
                     //------------
                     //schreibe wahrscheinlichkeitsarray
                     for (int k=0; k <propability_arr_diff.size(); k++)
@@ -671,10 +663,15 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x-1, y, obstvec)==true)
                                 {
-                                    persvec[i].D[x-1][y]++;
-                                    if (persvec[i].D[x][y]>=2)
+                                    if (persvec[i].D[x][y]>=0)
                                     {
-                                        persvec[i].D[x][y]--;
+                                        persvec[i].D[x-1][y]++;
+                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                    }
+                                    else
+                                    {
+                                        persvec[i].D[x-1][y]--;
+                                        persvec[i].D[x][y]++; ///d feld verwischt
                                     }
                                 }
                                 grid_full=false;
@@ -683,33 +680,51 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x+1, y, obstvec)==true)
                                 {
-                                    persvec[i].D[x+1][y]++;
-                                    if (persvec[i].D[x][y]>=2)
+                                    if (persvec[i].D[x][y]>=0)
                                     {
-                                        persvec[i].D[x][y]--;
-                                    }                                }
+                                        persvec[i].D[x+1][y]++;
+                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                    }
+                                    else
+                                    {
+                                        persvec[i].D[x+1][y]--;
+                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                    }
+                                }
                                 grid_full=false;
                             }
                             else if (x!=xn && y-1!=yn)
                             {
                                 if (can_d_field_be_here(x, y-1, obstvec)==true)
                                 {
-                                    persvec[i].D[x][y-1]++;
-                                    if (persvec[i].D[x][y]>=2)
+                                    if (persvec[i].D[x][y]>=0)
                                     {
-                                        persvec[i].D[x][y]--;
-                                    }                                }
+                                        persvec[i].D[x][y-1]++;
+                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                    }
+                                    else
+                                    {
+                                        persvec[i].D[x][y-1]--;
+                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                    }
+                                }
                                 grid_full=false;
                             }
                             else if (x!=xn && y+1!=yn)
                             {
                                 if (can_d_field_be_here(x, y+1, obstvec)==true)
                                 {
-                                    persvec[i].D[x][y+1]++;
-                                    if (persvec[i].D[x][y]>=2)
+                                    if (persvec[i].D[x][y]>=0)
                                     {
-                                        persvec[i].D[x][y]--;
-                                    }                                }
+                                        persvec[i].D[x][y+1]++;
+                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                    }
+                                    else
+                                    {
+                                        persvec[i].D[x][y+1]--;
+                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                    }
+                                }
                                 grid_full=false;
                             }
                         }
@@ -719,30 +734,50 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x+1, y, obstvec)==true)
                                 {
-                                    persvec[i].D[x+1][y]++;
-                                    if (persvec[i].D[x][y]>=2)
+                                    if (persvec[i].D[x][y]>=0)
                                     {
-                                        persvec[i].D[x][y]--;
-                                    }                                }
+                                        persvec[i].D[x+1][y]++;
+                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                    }
+                                    else
+                                    {
+                                        persvec[i].D[x+1][y]--;
+                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                    }
+                                }
                                 grid_full=false;
                             }
                             else if (x!=xn && y-1!=yn)
                             {
                                 if (can_d_field_be_here(x, y-1, obstvec)==true)
                                 {
-                                    persvec[i].D[x][y-1]++;
-                                    if (persvec[i].D[x][y]>=2)
+                                    if (persvec[i].D[x][y]>=0)
                                     {
-                                        persvec[i].D[x][y]--;
-                                    }                                }
+                                        persvec[i].D[x][y-1]++;
+                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                    }
+                                    else
+                                    {
+                                        persvec[i].D[x][y-1]--;
+                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                    }
+                                }
                                 grid_full=false;
                             }
                             else if (x!=xn && y+1!=yn)
                             {
                                if (can_d_field_be_here(x, y+1, obstvec)==true)
                                 {
-                                    persvec[i].D[x][y+1]++;
-                                    persvec[i].D[x][y]--;
+                                    if (persvec[i].D[x][y]>=0)
+                                    {
+                                        persvec[i].D[x][y+1]++;
+                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                    }
+                                    else
+                                    {
+                                        persvec[i].D[x][y+1]--;
+                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                    }
                                 }
                                 grid_full=false;
                             }
@@ -750,11 +785,17 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x-1, y, obstvec)==true)
                                 {
-                                    persvec[i].D[x-1][y]++;
-                                    if (persvec[i].D[x][y]>=2)
+                                    if (persvec[i].D[x][y]>=0)
                                     {
-                                        persvec[i].D[x][y]--;
-                                    }                                }
+                                        persvec[i].D[x-1][y]++;
+                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                    }
+                                    else
+                                    {
+                                        persvec[i].D[x-1][y]--;
+                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                    }
+                                }
                                 grid_full=false;
                             }
                         }
@@ -764,44 +805,68 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x, y-1, obstvec)==true)
                                 {
-                                    persvec[i].D[x][y-1]++;
-                                    if (persvec[i].D[x][y]>=2)
+                                    if (persvec[i].D[x][y]>=0)
                                     {
-                                        persvec[i].D[x][y]--;
-                                    }                                }
+                                        persvec[i].D[x][y-1]++;
+                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                    }
+                                    else
+                                    {
+                                        persvec[i].D[x][y-1]--;
+                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                    }
+                                }
                                 grid_full=false;
                             }
                             else if (x!=xn && y+1!=yn)
                             {
                                if (can_d_field_be_here(x, y+1, obstvec)==true)
                                 {
-                                    persvec[i].D[x][y+1]++;
-                                    if (persvec[i].D[x][y]>=2)
+                                    if (persvec[i].D[x][y]>=0)
                                     {
-                                        persvec[i].D[x][y]--;
-                                    }                                }
+                                        persvec[i].D[x][y+1]++;
+                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                    }
+                                    else
+                                    {
+                                        persvec[i].D[x][y+1]--;
+                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                    }
+                                }
                                 grid_full=false;
                             }
                             else if (x-1!=xn && y!=yn)
                             {
                                 if (can_d_field_be_here(x-1, y, obstvec)==true)
                                 {
-                                    persvec[i].D[x-1][y]++;
-                                    if (persvec[i].D[x][y]>=2)
+                                    if (persvec[i].D[x][y]>=0)
                                     {
-                                        persvec[i].D[x][y]--;
-                                    }                                }
+                                        persvec[i].D[x-1][y]++;
+                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                    }
+                                    else
+                                    {
+                                        persvec[i].D[x-1][y]--;
+                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                    }
+                                }
                                 grid_full=false;
                             }
                             else if (x+1!=xn && y!=yn)
                             {
                                 if (can_d_field_be_here(x+1, y, obstvec)==true)
                                 {
-                                    persvec[i].D[x+1][y]++;
-                                    if (persvec[i].D[x][y]>=2)
+                                    if (persvec[i].D[x][y]>=0)
                                     {
-                                        persvec[i].D[x][y]--;
-                                    }                                }
+                                        persvec[i].D[x+1][y]++;
+                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                    }
+                                    else
+                                    {
+                                        persvec[i].D[x+1][y]--;
+                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                    }
+                                }
                                 grid_full=false;
                             }
                         }
@@ -811,48 +876,71 @@ int quantity_persons;
                             {
                                if (can_d_field_be_here(x, y+1, obstvec)==true)
                                 {
-                                    persvec[i].D[x][y+1]++;
-                                    if (persvec[i].D[x][y]>=2)
+                                    if (persvec[i].D[x][y]>=0)
                                     {
-                                        persvec[i].D[x][y]--;
-                                    }                                }
+                                        persvec[i].D[x][y+1]++;
+                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                    }
+                                    else
+                                    {
+                                        persvec[i].D[x][y+1]--;
+                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                    }
+                                }
                                 grid_full=false;
                             }
                             else if (x-1!=xn && y!=yn)
                             {
                                 if (can_d_field_be_here(x-1, y, obstvec)==true)
                                 {
-                                    persvec[i].D[x-1][y]++;
-                                    if (persvec[i].D[x][y]>=2)
+                                    if (persvec[i].D[x][y]>=0)
                                     {
-                                        persvec[i].D[x][y]--;
-                                    }                                }
+                                        persvec[i].D[x-1][y]++;
+                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                    }
+                                    else
+                                    {
+                                        persvec[i].D[x-1][y]--;
+                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                    }
+                                }
                                 grid_full=false;
                             }
                             else if (x+1!=xn && y!=yn)
                             {
                                 if (can_d_field_be_here(x+1, y, obstvec)==true)
                                 {
-                                    persvec[i].D[x+1][y]++;
-                                    if (persvec[i].D[x][y]>=2)
+                                    if (persvec[i].D[x][y]>=0)
                                     {
-                                        persvec[i].D[x][y]--;
-                                    }                                }
+                                        persvec[i].D[x+1][y]++;
+                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                    }
+                                    else
+                                    {
+                                        persvec[i].D[x+1][y]--;
+                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                    }
+                                }
                                 grid_full=false;
                             }
                             else if (x!=xn && y-1!=yn)
                             {
                                 if (can_d_field_be_here(x, y-1, obstvec)==true)
                                 {
-                                    persvec[i].D[x][y-1]++;
-                                    if (persvec[i].D[x][y]>=2)
+                                    if (persvec[i].D[x][y]>=0)
                                     {
-                                        persvec[i].D[x][y]--;
-                                    }                                }
+                                        persvec[i].D[x][y-1]++;
+                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                    }
+                                    else
+                                    {
+                                        persvec[i].D[x][y-1]--;
+                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                    }
+                                }
                                 grid_full=false;
                             }
                         }
-                    }
                     }
                 }
             }
