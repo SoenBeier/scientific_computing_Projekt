@@ -39,15 +39,12 @@ set ttics format "% h"
 set timefmt "%d/%m/%y,%H:%M"
 set angles radians
 set tics back
-set grid nopolar
-set grid xtics nomxtics ytics nomytics noztics nomztics nortics nomrtics \
- nox2tics nomx2tics noy2tics nomy2tics nocbtics nomcbtics
-set grid layerdefault   lt 0 linecolor 0 linewidth 0.500,  lt 0 linecolor 0 linewidth 0.500
+unset grid
 unset raxis
 set theta counterclockwise right
 set style parallel front  lt black linewidth 2.000 dashtype solid
-set key title "Art des Hindernisses:" font "15,15"  center
-set key fixed right bottom vertical Right noreverse enhanced autotitle box lt black linewidth 1.000 dashtype solid font "15,15"
+set key title "" center
+set key fixed right top vertical Right noreverse enhanced autotitle nobox
 set key noinvert samplen 4 spacing 1 width 0 height 0 
 set key maxcolumns 0 maxrows 0
 set key noopaque
@@ -114,7 +111,7 @@ set cbtics  norangelimit autofreq
 set rtics axis in scale 1,0.5 nomirror norotate  autojustify
 set rtics  norangelimit autofreq 
 unset ttics
-set title "Einfluss von Hindernissen vor einem Ausgang auf die zur Evakuierung benötigte Zeit" 
+set title "" 
 set title  font "" norotate
 set timestamp bottom 
 set timestamp "" 
@@ -122,18 +119,18 @@ set timestamp  font "" norotate
 set trange [ * : * ] noreverse nowriteback
 set urange [ * : * ] noreverse nowriteback
 set vrange [ * : * ] noreverse nowriteback
-set xlabel "Reibungsparameter 'friction'" 
-set xlabel  font ",15" textcolor lt -1 norotate
+set xlabel "Stärkeparameter des statischen Feldes k_S" 
+set xlabel  font "" textcolor lt -1 norotate
 set x2label "" 
 set x2label  font "" textcolor lt -1 norotate
-set xrange [ 0.00000 : 0.900000 ] noreverse nowriteback
-set x2range [ 0.677884 : 0.719656 ] noreverse nowriteback
+set xrange [ * : * ] noreverse nowriteback
+set x2range [ * : * ] noreverse nowriteback
 set ylabel "Iteration bei Erreichen des Ziels" 
-set ylabel  font ",15" textcolor lt -1 rotate
+set ylabel  font "" textcolor lt -1 rotate
 set y2label "" 
 set y2label  font "" textcolor lt -1 rotate
-set yrange [ 550.000 : 5050.00 ] noreverse nowriteback
-set y2range [ 2377.21 : 3407.17 ] noreverse nowriteback
+set yrange [ * : * ] noreverse nowriteback
+set y2range [ * : * ] noreverse nowriteback
 set zlabel "" 
 set zlabel  font "" textcolor lt -1 norotate
 set zrange [ * : * ] noreverse nowriteback
@@ -165,12 +162,6 @@ set fontpath
 set psdir
 set fit brief errorvariables nocovariancevariables errorscaling prescale nowrap v5
 GNUTERM = "wxt"
-x = 0.0
-## Last datafile plotted: "pfeil.dat"
-set key font ",10"
-set key title font ",10"
-set key left top
-set xlabel font ",10"
-set ylabel font ",10"
-plot "ohne.dat" using 9:3 title "ohne Hindernis" with linespoints, "viereck_vor.dat" using 9:3 title "Quadrat direkt vor dem Ausgang" with linespoints, "viereck_daneben.dat" using 9:3 title "Quadrat versetzt vor dem Ausgang" with linespoints, "saeule.dat" using 9:3 title "Säule" with linespoints, "pfeil.dat" using 9:3 title "Pfeilspitze" with linespoints
+## Last datafile plotted: "friction=0.9.dat"
+plot "friction=0.0.dat" using 6:3, "friction=0.45.dat" using 6:3, "friction=0.9.dat" using 6:3
 #    EOF
