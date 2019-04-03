@@ -253,13 +253,8 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
             persvec[i].desired_y = persvec[i].y;
             persvec[i].wins_conflict = true; //Möchte die Person stehen bleiben, so gewinnt diese Person immer den Konflikt
             persvec[i].desired_direction = 's';
-            //Wenn die Person keine Bewegungsmöglichkeit mehr hat wird das als Konflikt gezählt
-            if((persvec[i].get_T(1,0) + persvec[i].get_T(2,1) + persvec[i].get_T(1,2) + persvec[i].get_T(0,1)) == 0){
-                persvec[i].had_a_conflict = true;
-            }
         }
     }
-
 
 ///Entscheidung welche Person sich bewegen darf und welche beispielsweise bei einem Konflikt stehen bleiben muss:
     for(int i = 0; i <persvec.size(); i++){
@@ -417,7 +412,7 @@ void unite_destinations(vector <person> &persvec, vector <destination> &destvec)
 
 //#### Analyse
 
-void adapt_w_S_has_only_one_destination(vector<person> &persvec, vector<destination> &destvec){// Sorgt dafür, dass alle Personen nur ein Ziel kennen, dies wird für die Simulation des Korridors benötigt
+void adapt_w_S_has_only_one_destination(vector<person> &persvec, vector<destination> &destvec){/// Sorgt dafür, dass alle Personen nur ein Ziel kennen, dies wird für die Simulation des Korridors benötigt
     //cout << "HIER !" << endl;
     for(int i = 0; i < persvec.size(); i++){
     //Setzt alle w_S Parameter einer Person auf 0 außer die von einem einzigen zufällig ausgewähltem Ziel:
@@ -802,8 +797,9 @@ for(int i = 0; i < 4;i++){
 
 for(int i = 0; i < max_number_of_iterations; i++){
 //################## iteration method
-    //persvec[0].print_D();
-
+    //persvec[20].print_coords();
+    //persvec[20].print_T();
+    //persvec[20].print_S();
     has_pers_reached_destination(destvec,persvec);
 
     if(movement_update == 's'){
@@ -838,6 +834,10 @@ for(int i = 0; i < max_number_of_iterations; i++){
     cout << "Personen haben sich zum " << i<< "ten mal bewegt!" << endl;
     cout << "================================================================" << endl;
 
+    cout << " " << endl;
+    cout << "D feld von person: 1" << endl;
+    persvec[1].print_D();
+
     cout << "                                                                " << endl;
     cout << "Grundriss + dfeld von Person:" << "1" << endl;
     lege_und_printe_grunriss_auf_dfeld(persvec, obstvec, destvec, 1, initcoord_pers_vec);
@@ -853,9 +853,7 @@ for(int i = 0; i < max_number_of_iterations; i++){
         draw_grid(persvec,destvec,obstvec,renderer,2);
         SDL_Delay(grafic_delay);
 }
-    cout << " " << endl;
-    cout << "Durchlauf abgeschlossen" << endl;
-    cout << "Evakuierungszeit: " << persvec[persvec.size()-1].evacuation_time << endl;
+
     SDL_Delay(500);
 
     while (ana_run.foreign_call == false) {if (SDL_PollEvent(&event) && event.type == SDL_QUIT){break;}} //HÃ¤lt Fenster so lange offen bis es per Hand geschlossen wird
