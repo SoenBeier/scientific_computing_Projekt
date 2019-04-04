@@ -362,7 +362,6 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
             }
         }
     }
-
 }
 
 bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &persvec){//Ueberprueft ob die Person das Ziel erreicht hat

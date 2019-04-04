@@ -549,6 +549,7 @@ int quantity_persons;
 
     void decay_dyn_f(vector <int> &propability_arr_dec, vector <person> &persvec, int i)
     {
+        if(decay_param == 0){return;}
         bool grid_full=true;
         //geht die gesamte fläche durch
         for (int x=0; x< grid_width; x++)
@@ -630,7 +631,7 @@ int quantity_persons;
 
     void diffusion_dyn_f(vector <int > &propability_arr_diff, vector <person> &persvec, int xn, int yn, int i, vector<obstacle> &obstvec, vector <int> &propability_arr_dec)
     {
-
+        if(diffusion_param == 0){return;}
         bool grid_full=true;
         //gehe ganzen grundriss durch und überprüfe ob sich das d feld verteilen soll
         for (int x=0; x< grid_width; x++)
@@ -984,6 +985,7 @@ int quantity_persons;
 
     void set_panic_par(vector <person> &persvec, int i, int iteration)
     {
+        if(panik_aktiviert == false){return;} // wenn der Panik Parameter nicht beachtet werden soll, wird diese Funktion abgebrochen
         if (iteration==0)
         {
             persvec[i].iterat_val=0;
@@ -1013,7 +1015,7 @@ int quantity_persons;
         {
             for (int k=0; k<persvec.size(); k++)
             {
-                /*if (persvec[k].x==persvec[i].x-1 && persvec[k].y==persvec[i].y)
+                if (persvec[k].x==persvec[i].x-1 && persvec[k].y==persvec[i].y)
                 {
                     persvec[k].panic_par++;
                 }
@@ -1028,7 +1030,7 @@ int quantity_persons;
                 if (persvec[k].x==persvec[i].x-1 && persvec[k].y==persvec[i].y+1)
                 {
                     persvec[k].panic_par++;
-                }*/
+                }
                 /*r=255;
                 g=0;
                 b=0;*/
