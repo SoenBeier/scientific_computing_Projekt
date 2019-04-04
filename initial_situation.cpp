@@ -28,22 +28,24 @@ Die restlichen Optionen können nach Belieben eingestellt werden und werden zu k
 */
 
 
-const static int grid_height = 120;
-const static int grid_width = 120;
+const static int grid_height = 50;
+const static int grid_width = 50;
 
 
 static int max_number_of_iterations = 10000;
 static bool iteration_break_condition = true; ///kann das Program auch vorher schon abbrechen(wenn alle Personen im Ziel sind)?
 
-static const char plant_layout[] = "einzel_haus.bmp";//Name des Gebäudeplans
+static const char plant_layout[] = "29x29_Haus.bmp";//Name des Gebäudeplans
 
 static const char movement_update = 'p'; //'s' - sequential, 'p' - parallel
 //BEIM PARALLELEN NOCHMAL NACHSCHAUEN: C[][] WIRD WIRKLICH RICHTIG GEWÄHLT ?? was hat es mit den einsen in der Matrix zu tun?
 
-static int grafic_delay = 100;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
+static int grafic_delay = 150;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
 
-static int decay_param = 15; //Zerfallsparameter fürs dynamische Feld [0,100]
-static int diffusion_param = 15; //Verteilungsparameter fürs dynamische Feld [0,100] ERZEUGT FEHLER BEIM AUSFÜHREN!
+static int decay_param = 0; //Zerfallsparameter fürs dynamische Feld [0,100]
+static int diffusion_param = 0; //Verteilungsparameter fürs dynamische Feld [0,100] ERZEUGT FEHLER BEIM AUSFÜHREN!
+
+static int panik_schwelle=10; ///ab welcher anzhal von konflikten geraet jmd in panik
 
 /*
 Veränderungen am Ablauf des Programms, wenn "reject_other_D_fields" aktiviert ist:
@@ -86,10 +88,10 @@ delta:
     bool foreign_call = false; //experimentell; Werte werden mit der Konsole hinzugefügt, dies kann für die Analyse benutzt werden
     // wird hier ein negativer eintrag gewählt, so wird dieser Parameter nicht gesetzt
 
-    double k_S = 15; //Einfluss von s auf die Bewegung der Personen
+    double k_S = 2; //Einfluss von s auf die Bewegung der Personen
     double k_D = 0; //Einfluss von D auf die Bewegung der Personen
     double w_S = -1; ///Wissen der Personen über die Ausgänge (zufaellig im default)
-    double friction = -1; ///zufaellig im default
+    double friction = 0; ///zufaellig im default
 
 };
 

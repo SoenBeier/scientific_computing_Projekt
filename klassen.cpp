@@ -498,6 +498,7 @@ int quantity_persons;
 
 // ###### Dynamic floor field DZur Uni Potsdam(Brandenburg):
     double k_D = 1;
+    int panic_par;
     int D[grid_width][grid_height];
 
     void set_D_on_zero()
@@ -553,22 +554,22 @@ int quantity_persons;
             for (int y=0; y<grid_height; y++)
             {
                 int d_abs_beginn = abs(persvec[i].D[x][y]);
-                for (int j=0; j<d_abs_beginn; j++) ///je staerker das d feld am puntk x y ost, desto stärker kann es zerfallen
+                for (int j=0; j<d_abs_beginn; j++) ///je staerker das d feld am puntk x y ist, desto stärker kann es zerfallen
                 {
                     //zerfall des d Feldes:
                     //-----------------------------
                     //schreibe wahrscheinlichkeitsarray
                     for (int k=0; k < propability_arr_dec.size(); k++)
-                {
-                    propability_arr_dec[k]=0;
-                }
-                if (decay_param!=0)
-                {
-                    for (int k=0; k<decay_param ; k++)
                     {
-                        propability_arr_dec[k]=1;
+                        propability_arr_dec[k]=0;
                     }
-                }
+                    if (decay_param!=0)
+                    {
+                        for (int k=0; k<decay_param ; k++)
+                        {
+                            propability_arr_dec[k]=1;
+                        }
+                    }
                     /*if (i==1)
                     {
                         cout << "Person " << i << " hat die Koordinaten: (x;y) = " << "(" << persvec[i].x << ";" << persvec[i].y << ")" << endl;
@@ -579,9 +580,9 @@ int quantity_persons;
 
 
                 //generiere zufällige zahl und überprüfe ob d feld zerfallen soll
-                int r_2=rand()%100;
-                if (propability_arr_dec[r_2]==1) //verifikation: D feld soll sich auflösen
-                {
+                    int r_2=rand()%100;
+                    if (propability_arr_dec[r_2]==1) //verifikation: D feld soll sich auflösen
+                    {
                     //if (/*falls 1 Nachbar frei ist*/ persvec[i].D[x][y+1]==0 || persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==0 || persvec[i].D[x-1][y]==0 || /*falls 2 Nachbarn frei sind*/ persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==0 || persvec[i].D[x+1][y]==persvec[i].D[x][y-1]==0 || /*falls 3 Nachbarn frei sind*/ persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x-1][y]==persvec[i].D[x][y+1]==0 || persvec[i].D[x-1][y]==persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==0 || persvec[i].D[x][y-1]==persvec[i].D[x+1][y]==persvec[i].D[x][y+1]==0)
                     //{
                         /*if (i==1)
@@ -634,7 +635,7 @@ int quantity_persons;
         {
             for (int y=0; y<grid_height; y++)
             {
-                    for (int k=0; k<persvec[i].D[x][y]; k++) ///je stärker das d feld desto schneller kann es sich verteilen
+                    for (int k=0; k<abs(persvec[i].D[x][y]); k++) ///je stärker das d feld desto schneller kann es sich verteilen
                     {
                     //Verteilung des D-Felds
                     //------------
@@ -663,7 +664,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x-1, y, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x-1][y]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -680,7 +681,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x+1, y, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x+1][y]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -697,7 +698,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x, y-1, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y-1]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -714,7 +715,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x, y+1, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y+1]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -734,7 +735,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x+1, y, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x+1][y]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -751,7 +752,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x, y-1, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y-1]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -768,7 +769,7 @@ int quantity_persons;
                             {
                                if (can_d_field_be_here(x, y+1, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y+1]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -785,7 +786,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x-1, y, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x-1][y]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -805,7 +806,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x, y-1, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y-1]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -822,7 +823,7 @@ int quantity_persons;
                             {
                                if (can_d_field_be_here(x, y+1, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y+1]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -839,7 +840,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x-1, y, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x-1][y]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -856,7 +857,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x+1, y, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x+1][y]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -876,7 +877,7 @@ int quantity_persons;
                             {
                                if (can_d_field_be_here(x, y+1, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y+1]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -893,7 +894,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x-1, y, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x-1][y]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -910,7 +911,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x+1, y, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x+1][y]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -927,7 +928,7 @@ int quantity_persons;
                             {
                                 if (can_d_field_be_here(x, y-1, obstvec)==true)
                                 {
-                                    if (persvec[i].D[x][y]>=0)
+                                    if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y-1]++;
                                         persvec[i].D[x][y]--; ///d feld verwischt
@@ -977,13 +978,76 @@ int quantity_persons;
         return true;
     }
 
+
+    int iterat_val;
+
+    void set_panic_par(vector <person> &persvec, int i, int iteration)
+    {
+        if (iteration==0)
+        {
+            persvec[i].iterat_val=0;
+        }
+
+        ///rising panic parameter
+        if (persvec[i].had_a_conflict==true)
+        {
+            persvec[i].panic_par++;
+            persvec[i].iterat_val=persvec[i].iteration;
+            r=0;
+            g=255;
+            b=0;
+        }
+
+        ///zerfall vom panikparameter
+        if (persvec[i].iterat_val+1==persvec[i].iteration && persvec[i].had_a_conflict==false && persvec[i].evacuated==false)
+        {
+            persvec[i].panic_par--;
+            r=0;
+            g=0;
+            b=255;
+        }
+
+        ///panikschwelle -> diffusion
+        if (persvec[i].panic_par>=panik_schwelle)
+        {
+            for (int k=0; k<persvec.size(); k++)
+            {
+                if (persvec[k].x==persvec[i].x-1 && persvec[k].y==persvec[i].y)
+                {
+                    persvec[k].panic_par++;
+                }
+                if (persvec[k].x==persvec[i].x+1 && persvec[k].y==persvec[i].y)
+                {
+                    persvec[k].panic_par++;
+                }
+                if (persvec[k].x==persvec[i].x && persvec[k].y==persvec[i].y-1)
+                {
+                    persvec[k].panic_par++;
+                }
+                if (persvec[k].x==persvec[i].x-1 && persvec[k].y==persvec[i].y+1)
+                {
+                    persvec[k].panic_par++;
+                }
+                r=255;
+                g=0;
+                b=0;
+            }
+        }
+    }
+
     void print_D()
     {
-        for (int i = 0; i < grid_height; i++){
-            for(int j = 0; j < grid_width; j++){
-                cout << D[i][j] << ":";
+        cout << "----------------------------------------------------------------" << endl;
+        for(int j = 0; j < grid_height; j++){
+            for(int i = 0; i < grid_width; i++){
+                if (D[i][j] > 9999){cout << "" << (int)D[i][j] << ";" ;}
+                else if (D[i][j] > 999){cout << " " << (int)D[i][j] << ";" ;}
+                else if (D[i][j] > 99){cout << "  " << (int)D[i][j] << ";" ;}
+                else if (D[i][j] > 9){cout << "   " << (int)D[i][j] << ";" ;}
+                else {cout << "    " << D[i][j] << ";" ;}
+
             }
-            cout << endl;
+        cout << endl;
         }
     }
 

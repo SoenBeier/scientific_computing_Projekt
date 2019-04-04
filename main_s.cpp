@@ -253,8 +253,13 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
             persvec[i].desired_y = persvec[i].y;
             persvec[i].wins_conflict = true; //Möchte die Person stehen bleiben, so gewinnt diese Person immer den Konflikt
             persvec[i].desired_direction = 's';
+            //Wenn die Person keine Bewegungsmöglichkeit mehr hat wird das als Konflikt gezählt
+            if((persvec[i].get_T(1,0) + persvec[i].get_T(2,1) + persvec[i].get_T(1,2) + persvec[i].get_T(0,1)) == 0){
+                persvec[i].had_a_conflict = true;
+            }
         }
     }
+
 
 ///Entscheidung welche Person sich bewegen darf und welche beispielsweise bei einem Konflikt stehen bleiben muss:
     for(int i = 0; i <persvec.size(); i++){
@@ -282,7 +287,7 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
                 if(persvec[conflict_partner[j]].wins_conflict == true){
                     conflict_done = true;
                 }
-
+                persvec[conflict_partner[j]].had_a_conflict=true;
             }
         }
 
@@ -379,6 +384,7 @@ void update_object_parameters(int iteration, vector<person> &persvec, vector<des
         persvec[j].last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].ax, persvec[j].ay, persvec[j].x, persvec[j].y);
         persvec[j].a_last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].aax, persvec[j].aay, persvec[j].ax, persvec[j].ay);
         persvec[j].set_D_3(persvec, j);
+        persvec[j].set_panic_par(persvec, j, iteration);
         persvec[j].diffusion_dyn_f(propability_arr_diff, persvec, persvec[j].x, persvec[j].y,j, obstvec, propability_arr_dec);
         persvec[j].decay_dyn_f(propability_arr_dec, persvec, j);
     }
@@ -679,6 +685,7 @@ int main(int argc, char* args[]){
     int quantity_obstacles = initcoord_obst_vec.size();
 
     //Ausgabe der Koordinaten der noch zu erstellenden Personen, Hindernissen, Zielen
+    cout << "------------------------------" << endl;
     cout << "dest " ;
     print_init_vector(initcoord_dest_vec);
     cout << "Anzahl Ziele: " << initcoord_dest_vec.size()<< endl;
@@ -795,9 +802,8 @@ for(int i = 0; i < 4;i++){
 
 for(int i = 0; i < max_number_of_iterations; i++){
 //################## iteration method
-    //persvec[20].print_coords();
-    //persvec[20].print_T();
-    //persvec[20].print_S();
+    //persvec[0].print_D();
+
     has_pers_reached_destination(destvec,persvec);
 
     if(movement_update == 's'){
