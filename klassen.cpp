@@ -669,12 +669,12 @@ int quantity_persons;
                                     if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x-1][y]++;
-                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                        //persvec[i].D[x][y]--; ///d feld verwischt
                                     }
                                     else
                                     {
                                         persvec[i].D[x-1][y]--;
-                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                        //persvec[i].D[x][y]++; ///d feld verwischt
                                     }
                                 }
                                 grid_full=false;
@@ -686,12 +686,12 @@ int quantity_persons;
                                     if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x+1][y]++;
-                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                        //persvec[i].D[x][y]--; ///d feld verwischt
                                     }
                                     else
                                     {
                                         persvec[i].D[x+1][y]--;
-                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                        //persvec[i].D[x][y]++; ///d feld verwischt
                                     }
                                 }
                                 grid_full=false;
@@ -703,12 +703,12 @@ int quantity_persons;
                                     if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y-1]++;
-                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                        //persvec[i].D[x][y]--; ///d feld verwischt
                                     }
                                     else
                                     {
                                         persvec[i].D[x][y-1]--;
-                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                        //persvec[i].D[x][y]++; ///d feld verwischt
                                     }
                                 }
                                 grid_full=false;
@@ -720,12 +720,12 @@ int quantity_persons;
                                     if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y+1]++;
-                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                        //persvec[i].D[x][y]--; ///d feld verwischt
                                     }
                                     else
                                     {
                                         persvec[i].D[x][y+1]--;
-                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                        //persvec[i].D[x][y]++; ///d feld verwischt
                                     }
                                 }
                                 grid_full=false;
@@ -740,12 +740,12 @@ int quantity_persons;
                                     if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x+1][y]++;
-                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                        //persvec[i].D[x][y]--; ///d feld verwischt
                                     }
                                     else
                                     {
                                         persvec[i].D[x+1][y]--;
-                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                        //persvec[i].D[x][y]++; ///d feld verwischt
                                     }
                                 }
                                 grid_full=false;
@@ -757,12 +757,12 @@ int quantity_persons;
                                     if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y-1]++;
-                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                        //persvec[i].D[x][y]--; ///d feld verwischt
                                     }
                                     else
                                     {
                                         persvec[i].D[x][y-1]--;
-                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                        //persvec[i].D[x][y]++; ///d feld verwischt
                                     }
                                 }
                                 grid_full=false;
@@ -774,12 +774,12 @@ int quantity_persons;
                                     if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y+1]++;
-                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                        //persvec[i].D[x][y]--; ///d feld verwischt
                                     }
                                     else
                                     {
                                         persvec[i].D[x][y+1]--;
-                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                        //persvec[i].D[x][y]++; ///d feld verwischt
                                     }
                                 }
                                 grid_full=false;
@@ -791,12 +791,12 @@ int quantity_persons;
                                     if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x-1][y]++;
-                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                        //persvec[i].D[x][y]--; ///d feld verwischt
                                     }
                                     else
                                     {
                                         persvec[i].D[x-1][y]--;
-                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                        //persvec[i].D[x][y]++; ///d feld verwischt
                                     }
                                 }
                                 grid_full=false;
@@ -811,12 +811,12 @@ int quantity_persons;
                                     if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y-1]++;
-                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                        //persvec[i].D[x][y]--; ///d feld verwischt
                                     }
                                     else
                                     {
                                         persvec[i].D[x][y-1]--;
-                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                        //persvec[i].D[x][y]++; ///d feld verwischt
                                     }
                                 }
                                 grid_full=false;
@@ -828,12 +828,12 @@ int quantity_persons;
                                     if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y+1]++;
-                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                        //persvec[i].D[x][y]--; ///d feld verwischt
                                     }
                                     else
                                     {
                                         persvec[i].D[x][y+1]--;
-                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                        //persvec[i].D[x][y]++; ///d feld verwischt
                                     }
                                 }
                                 grid_full=false;
@@ -845,12 +845,12 @@ int quantity_persons;
                                     if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x-1][y]++;
-                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                        //persvec[i].D[x][y]--; ///d feld verwischt
                                     }
                                     else
                                     {
                                         persvec[i].D[x-1][y]--;
-                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                        //persvec[i].D[x][y]++; ///d feld verwischt
                                     }
                                 }
                                 grid_full=false;
@@ -862,12 +862,12 @@ int quantity_persons;
                                     if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x+1][y]++;
-                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                        //persvec[i].D[x][y]--; ///d feld verwischt
                                     }
                                     else
                                     {
                                         persvec[i].D[x+1][y]--;
-                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                        //persvec[i].D[x][y]++; ///d feld verwischt
                                     }
                                 }
                                 grid_full=false;
@@ -882,12 +882,12 @@ int quantity_persons;
                                     if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y+1]++;
-                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                        //persvec[i].D[x][y]--; ///d feld verwischt
                                     }
                                     else
                                     {
                                         persvec[i].D[x][y+1]--;
-                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                        //persvec[i].D[x][y]++; ///d feld verwischt
                                     }
                                 }
                                 grid_full=false;
@@ -899,12 +899,12 @@ int quantity_persons;
                                     if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x-1][y]++;
-                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                        //persvec[i].D[x][y]--; ///d feld verwischt
                                     }
                                     else
                                     {
                                         persvec[i].D[x-1][y]--;
-                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                        //persvec[i].D[x][y]++; ///d feld verwischt
                                     }
                                 }
                                 grid_full=false;
@@ -916,12 +916,12 @@ int quantity_persons;
                                     if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x+1][y]++;
-                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                        //persvec[i].D[x][y]--; ///d feld verwischt
                                     }
                                     else
                                     {
                                         persvec[i].D[x+1][y]--;
-                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                        //persvec[i].D[x][y]++; ///d feld verwischt
                                     }
                                 }
                                 grid_full=false;
@@ -933,12 +933,12 @@ int quantity_persons;
                                     if (persvec[i].D[x][y]>0)
                                     {
                                         persvec[i].D[x][y-1]++;
-                                        persvec[i].D[x][y]--; ///d feld verwischt
+                                        //persvec[i].D[x][y]--; ///d feld verwischt
                                     }
                                     else
                                     {
                                         persvec[i].D[x][y-1]--;
-                                        persvec[i].D[x][y]++; ///d feld verwischt
+                                        //persvec[i].D[x][y]++; ///d feld verwischt
                                     }
                                 }
                                 grid_full=false;
@@ -1038,11 +1038,17 @@ int quantity_persons;
 
     void print_D()
     {
-        for (int i = 0; i < grid_height; i++){
-            for(int j = 0; j < grid_width; j++){
-                cout << D[i][j] << ":";
+        cout << "----------------------------------------------------------------" << endl;
+        for(int j = 0; j < grid_height; j++){
+            for(int i = 0; i < grid_width; i++){
+                if (D[i][j] > 9999){cout << "" << (int)D[i][j] << ";" ;}
+                else if (D[i][j] > 999){cout << " " << (int)D[i][j] << ";" ;}
+                else if (D[i][j] > 99){cout << "  " << (int)D[i][j] << ";" ;}
+                else if (D[i][j] > 9){cout << "   " << (int)D[i][j] << ";" ;}
+                else {cout << "    " << D[i][j] << ";" ;}
+
             }
-            cout << endl;
+        cout << endl;
         }
     }
 

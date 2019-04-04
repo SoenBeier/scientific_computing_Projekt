@@ -302,6 +302,65 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
             persvec[i].moveto(persvec[i].desired_x, persvec[i].desired_y, persvec[i].had_a_conflict);
             //Nach konflikt muss hier noch true übergeben werden
         }
+        //Die Personen die den Konflikt verloren haben erhalten ein D Feld steigerung auf der von ihnen aus rechts gesehenem Feld -> Dies soll zu einer besseren Konfliktbeweltigung führen:
+        else{
+            int radius = 5;
+            if(persvec[i].desired_direction == 'o'){
+                for(int j = 0; j < persvec.size(); j++){
+                    if(persvec[j].desired_direction == 'o' && i!=j && persvec[j].x < persvec[i].x + radius && persvec[j].x > persvec[i].x - radius && persvec[j].y < persvec[i].y + radius && persvec[j].y > persvec[i].y - radius){
+                        if(persvec[j].could_I_go_to(persvec[j].x + 1,persvec[j].y,obstvec,persvec)){
+                            persvec[j].D[persvec[j].x + 1][persvec[j].y]++;
+                        }
+                    }
+                }
+
+                if(persvec[i].could_I_go_to(persvec[i].x + 1,persvec[i].y,obstvec,persvec)){
+                    persvec[i].D[persvec[i].x + 1][persvec[i].y]++;
+                    persvec[i].D[persvec[i].x + 1][persvec[i].y]++;
+                }
+
+            }
+            else if(persvec[i].desired_direction == 'r'){
+                for(int j = 0; j < persvec.size(); j++){
+                    if(persvec[j].desired_direction == 'r' && i!=j &&persvec[j].x < persvec[i].x + radius && persvec[j].x > persvec[i].x - radius && persvec[j].y < persvec[i].y + radius && persvec[j].y > persvec[i].y - radius){
+                        if(persvec[j].could_I_go_to(persvec[j].x,persvec[j].y + 1,obstvec,persvec)){
+                            persvec[j].D[persvec[j].x][persvec[j].y + 1]++;
+                        }
+                    }
+                }
+
+                if(persvec[i].could_I_go_to(persvec[i].x,persvec[i].y + 1,obstvec,persvec)){
+                    persvec[i].D[persvec[i].x][persvec[i].y + 1]++;
+                    persvec[i].D[persvec[i].x][persvec[i].y + 1]++;
+                }
+            }
+            else if(persvec[i].desired_direction == 'u'){
+                for(int j = 0; j < persvec.size(); j++){
+                    if(persvec[j].desired_direction == 'u' && i!=j &&persvec[j].x < persvec[i].x + radius && persvec[j].x > persvec[i].x - radius && persvec[j].y < persvec[i].y + radius && persvec[j].y > persvec[i].y - radius){
+                        if(persvec[j].could_I_go_to(persvec[j].x - 1,persvec[j].y,obstvec,persvec)){
+                            persvec[j].D[persvec[j].x - 1][persvec[j].y]++;
+                        }
+                    }
+                }
+                if(persvec[i].could_I_go_to(persvec[i].x - 1,persvec[i].y,obstvec,persvec)){
+                    persvec[i].D[persvec[i].x - 1][persvec[i].y]++;
+                    persvec[i].D[persvec[i].x - 1][persvec[i].y]++;
+                }
+            }
+            else if(persvec[i].desired_direction == 'l'){
+                for(int j = 0; j < persvec.size(); j++){
+                    if(persvec[j].desired_direction == 'l' && i!=j &&persvec[j].x < persvec[i].x + radius && persvec[j].x > persvec[i].x - radius && persvec[j].y < persvec[i].y + radius && persvec[j].y > persvec[i].y - radius){
+                        if(persvec[j].could_I_go_to(persvec[j].x,persvec[j].y - 1,obstvec,persvec)){
+                            persvec[j].D[persvec[j].x][persvec[j].y - 1]++;
+                        }
+                    }
+                }
+                if(persvec[i].could_I_go_to(persvec[i].x,persvec[i].y - 1,obstvec,persvec)){
+                    persvec[i].D[persvec[i].x][persvec[i].y - 1]++;
+                    persvec[i].D[persvec[i].x][persvec[i].y - 1]++;
+                }
+            }
+        }
     }
 
 }

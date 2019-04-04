@@ -28,8 +28,8 @@ Die restlichen Optionen können nach Belieben eingestellt werden und werden zu k
 */
 
 
-const static int grid_height = 50;
-const static int grid_width = 120;
+const static int grid_height = 30;
+const static int grid_width = 110;
 
 
 static int max_number_of_iterations = 10000;
@@ -42,10 +42,10 @@ static const char movement_update = 'p'; //'s' - sequential, 'p' - parallel
 
 static int grafic_delay = 0;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
 
-static int decay_param = 10; //Zerfallsparameter fürs dynamische Feld [0,100]
+static int decay_param = 25; //Zerfallsparameter fürs dynamische Feld [0,100]
 static int diffusion_param = 20; //Verteilungsparameter fürs dynamische Feld [0,100] ERZEUGT FEHLER BEIM AUSFÜHREN!
 
-static int panik_schwelle=5; ///ab welcher anzhal von konflikten geraet jmd in panik
+static int panik_schwelle=10; ///ab welcher anzhal von konflikten geraet jmd in panik
 
 /*
 Veränderungen am Ablauf des Programms, wenn "reject_other_D_fields" aktiviert ist:
@@ -88,8 +88,8 @@ delta:
     bool foreign_call = false; //experimentell; Werte werden mit der Konsole hinzugefügt, dies kann für die Analyse benutzt werden
     // wird hier ein negativer eintrag gewählt, so wird dieser Parameter nicht gesetzt
 
-    double k_S = 15; //Einfluss von s auf die Bewegung der Personen
-    double k_D = 12; //Einfluss von D auf die Bewegung der Personen
+    double k_S = 10; //Einfluss von s auf die Bewegung der Personen
+    double k_D = 7; //Einfluss von D auf die Bewegung der Personen
     double w_S = -1; ///Wissen der Personen über die Ausgänge (zufaellig im default)
     double friction = 0; ///zufaellig im default
 
