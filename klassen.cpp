@@ -499,6 +499,7 @@ int quantity_persons;
 // ###### Dynamic floor field DZur Uni Potsdam(Brandenburg):
     double k_D = 1;
     int panic_par;
+    int iterat_val;
     int D[grid_width][grid_height];
 
     void set_D_on_zero()
@@ -529,17 +530,18 @@ int quantity_persons;
                         persvec[j].D[persvec[i].ax][persvec[i].ay]++;
                     }
                 }
-                else if (followed_the_pers_my_S(persvec[i], 2)==false && reject_other_D_fields ==true) ///bei mehreren zielen kann, wenn eine pers von mir weg läuft, diese person mein d feld in die richtung der person kauputtmachen (--)
+                if (followed_the_pers_my_S(persvec[i], 2)==false && reject_other_D_fields ==true) ///bei mehreren zielen kann, wenn eine pers von mir weg läuft, diese person mein d feld in die richtung der person kauputtmachen (--)
                 {
-                    if ((persvec[i].ax!=persvec[i].x || persvec[i].ay!=persvec[i].y) && persvec[i].evacuated == false)
+                    if ((persvec[i].ax!=persvec[i].x || persvec[i].ay!=persvec[i].y) && persvec[i].evacuated == false) /// überprüfe ob sich die person i bewegt hat
                     {
-                        persvec[j].D[persvec[i].ax][persvec[i].ax]--;
+                        persvec[j].D[persvec[i].ax][persvec[i].ay]--;
                     }
                 }
+                /*
                 else
                 {
                     cout << "Fehler in set_D" << endl;
-                }
+                }*/
             }
         }
         }
@@ -591,7 +593,7 @@ int quantity_persons;
                             cout << "Zerfall findet bei Person "<< i<< " am Punkt: (x;y) = " <<"("<<x<<";"<<y<<")  statt."<< endl;
                             cout << "--------------------------------------------" << endl;
                         }*/
-                        if(persvec[i].D[x][y] >= 0){
+                        if(persvec[i].D[x][y] > 0){
                             persvec[i].D[x][y]--;
                         }
                         else{
@@ -979,7 +981,6 @@ int quantity_persons;
     }
 
 
-    int iterat_val;
 
     void set_panic_par(vector <person> &persvec, int i, int iteration)
     {
@@ -993,18 +994,18 @@ int quantity_persons;
         {
             persvec[i].panic_par++;
             persvec[i].iterat_val=persvec[i].iteration;
-            r=0;
+            /*r=0;
             g=255;
-            b=0;
+            b=0;*/
         }
 
         ///zerfall vom panikparameter
         if (persvec[i].iterat_val+1==persvec[i].iteration && persvec[i].had_a_conflict==false && persvec[i].evacuated==false)
         {
             persvec[i].panic_par--;
-            r=0;
+            /*r=0;
             g=0;
-            b=255;
+            b=255;*/
         }
 
         ///panikschwelle -> diffusion
@@ -1012,7 +1013,7 @@ int quantity_persons;
         {
             for (int k=0; k<persvec.size(); k++)
             {
-                if (persvec[k].x==persvec[i].x-1 && persvec[k].y==persvec[i].y)
+                /*if (persvec[k].x==persvec[i].x-1 && persvec[k].y==persvec[i].y)
                 {
                     persvec[k].panic_par++;
                 }
@@ -1027,27 +1028,21 @@ int quantity_persons;
                 if (persvec[k].x==persvec[i].x-1 && persvec[k].y==persvec[i].y+1)
                 {
                     persvec[k].panic_par++;
-                }
-                r=255;
+                }*/
+                /*r=255;
                 g=0;
-                b=0;
+                b=0;*/
             }
         }
     }
 
     void print_D()
     {
-        cout << "----------------------------------------------------------------" << endl;
-        for(int j = 0; j < grid_height; j++){
-            for(int i = 0; i < grid_width; i++){
-                if (D[i][j] > 9999){cout << "" << (int)D[i][j] << ";" ;}
-                else if (D[i][j] > 999){cout << " " << (int)D[i][j] << ";" ;}
-                else if (D[i][j] > 99){cout << "  " << (int)D[i][j] << ";" ;}
-                else if (D[i][j] > 9){cout << "   " << (int)D[i][j] << ";" ;}
-                else {cout << "    " << D[i][j] << ";" ;}
-
+        for (int i = 0; i < grid_height; i++){
+            for(int j = 0; j < grid_width; j++){
+                cout << D[i][j] << ":";
             }
-        cout << endl;
+            cout << endl;
         }
     }
 
@@ -1249,26 +1244,26 @@ int quantity_persons;
         //Eintrag oben:
         //cout << "oben ?" << could_I_go_to(x,y - 1,obstvec) << endl;
         if(could_I_go_to(x,y - 1,obstvec,persvec)){ // entweder sequentieller Ablauf: dann could I go to; bei paralellen ist es egal ob auf dem Feld gerade eine andere Person steht
-            T[1][0] = expl(k_S * S[x][y - 1] + k_D * D[x][y - 1]);
+            T[1][0] = expl(k_S * S[x][y - 1] + (k_D+panic_par) * D[x][y - 1]);
         }
         //Eintrag rechts:
         //cout << "rechts ?" << could_I_go_to(x + 1,y,obstvec) << endl;
         if(could_I_go_to(x + 1,y,obstvec,persvec)){
-            T[2][1] = expl(k_S * S[x + 1][y] + k_D * D[x + 1][y]);
+            T[2][1] = expl(k_S * S[x + 1][y] + (k_D+panic_par) * D[x + 1][y]);
         }
         //Eintrag unten:
         //cout << "unten ?" << could_I_go_to(x,y+1,obstvec) << endl;
         if(could_I_go_to(x,y + 1,obstvec,persvec)){
-            T[1][2] = expl(k_S * S[x][y + 1] + k_D * D[x][y + 1]);
+            T[1][2] = expl(k_S * S[x][y + 1] + (k_D+panic_par) * D[x][y + 1]);
         }
         //Eintrag links:
         //cout << "unten ?" << could_I_go_to(x,y+1,obstvec) << endl;
         if(could_I_go_to(x - 1,y,obstvec,persvec)){
-            T[0][1] = expl(k_S * S[x - 1][y]+ k_D * D[x - 1][y]);
+            T[0][1] = expl(k_S * S[x - 1][y]+ (k_D+panic_par) * D[x - 1][y]);
         }
         //mitte:
         //cout << "hier bleiben ?" << could_I_go_to(x,y,obstvec) << endl;
-            T[1][1] = expl(k_S * S[x][y]) + exp((k_D) * D[x][y]);
+            T[1][1] = expl(k_S * S[x][y] + (k_D+panic_par) * D[x][y]);
 
 
     //Überprüfung ob die Einträge des Feldes zu groß sind und deswegen T fehlerhaft erstellt wird:
