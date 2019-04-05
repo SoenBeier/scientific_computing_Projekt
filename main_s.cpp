@@ -856,6 +856,9 @@ for(int i = 0; i < 4;i++){
 
 for(int i = 0; i < max_number_of_iterations; i++){
 //################## iteration method
+    if(i > 700){
+        persvec[0].print_D();
+    }
     //persvec[20].print_coords();
     //persvec[20].print_T();
     //persvec[20].print_S();

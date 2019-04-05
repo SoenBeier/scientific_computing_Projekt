@@ -1390,7 +1390,7 @@ private:
         else{
             cout << "Fehler in followed_the_pers_my_S()" << endl;
         }
-        if((k_S * S[nx][ny]) > (k_S * S[ax][ay]) && qpers.evacuated == false && iteration > 1)
+        if((k_S * S[nx][ny]) >= (k_S * S[ax][ay]) && qpers.evacuated == false && iteration > 1)
         {
             if ((iterations_done==2 && followed_the_pers_my_S(qpers, 1)==true) || iterations_done==1)
             {
