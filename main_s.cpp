@@ -303,9 +303,10 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
             //Nach konflikt muss hier noch true übergeben werden
         }
         //Die Personen die den Konflikt verloren haben erhalten ein D Feld steigerung auf der von ihnen aus rechts gesehenem Feld -> Dies soll zu einer besseren Konfliktbeweltigung führen:
-        else{
-            int radius = 5;
+        else if(corridor_conditions == true){
+            int radius = 5; //Radius um die gefragt Person, die einen Konflikt hat, welcher angibt von welchen Nachbarpersonen das D Feld verändert wird
             if(persvec[i].desired_direction == 'o'){
+                //Veränderung des D Feldes der Nachbarpersonen
                 for(int j = 0; j < persvec.size(); j++){
                     if(persvec[j].desired_direction == 'o' && i!=j && persvec[j].x < persvec[i].x + radius && persvec[j].x > persvec[i].x - radius && persvec[j].y < persvec[i].y + radius && persvec[j].y > persvec[i].y - radius){
                         if(persvec[j].could_I_go_to(persvec[j].x + 1,persvec[j].y,obstvec,persvec)){
@@ -313,7 +314,7 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
                         }
                     }
                 }
-
+                //Veränderung des eigenen D Feldes
                 if(persvec[i].could_I_go_to(persvec[i].x + 1,persvec[i].y,obstvec,persvec)){
                     persvec[i].D[persvec[i].x + 1][persvec[i].y]++;
                     persvec[i].D[persvec[i].x + 1][persvec[i].y]++;
