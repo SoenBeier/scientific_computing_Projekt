@@ -428,13 +428,13 @@ bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &
         }
         return return_value;
 }
-void update_object_parameters(int iteration, vector<person> &persvec, vector<destination> &destvec, vector<int> &propability_arr_diff, vector<int> &propability_arr_dec, vector <obstacle> &obstvec){//Erneuert Parameter, wird nach jedem Iterationsschritt aufgerufen
+void update_object_parameters(int iteration, vector<person> &persvec, vector<destination> &destvec, vector<int> &propability_arr_diff, vector<int> &propability_arr_dec, vector <obstacle> &obstvec, bool foreign_call){//Erneuert Parameter, wird nach jedem Iterationsschritt aufgerufen
 
     for(int j = 0; j < persvec.size(); j++)
     {
         //cout << "persvec[j].x= " << persvec[j].x << endl;
         persvec[j].iteration = iteration;
-        if(corridor_conditions == false){ persvec[j].renew_w_S_and_S(destvec); }
+        if(corridor_conditions == false){ persvec[j].renew_w_S_and_S(destvec,foreign_call); }
         persvec[j].last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].ax, persvec[j].ay, persvec[j].x, persvec[j].y);
         persvec[j].a_last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].aax, persvec[j].aay, persvec[j].ax, persvec[j].ay);
         persvec[j].set_D_3(persvec, j);
@@ -882,7 +882,7 @@ for(int i = 0; i < max_number_of_iterations; i++){
         break;
     }
 
-    update_object_parameters(i,persvec,destvec,propability_arr_diff,propability_arr_dec, obstvec);
+    update_object_parameters(i,persvec,destvec,propability_arr_diff,propability_arr_dec, obstvec, ana_run.foreign_call);
 
     ///test
 

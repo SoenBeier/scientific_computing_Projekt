@@ -304,7 +304,6 @@ public:
 
         p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zufällig ausgewählt
         set_w_S(true,1,p_d, rand() % (quantity_destinations) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
-        renew_w_S_and_S(destvec);
 
 
         if(corridor_conditions == false){
@@ -336,7 +335,6 @@ public:
         int p_d[1]; //bevorzugtes Ziel
         p_d[0] = rand() % quantity_destinations; // bevorzugtes Ziel wird zufällig ausgewählt
         set_w_S(true,1,p_d, rand() % (quantity_destinations) + 1); //die Person kennt also mindestens eines der Ziele sehr gut .. der Rest wird zufällig entschieden
-        renew_w_S_and_S(destvec);
 
         if(corridor_conditions == false){
             set_S_normal(destvec);
@@ -1103,13 +1101,6 @@ int quantity_persons;
                 i--;//könnte eine Endlosscheife verursachen -> nicht so schön ;) aber geht
             }
         }
-
-        /*
-        for(int i = 0; i < quantity_known_dest; i++){
-            //Gibt dem Wert w_S für das jeweilige Ziele einen zufälligen Wert zwischen 0 und 1; w_S stellt hier das Wissen der Person über den ort des Ausgangs da
-            w_S[i] = (double)(rand() % 10) / 10;
-            cout <<"w_S ist:" <<w_S[i] << endl;
-        }*/
     }
     void set_w_S(bool prefer_a_dest, int quantity_preferred_dest, int *preferred_dest, int quantity_known_dest){//legt den anfänglichen Wissensstand der Person über die Ausgänge fest; preferierte Ziele werden bevorzugt nach der Festlegung angesteuert, qpd ist die Anzahl der übergebenen Ziele
         w_S.resize(quantity_destinations);
@@ -1137,17 +1128,44 @@ int quantity_persons;
 
 
     }
-    void renew_w_S_and_S(vector<destination> &destvec){// erneuert die Einträge von w_S, wenn bestimmt Umstände eintreten
+    void renew_w_S_and_S(vector<destination> &destvec, bool foreign_call){// erneuert die Einträge von w_S, wenn bestimmt Umstände eintreten
         //wenn sich die Person sehr nahe an einem Ausgang befindet bekommt der Wert w_S, der für das Wissen über diesen Ausgang steht, einen sehr hohen Wert, da die Person den Ausgang sieht o.Ä.
-        int r_influence_sphere = 5;// legt fest, ab wann die Person den Ausgang sehen kann
-        for(int i = 0; i < quantity_destinations; i++){
-            if(destvec[i].x > x - r_influence_sphere && destvec[i].x < x + r_influence_sphere){
-                if(destvec[i].y > y - r_influence_sphere && destvec[i].y < y + r_influence_sphere){
-                    w_S[i] = 2;
+        if(foreign_call == false){//Bedingung, da sonst die Analyse verfälscht wird
+            int r_influence_sphere = 5;// legt fest, ab wann die Person den Ausgang sehen kann
+            for(int i = 0; i < quantity_destinations; i++){
+                if(destvec[i].x > x - r_influence_sphere && destvec[i].x < x + r_influence_sphere){
+                    if(destvec[i].y > y - r_influence_sphere && destvec[i].y < y + r_influence_sphere){
+                        w_S[i] = 2;
+                    }
                 }
             }
         }
-        set_S_normal(destvec);
+        if(take_closest_exit == true){//Wenn es einen näheren Ausang gibt wird w_S so verändert, dass dieser angesteuert wird
+            // Suchen des Ziels, zu welchem die Person am wenigsten Schritte machen muss
+            int max_S_k = 0;
+            int numb_new_dest;
+            for (int i = 0; i < destvec.size(); i++){
+                if (destvec[i].S_k[x][y] > max_S_k){
+                    max_S_k = destvec[i].S_k[x][y];
+                    numb_new_dest = i;
+                    //cout << min_S_k << endl;
+                }
+            }
+            //Veränderung von w_S, alle weiter entfernten Ziele erhalten ein w_S von 0
+            for (int i = 0; i < w_S.size(); i++){
+                if(i != numb_new_dest){
+                    w_S[i] = 0;
+                }
+                else{
+                    w_S[i] = 1;
+                    g = (int)(i * 250 / destvec.size());//Ändert die Farbe der Personen, damit klar ersichtlich ist, welche PErson welches Ziel ansteuert
+                }
+            }
+        }
+        if((foreign_call == false || take_closest_exit == true) && corridor_conditions == false){
+            set_S_normal(destvec);
+        }
+
     }
     void print_w_S(){
         cout << endl << "print_w_S:" << endl;
