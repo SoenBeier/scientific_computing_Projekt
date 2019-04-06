@@ -979,8 +979,6 @@ int quantity_persons;
         return true;
     }
 
-
-
     void set_panic_par(vector <person> &persvec, int i, int iteration)
     {
         if(panik_aktiviert == false){return;} // wenn der Panik Parameter nicht beachtet werden soll, wird diese Funktion abgebrochen
@@ -1290,7 +1288,6 @@ int quantity_persons;
         //mitte:
         //cout << "hier bleiben ?" << could_I_go_to(x,y,obstvec) << endl;
             T[1][1] = expl(k_S * S[x][y] + (k_D+panic_par) * D[x][y]);
-
 
     //Überprüfung ob die Einträge des Feldes zu groß sind und deswegen T fehlerhaft erstellt wird:
         for (int i = 0; i < 3; i++){

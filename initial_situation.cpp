@@ -33,7 +33,7 @@ Die restlichen Optionen können nach Belieben eingestellt werden und werden zu k
 */
 
 
-const static int grid_height = 25;
+const static int grid_height = 35;
 const static int grid_width = 100;
 
 
