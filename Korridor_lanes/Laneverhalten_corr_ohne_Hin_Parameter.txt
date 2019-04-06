@@ -1,0 +1,16 @@
+k_D=13
+k_S=15
+
+Diff=20
+Dec=25
+
+corridorconditions=true
+reject_other_d_fields=true
+
+Bewegungsupdate=p
+
+take_closest_exit=false
+
+panik_aktiviert=false
+
+Personen=230
