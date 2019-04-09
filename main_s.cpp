@@ -513,7 +513,7 @@ void set_model_parameters(analysis_run ana_run, vector<person> &persvec, vector<
             if(ana_run.k_S >= 0){
                 persvec[i].k_S = ana_run.k_S;
             }
-            if(ana_run.k_D >= 0){
+            if(ana_run.k_D >= -20){
                 persvec[i].k_D = ana_run.k_D;
             }
             if(ana_run.w_S >= 0){
@@ -811,6 +811,7 @@ cout << "Wahrscheinlichkeitsarrays wurden erstellt;" << endl;
 
     cout << " " <<endl;
     cout << "Diff. Parameter: " << diffusion_param << endl;
+    cout << " " <<endl;
     cout << "Dec. Parameter: " << decay_param << endl;
 
     cout << " " <<endl;
@@ -825,20 +826,14 @@ cout << "Wahrscheinlichkeitsarrays wurden erstellt;" << endl;
     cout << " " <<endl;
     cout << "Bewegungsupdate: " << movement_update << endl;
 
-    cout << " " <<endl;
-    cout << "take_closest_exit: " << take_closest_exit << endl;
-
-    cout << " " <<endl;
-    cout << "panik_aktiviert: " << panik_aktiviert << endl;
-    cout << "panik_schwelle: " << panik_schwelle << endl;
 
 
 //################## visual output 1
-    SDL_Event event;
     SDL_Renderer *renderer = NULL;
     SDL_Window *window = NULL;
     SDL_Init(SDL_INIT_VIDEO);
     SDL_CreateWindowAndRenderer(grid_width*3, grid_height*3, 0, &window, &renderer);
+    SDL_Event event;
 //################## visual output 1
 
 
@@ -861,11 +856,20 @@ for(int i = 0; i < 4;i++){
 
 for(int i = 0; i < max_number_of_iterations; i++){
 //################## iteration method
-    //persvec[20].print_coords();
-    //persvec[20].print_T();
-    //persvec[20].print_S();
+    //Damit das Programm beim Bewegen des Fensters nicht abstürzt und das Fenster geschlossen werden kann:
+    while(SDL_PollEvent(&event)){
+        if (event.type == SDL_QUIT){
+            SDL_DestroyRenderer(renderer);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return EXIT_SUCCESS;
+        }
+    }
+
+    //Haben Personen das Ziel erreicht:
     has_pers_reached_destination(destvec,persvec);
 
+    //Bewege Personen:
     if(movement_update == 's'){
         move_people_sequential(persvec,obstvec,destvec, propability_arr_diff, propability_arr_dec);
     }
@@ -887,6 +891,7 @@ for(int i = 0; i < max_number_of_iterations; i++){
         break;
     }
 
+    //Erneuere die Parameter der Objekte, die sich im Laufe der Iteration verändert haben:
     update_object_parameters(i,persvec,destvec,propability_arr_diff,propability_arr_dec, obstvec, ana_run.foreign_call);
 
     ///test
@@ -921,6 +926,11 @@ for(int i = 0; i < max_number_of_iterations; i++){
     SDL_Delay(500);
 
     while (ana_run.foreign_call == false) {if (SDL_PollEvent(&event) && event.type == SDL_QUIT){break;}} //HÃ¤lt Fenster so lange offen bis es per Hand geschlossen wird
+    bool run = true;
+
+
+
+
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
