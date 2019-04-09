@@ -302,8 +302,67 @@ void move_people_parallel(vector<person> &persvec, vector<obstacle> &obstvec, ve
             persvec[i].moveto(persvec[i].desired_x, persvec[i].desired_y, persvec[i].had_a_conflict);
             //Nach konflikt muss hier noch true übergeben werden
         }
-    }
+        //Die Personen die den Konflikt verloren haben erhalten ein D Feld steigerung auf der von ihnen aus rechts gesehenem Feld -> Dies soll zu einer besseren Konfliktbeweltigung führen:
+        else if(corridor_conditions == true){
+            int radius = 5; //Radius um die gefragt Person, die einen Konflikt hat, welcher angibt von welchen Nachbarpersonen das D Feld verändert wird
+            if(persvec[i].desired_direction == 'o'){
+                //Veränderung des D Feldes der Nachbarpersonen
+                for(int j = 0; j < persvec.size(); j++){
+                    if(persvec[j].desired_direction == 'o' && i!=j && persvec[j].x < persvec[i].x + radius && persvec[j].x > persvec[i].x - radius && persvec[j].y < persvec[i].y + radius && persvec[j].y > persvec[i].y - radius){
+                        if(persvec[j].could_I_go_to(persvec[j].x + 1,persvec[j].y,obstvec,persvec)){
+                            persvec[j].D[persvec[j].x + 1][persvec[j].y]++;
+                        }
+                    }
+                }
+                //Veränderung des eigenen D Feldes
+                if(persvec[i].could_I_go_to(persvec[i].x + 1,persvec[i].y,obstvec,persvec)){
+                    persvec[i].D[persvec[i].x + 1][persvec[i].y]++;
+                    persvec[i].D[persvec[i].x + 1][persvec[i].y]++;
+                }
 
+            }
+            else if(persvec[i].desired_direction == 'r'){
+                for(int j = 0; j < persvec.size(); j++){
+                    if(persvec[j].desired_direction == 'r' && i!=j &&persvec[j].x < persvec[i].x + radius && persvec[j].x > persvec[i].x - radius && persvec[j].y < persvec[i].y + radius && persvec[j].y > persvec[i].y - radius){
+                        if(persvec[j].could_I_go_to(persvec[j].x,persvec[j].y + 1,obstvec,persvec)){
+                            persvec[j].D[persvec[j].x][persvec[j].y + 1]++;
+                        }
+                    }
+                }
+
+                if(persvec[i].could_I_go_to(persvec[i].x,persvec[i].y + 1,obstvec,persvec)){
+                    persvec[i].D[persvec[i].x][persvec[i].y + 1]++;
+                    persvec[i].D[persvec[i].x][persvec[i].y + 1]++;
+                }
+            }
+            else if(persvec[i].desired_direction == 'u'){
+                for(int j = 0; j < persvec.size(); j++){
+                    if(persvec[j].desired_direction == 'u' && i!=j &&persvec[j].x < persvec[i].x + radius && persvec[j].x > persvec[i].x - radius && persvec[j].y < persvec[i].y + radius && persvec[j].y > persvec[i].y - radius){
+                        if(persvec[j].could_I_go_to(persvec[j].x - 1,persvec[j].y,obstvec,persvec)){
+                            persvec[j].D[persvec[j].x - 1][persvec[j].y]++;
+                        }
+                    }
+                }
+                if(persvec[i].could_I_go_to(persvec[i].x - 1,persvec[i].y,obstvec,persvec)){
+                    persvec[i].D[persvec[i].x - 1][persvec[i].y]++;
+                    persvec[i].D[persvec[i].x - 1][persvec[i].y]++;
+                }
+            }
+            else if(persvec[i].desired_direction == 'l'){
+                for(int j = 0; j < persvec.size(); j++){
+                    if(persvec[j].desired_direction == 'l' && i!=j &&persvec[j].x < persvec[i].x + radius && persvec[j].x > persvec[i].x - radius && persvec[j].y < persvec[i].y + radius && persvec[j].y > persvec[i].y - radius){
+                        if(persvec[j].could_I_go_to(persvec[j].x,persvec[j].y - 1,obstvec,persvec)){
+                            persvec[j].D[persvec[j].x][persvec[j].y - 1]++;
+                        }
+                    }
+                }
+                if(persvec[i].could_I_go_to(persvec[i].x,persvec[i].y - 1,obstvec,persvec)){
+                    persvec[i].D[persvec[i].x][persvec[i].y - 1]++;
+                    persvec[i].D[persvec[i].x][persvec[i].y - 1]++;
+                }
+            }
+        }
+    }
 }
 
 bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &persvec){//Ueberprueft ob die Person das Ziel erreicht hat
@@ -369,13 +428,13 @@ bool has_pers_reached_destination(vector<destination> &destvec, vector<person> &
         }
         return return_value;
 }
-void update_object_parameters(int iteration, vector<person> &persvec, vector<destination> &destvec, vector<int> &propability_arr_diff, vector<int> &propability_arr_dec, vector <obstacle> &obstvec){//Erneuert Parameter, wird nach jedem Iterationsschritt aufgerufen
+void update_object_parameters(int iteration, vector<person> &persvec, vector<destination> &destvec, vector<int> &propability_arr_diff, vector<int> &propability_arr_dec, vector <obstacle> &obstvec, bool foreign_call){//Erneuert Parameter, wird nach jedem Iterationsschritt aufgerufen
 
     for(int j = 0; j < persvec.size(); j++)
     {
         //cout << "persvec[j].x= " << persvec[j].x << endl;
         persvec[j].iteration = iteration;
-        if(corridor_conditions == false){ persvec[j].renew_w_S_and_S(destvec); }
+        if(corridor_conditions == false){ persvec[j].renew_w_S_and_S(destvec,foreign_call); }
         persvec[j].last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].ax, persvec[j].ay, persvec[j].x, persvec[j].y);
         persvec[j].a_last_movement_direction = persvec[j].set_last_movement_direction(persvec[j].aax, persvec[j].aay, persvec[j].ax, persvec[j].ay);
         persvec[j].set_D_3(persvec, j);
@@ -454,7 +513,7 @@ void set_model_parameters(analysis_run ana_run, vector<person> &persvec, vector<
             if(ana_run.k_S >= 0){
                 persvec[i].k_S = ana_run.k_S;
             }
-            if(ana_run.k_D >= 0){
+            if(ana_run.k_D >= -20){
                 persvec[i].k_D = ana_run.k_D;
             }
             if(ana_run.w_S >= 0){
@@ -770,11 +829,11 @@ cout << "Wahrscheinlichkeitsarrays wurden erstellt;" << endl;
 
 
 //################## visual output 1
-    SDL_Event event;
     SDL_Renderer *renderer = NULL;
     SDL_Window *window = NULL;
     SDL_Init(SDL_INIT_VIDEO);
     SDL_CreateWindowAndRenderer(grid_width*3, grid_height*3, 0, &window, &renderer);
+    SDL_Event event;
 //################## visual output 1
 
 
@@ -797,11 +856,20 @@ for(int i = 0; i < 4;i++){
 
 for(int i = 0; i < max_number_of_iterations; i++){
 //################## iteration method
-    //persvec[20].print_coords();
-    //persvec[20].print_T();
-    //persvec[20].print_S();
+    //Damit das Programm beim Bewegen des Fensters nicht abstürzt und das Fenster geschlossen werden kann:
+    while(SDL_PollEvent(&event)){
+        if (event.type == SDL_QUIT){
+            SDL_DestroyRenderer(renderer);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return EXIT_SUCCESS;
+        }
+    }
+
+    //Haben Personen das Ziel erreicht:
     has_pers_reached_destination(destvec,persvec);
 
+    //Bewege Personen:
     if(movement_update == 's'){
         move_people_sequential(persvec,obstvec,destvec, propability_arr_diff, propability_arr_dec);
     }
@@ -823,7 +891,8 @@ for(int i = 0; i < max_number_of_iterations; i++){
         break;
     }
 
-    update_object_parameters(i,persvec,destvec,propability_arr_diff,propability_arr_dec, obstvec);
+    //Erneuere die Parameter der Objekte, die sich im Laufe der Iteration verändert haben:
+    update_object_parameters(i,persvec,destvec,propability_arr_diff,propability_arr_dec, obstvec, ana_run.foreign_call);
 
     ///test
 
@@ -857,6 +926,11 @@ for(int i = 0; i < max_number_of_iterations; i++){
     SDL_Delay(500);
 
     while (ana_run.foreign_call == false) {if (SDL_PollEvent(&event) && event.type == SDL_QUIT){break;}} //HÃ¤lt Fenster so lange offen bis es per Hand geschlossen wird
+    bool run = true;
+
+
+
+
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

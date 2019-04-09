@@ -16,8 +16,13 @@ iteration_break_condition: Gibt an ob die Simulation auch schon vorher gestoppt 
 plant_layout: Gibt den Namen des Bildes an, welches den Anfangssituation der Hindernisse, Personen und Ziele darstellt. Dieses Bild wird im Laufe der Simulation geladen
 movement_update: Gibt an ob sich die Personen parallel oder hintereinander Bewegen sollen. Verschiedene Effekte sind nur mit der parallelen Methode möglich (z.B. das Ausbrechen von Panik)
 grafic_delay: Gibt an wie schnell die Iterationsschritte abgearbeitet werden [in ms]
-
-
+decay_param: legt fest, wie stark das D Feld nach jeder Iteration verkleinert wird
+diffusion_param: legt fest, wie schnell sich das D Feld nach jeder Iteration ausbreitet
+panik_aktiviert: legt fest, ob bei der Simulation die Panik der Personen einbezogen wird
+panik_schwelle: legt die Schwelle an Konflikten fest, ab der die Personen in Panik verfallen
+corridor_conditions: muss aktiviert sein, damit das statische Feld im Falle, dass ein Korridor simmuliert wird richtig gebildet wird
+reject_other_D_fields: wenn dies aktiviert ist stoßen sich Personen, die in unterschiedliche Richtungen laufen voneinander ab
+unite_destinations_if_possible: legt fest ob Ziele die beieinander liegen die selben Wissenswerte w_S erhalten
 
 Wie setze ich die Variablen richtig?
 Schritt:
@@ -28,11 +33,11 @@ Die restlichen Optionen können nach Belieben eingestellt werden und werden zu k
 */
 
 
-const static int grid_height = 50;
-const static int grid_width = 120;
+const static int grid_height = 35;
+const static int grid_width = 100;
 
 
-static int max_number_of_iterations = 10000;
+static int max_number_of_iterations = 20000;
 static bool iteration_break_condition = true; ///kann das Program auch vorher schon abbrechen(wenn alle Personen im Ziel sind)?
 
 static const char plant_layout[] = "korridor_ohne_hin.bmp";//Name des Gebäudeplans
@@ -42,10 +47,11 @@ static const char movement_update = 'p'; //'s' - sequential, 'p' - parallel
 
 static int grafic_delay = 0;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
 
-static int decay_param = 10; //Zerfallsparameter fürs dynamische Feld [0,100]
+static int decay_param = 25; //Zerfallsparameter fürs dynamische Feld [0,100]
 static int diffusion_param = 20; //Verteilungsparameter fürs dynamische Feld [0,100] ERZEUGT FEHLER BEIM AUSFÜHREN!
 
-static int panik_schwelle=5; ///ab welcher anzhal von konflikten geraet jmd in panik
+static int panik_aktiviert = false;
+static int panik_schwelle = 2; ///ab welcher Anzahl von konflikten geraet jmd in panik
 
 /*
 Veränderungen am Ablauf des Programms, wenn "reject_other_D_fields" aktiviert ist:
@@ -56,6 +62,7 @@ Veränderungen am Ablauf des Programms, wenn "reject_other_D_fields" aktiviert i
 static bool corridor_conditions = true; //Korridor muss waagerecht liegen; aktiviert automatisch unite_destinations_if_possible
 static bool reject_other_D_fields = true; //(noch nicht eingebaut) Ist für die Simulation für den Korridor nötig, bei dem die Menschen mit unterschiedlichen Zielen das D Feld der Menschen mit einem anderen Ziel abstoßend finden
 static bool unite_destinations_if_possible = true; //(nur möglich wenn reject_other_D_fields aktiv ist) Vereinigt Ziele die genau nebeneinanderliegen zu einem Ziel (w_S wird kopiert)
+static bool take_closest_exit = false; //ist dies aktiviert wird w_S so verändert, dass jede Person den Ausgang nimmt, der für sie am nähsten ist
 /*
 Erklärung zur Benutzung des Analysedurchlaufs:
 Wenn die Daten des Simulationslaufs gespeichert werden sollen, so muss "execute" aktiviert sein.
@@ -89,7 +96,7 @@ delta:
     // wird hier ein negativer eintrag gewählt, so wird dieser Parameter nicht gesetzt
 
     double k_S = 15; //Einfluss von s auf die Bewegung der Personen
-    double k_D = 12; //Einfluss von D auf die Bewegung der Personen
+    double k_D = 13; //Einfluss von D auf die Bewegung der Personen
     double w_S = -1; ///Wissen der Personen über die Ausgänge (zufaellig im default)
     double friction = 0; ///zufaellig im default
 
