@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -23,6 +24,7 @@ panik_schwelle: legt die Schwelle an Konflikten fest, ab der die Personen in Pan
 corridor_conditions: muss aktiviert sein, damit das statische Feld im Falle, dass ein Korridor simmuliert wird richtig gebildet wird
 reject_other_D_fields: wenn dies aktiviert ist stoßen sich Personen, die in unterschiedliche Richtungen laufen voneinander ab
 unite_destinations_if_possible: legt fest ob Ziele die beieinander liegen die selben Wissenswerte w_S erhalten
+take_closest_exit: ist dies aktiviert, so wird w_S in jeder Iteration so verändert, dass das nächste Ziel angesteuert wird
 
 Wie setze ich die Variablen richtig?
 Schritt:
@@ -33,25 +35,25 @@ Die restlichen Optionen können nach Belieben eingestellt werden und werden zu k
 */
 
 
-const static int grid_height = 35;
+const static int grid_height = 100;
 const static int grid_width = 100;
 
 
-static int max_number_of_iterations = 20000;
+static int max_number_of_iterations = 30000;
 static bool iteration_break_condition = true; ///kann das Program auch vorher schon abbrechen(wenn alle Personen im Ziel sind)?
 
-static const char plant_layout[] = "korridor_ohne_hin.bmp";//Name des Gebäudeplans
+static const char plant_layout[] = "ent_strom.bmp";//Name des Gebäudeplans
 
 static const char movement_update = 'p'; //'s' - sequential, 'p' - parallel
 //BEIM PARALLELEN NOCHMAL NACHSCHAUEN: C[][] WIRD WIRKLICH RICHTIG GEWÄHLT ?? was hat es mit den einsen in der Matrix zu tun?
 
 static int grafic_delay = 0;// Je höher, desto langsamer aktuallisiert sich die grafische Anzeige
 
-static int decay_param = 25; //Zerfallsparameter fürs dynamische Feld [0,100]
-static int diffusion_param = 20; //Verteilungsparameter fürs dynamische Feld [0,100] ERZEUGT FEHLER BEIM AUSFÜHREN!
+static int decay_param = 10; //Zerfallsparameter fürs dynamische Feld [0,100]
+static int diffusion_param = 0; //Verteilungsparameter fürs dynamische Feld [0,100] ERZEUGT FEHLER BEIM AUSFÜHREN!
 
 static int panik_aktiviert = false;
-static int panik_schwelle = 2; ///ab welcher Anzahl von konflikten geraet jmd in panik
+static int panik_schwelle = 10000; ///ab welcher Anzahl von konflikten geraet jmd in panik
 
 /*
 Veränderungen am Ablauf des Programms, wenn "reject_other_D_fields" aktiviert ist:
@@ -59,10 +61,10 @@ Veränderungen am Ablauf des Programms, wenn "reject_other_D_fields" aktiviert i
     -> jede Person kennt also nur ein Ziel. Die Nummer dieses Ziels wird in der Variable "numb_selected_dest" in der Personenklasse gespeichert
 - Das D Feld von einer Person wird von anderen Personen nur erhöht, wenn sich diese in die Richtung bewegen, in die das statische Feld der Person zeigt
 */
-static bool corridor_conditions = true; //Korridor muss waagerecht liegen; aktiviert automatisch unite_destinations_if_possible
-static bool reject_other_D_fields = true; //(noch nicht eingebaut) Ist für die Simulation für den Korridor nötig, bei dem die Menschen mit unterschiedlichen Zielen das D Feld der Menschen mit einem anderen Ziel abstoßend finden
-static bool unite_destinations_if_possible = true; //(nur möglich wenn reject_other_D_fields aktiv ist) Vereinigt Ziele die genau nebeneinanderliegen zu einem Ziel (w_S wird kopiert)
-static bool take_closest_exit = false; //ist dies aktiviert wird w_S so verändert, dass jede Person den Ausgang nimmt, der für sie am nähsten ist
+static bool corridor_conditions = false; //Korridor muss waagerecht liegen; aktiviert automatisch unite_destinations_if_possible
+static bool reject_other_D_fields = false; //(noch nicht eingebaut) Ist für die Simulation für den Korridor nötig, bei dem die Menschen mit unterschiedlichen Zielen das D Feld der Menschen mit einem anderen Ziel abstoßend finden
+static bool unite_destinations_if_possible = false; //(nur möglich wenn reject_other_D_fields aktiv ist) Vereinigt Ziele die genau nebeneinanderliegen zu einem Ziel (w_S wird kopiert)
+static string take_which_exit = "far"; //  wenn "far" oder "near": w_S wird so verändert, dass jede Person den Ausgang nimmt, der für sie am weitesten/nahesten ist. Bei "defaullt" wird nichts ueberschrieben
 /*
 Erklärung zur Benutzung des Analysedurchlaufs:
 Wenn die Daten des Simulationslaufs gespeichert werden sollen, so muss "execute" aktiviert sein.
@@ -95,10 +97,10 @@ delta:
     bool foreign_call = false; //experimentell; Werte werden mit der Konsole hinzugefügt, dies kann für die Analyse benutzt werden
     // wird hier ein negativer eintrag gewählt, so wird dieser Parameter nicht gesetzt
 
-    double k_S = 15; //Einfluss von s auf die Bewegung der Personen
-    double k_D = 13; //Einfluss von D auf die Bewegung der Personen
+    double k_S = 5; //Einfluss von s auf die Bewegung der Personen
+    double k_D = 1; //Einfluss von D auf die Bewegung der Personen
     double w_S = -1; ///Wissen der Personen über die Ausgänge (zufaellig im default)
-    double friction = 0; ///zufaellig im default
+    double friction = 0.65; ///zufaellig im default
 
 };
 

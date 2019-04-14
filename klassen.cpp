@@ -979,6 +979,8 @@ int quantity_persons;
         return true;
     }
 
+
+
     void set_panic_par(vector <person> &persvec, int i, int iteration)
     {
         if(panik_aktiviert == false){return;} // wenn der Panik Parameter nicht beachtet werden soll, wird diese Funktion abgebrochen
@@ -1138,29 +1140,7 @@ int quantity_persons;
                 }
             }
         }
-        if(take_closest_exit == true){//Wenn es einen näheren Ausang gibt wird w_S so verändert, dass dieser angesteuert wird
-            // Suchen des Ziels, zu welchem die Person am wenigsten Schritte machen muss
-            int max_S_k = 0;
-            int numb_new_dest;
-            for (int i = 0; i < destvec.size(); i++){
-                if (destvec[i].S_k[x][y] > max_S_k){
-                    max_S_k = destvec[i].S_k[x][y];
-                    numb_new_dest = i;
-                    //cout << min_S_k << endl;
-                }
-            }
-            //Veränderung von w_S, alle weiter entfernten Ziele erhalten ein w_S von 0
-            for (int i = 0; i < w_S.size(); i++){
-                if(i != numb_new_dest){
-                    w_S[i] = 0;
-                }
-                else{
-                    w_S[i] = 1;
-                    g = (int)(i * 250 / destvec.size());//Ändert die Farbe der Personen, damit klar ersichtlich ist, welche PErson welches Ziel ansteuert
-                }
-            }
-        }
-        if((foreign_call == false || take_closest_exit == true) && corridor_conditions == false){
+        if((foreign_call == false || take_which_exit == "near") && corridor_conditions == false){
             set_S_normal(destvec);
         }
 
@@ -1289,6 +1269,7 @@ int quantity_persons;
         //cout << "hier bleiben ?" << could_I_go_to(x,y,obstvec) << endl;
             T[1][1] = expl(k_S * S[x][y] + (k_D+panic_par) * D[x][y]);
 
+
     //Überprüfung ob die Einträge des Feldes zu groß sind und deswegen T fehlerhaft erstellt wird:
         for (int i = 0; i < 3; i++){
             for(int j = 0; j < 3; j++){
@@ -1387,7 +1368,7 @@ private:
         else{
             cout << "Fehler in followed_the_pers_my_S()" << endl;
         }
-        if((k_S * S[nx][ny]) > (k_S * S[ax][ay]) && qpers.evacuated == false && iteration > 1)
+        if((k_S * S[nx][ny]) >= (k_S * S[ax][ay]) && qpers.evacuated == false && iteration > 1)
         {
             if ((iterations_done==2 && followed_the_pers_my_S(qpers, 1)==true) || iterations_done==1)
             {

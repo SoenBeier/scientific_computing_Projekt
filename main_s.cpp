@@ -543,6 +543,56 @@ void set_model_parameters(analysis_run ana_run, vector<person> &persvec, vector<
     if(unite_destinations_if_possible == true){
         unite_destinations(persvec,destvec);
     }
+    if(take_which_exit == "near"){//Wenn es einen näheren Ausang gibt wird w_S so verändert, dass dieser angesteuert wird
+        for(int j = 0; j < persvec.size(); j++){
+
+            // Suchen des Ziels, zu welchem die Person am wenigsten Schritte machen muss
+            int max_S_k = 0;
+            int numb_new_dest;
+            for (int i = 0; i < destvec.size(); i++){
+                if (destvec[i].S_k[persvec[j].x][persvec[j].y] > max_S_k){
+                    max_S_k = destvec[i].S_k[persvec[j].x][persvec[j].y];
+                    numb_new_dest = i;
+                    //cout << min_S_k << endl;
+                }
+            }
+            //Veränderung von w_S, alle weiter entfernten Ziele erhalten ein w_S von 0
+            for (int i = 0; i < persvec[j].w_S.size(); i++){
+                if(i != numb_new_dest){
+                    persvec[j].w_S[i] = 0;
+                }
+                else{
+                    persvec[j].w_S[i] = 1;
+                    persvec[j].g = (int)(i * 250 / destvec.size());//Ändert die Farbe der Personen, damit klar ersichtlich ist, welche PErson welches Ziel ansteuert
+                }
+            }
+        }
+    }
+    else if(take_which_exit == "far"){
+        for(int j = 0; j < persvec.size(); j++){
+
+            // Suchen des Ziels, zu welchem die Person am meisten Schritte machen muss
+            int min_S_k = 100000;
+            int numb_new_dest;
+            for (int i = 0; i < destvec.size(); i++){
+                if (destvec[i].S_k[persvec[j].x][persvec[j].y] < min_S_k){
+                    min_S_k = destvec[i].S_k[persvec[j].x][persvec[j].y];
+                    numb_new_dest = i;
+                    //cout << min_S_k << endl;
+                }
+            }
+            //Veränderung von w_S, alle weiter entfernten Ziele erhalten ein w_S von 0
+            for (int i = 0; i < persvec[j].w_S.size(); i++){
+                if(i != numb_new_dest){
+                    persvec[j].w_S[i] = 0;
+                }
+                else{
+                    persvec[j].w_S[i] = 1;
+                    persvec[j].g = (int)(i * 250 / destvec.size());//Ändert die Farbe der Personen, damit klar ersichtlich ist, welche PErson welches Ziel ansteuert
+                }
+            }
+        }
+    }
 }
 
 void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungszeit der Personen, sollte nur ausgefÃ¼rt werden, wenn vorher "set_model_parameters" angewendet wurde, also analysis_run.execute aktiviert ist
