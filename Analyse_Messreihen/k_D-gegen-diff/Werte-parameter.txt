@@ -1,0 +1,10 @@
+Update: p
+friction=0
+
+haus:
+28x28 pixel (inkl umrisswand also tatsächliche groesse 26x26)
+dichte=0,5
+
+anzahl üpersonen= 338
+
+leistung von pc nicht ausreichend um eindeutigere ergebnisse zu bekommen...
