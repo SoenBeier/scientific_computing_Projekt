@@ -543,6 +543,56 @@ void set_model_parameters(analysis_run ana_run, vector<person> &persvec, vector<
     if(unite_destinations_if_possible == true){
         unite_destinations(persvec,destvec);
     }
+    if(take_which_exit == "near"){//Wenn es einen näheren Ausang gibt wird w_S so verändert, dass dieser angesteuert wird
+        for(int j = 0; j < persvec.size(); j++){
+
+            // Suchen des Ziels, zu welchem die Person am wenigsten Schritte machen muss
+            int max_S_k = 0;
+            int numb_new_dest;
+            for (int i = 0; i < destvec.size(); i++){
+                if (destvec[i].S_k[persvec[j].x][persvec[j].y] > max_S_k){
+                    max_S_k = destvec[i].S_k[persvec[j].x][persvec[j].y];
+                    numb_new_dest = i;
+                    //cout << min_S_k << endl;
+                }
+            }
+            //Veränderung von w_S, alle weiter entfernten Ziele erhalten ein w_S von 0
+            for (int i = 0; i < persvec[j].w_S.size(); i++){
+                if(i != numb_new_dest){
+                    persvec[j].w_S[i] = 0;
+                }
+                else{
+                    persvec[j].w_S[i] = 1;
+                    persvec[j].g = (int)(i * 250 / destvec.size());//Ändert die Farbe der Personen, damit klar ersichtlich ist, welche PErson welches Ziel ansteuert
+                }
+            }
+        }
+    }
+    else if(take_which_exit == "far"){
+        for(int j = 0; j < persvec.size(); j++){
+
+            // Suchen des Ziels, zu welchem die Person am meisten Schritte machen muss
+            int min_S_k = 100000;
+            int numb_new_dest;
+            for (int i = 0; i < destvec.size(); i++){
+                if (destvec[i].S_k[persvec[j].x][persvec[j].y] < min_S_k){
+                    min_S_k = destvec[i].S_k[persvec[j].x][persvec[j].y];
+                    numb_new_dest = i;
+                    //cout << min_S_k << endl;
+                }
+            }
+            //Veränderung von w_S, alle weiter entfernten Ziele erhalten ein w_S von 0
+            for (int i = 0; i < persvec[j].w_S.size(); i++){
+                if(i != numb_new_dest){
+                    persvec[j].w_S[i] = 0;
+                }
+                else{
+                    persvec[j].w_S[i] = 1;
+                    persvec[j].g = (int)(i * 250 / destvec.size());//Ändert die Farbe der Personen, damit klar ersichtlich ist, welche PErson welches Ziel ansteuert
+                }
+            }
+        }
+    }
 }
 
 void evacuation_analysis(vector<person> &persvec){// Analysiert die Evakuierungszeit der Personen, sollte nur ausgefÃ¼rt werden, wenn vorher "set_model_parameters" angewendet wurde, also analysis_run.execute aktiviert ist
@@ -684,8 +734,6 @@ void lege_und_printe_grunriss_auf_dfeld (vector <person> &persvec, vector <obsta
         cout << endl;
     }
 }
-
-
 
 //test
 
@@ -852,7 +900,8 @@ for(int i = 0; i < 4;i++){
 }
 */
 //test
-
+//Zeichnet einmal das Feld
+draw_grid(persvec,destvec,obstvec,renderer,2);
 
 for(int i = 0; i < max_number_of_iterations; i++){
 //################## iteration method
@@ -917,18 +966,20 @@ for(int i = 0; i < max_number_of_iterations; i++){
 //################## iteration method
 
 
-
-//################## visual output 2
         draw_grid(persvec,destvec,obstvec,renderer,2);
         SDL_Delay(grafic_delay);
 }
 
     SDL_Delay(500);
+    cout << "Simulation abgeschlossen" << endl;
 
+//################## Analyse
+    if(ana_run.execute == true){
+        evacuation_analysis(persvec);
+    }
+//################## Analyse
     while (ana_run.foreign_call == false) {if (SDL_PollEvent(&event) && event.type == SDL_QUIT){break;}} //HÃ¤lt Fenster so lange offen bis es per Hand geschlossen wird
-    bool run = true;
-
-
+    //bool run = true;
 
 
     SDL_DestroyRenderer(renderer);
@@ -936,53 +987,8 @@ for(int i = 0; i < max_number_of_iterations; i++){
     SDL_Quit();
 
 
-//test
-/*
-for (int i = 0; i < persvec.size(); i++){
-    cout << "Anzahl Konflikte von: " << i << " ist: " << persvec[i].number_of_conflicts << endl;
-}
-cout << "anzahl personen:" << quantity_persons<< endl;
-int i;
-    for (i=1; i< 2  ; i++)
-    {
-        cout << i<<". " << "Person D Feld:"  << endl;
-        persvec[i].print_D();
-
-        /*cout << i<<". " << "Person S Feld:"  << endl;
-        persvec[i].print_S();
-    }
-
-    cout << " " << endl;
-    cout << "Grundriss + D-Feld von Person:" << "1" << endl;
-    lege_und_printe_grunriss_auf_dfeld(persvec, obstvec, destvec, 1, initcoord_pers_vec);
-
-    cout << " " <<endl;
-    cout << "diff parameter: " << diffusion_param << endl;
-    cout << "propabillity arr diff" << endl;
-    for (int i=0; i<propability_arr_diff.size(); i++)
-    {
-        cout << propability_arr_diff[i] << "; ";
-    }
-
-    cout << " " <<endl;
-    cout << "dec parameter: " << decay_param << endl;
-    cout << "propabillity arr dec" << endl;
-    for (int i=0; i<propability_arr_dec.size(); i++)
-    {
-        cout << propability_arr_dec[i] << "; ";
-    }
-
-*/
-//test
 
 
-//################## visual output 2
-
-//################## Analyse
-    if(ana_run.execute == true){
-        evacuation_analysis(persvec);
-    }
-//################## Analyse
 
 
 
